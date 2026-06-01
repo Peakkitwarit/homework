@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="th" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none';">
+    <title>⚡ M.6/4 SMART HUB v24.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Sarabun:wght@300;400;600;700;800&family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { animation: { 'shake': 'shake 0.5s infinite', 'float': 'float 3s ease-in-out infinite', 'pulse-slow': 'pulse 3s ease-in-out infinite', 'scanline': 'scanline 8s linear infinite', 'glitch': 'glitch 2s infinite', 'blink': 'blink 1s step-end infinite' }, keyframes: { shake: { '10%, 90%': { transform: 'translateX(-1px)' }, '20%, 80%': { transform: 'translateX(2px)' }, '30%, 50%, 70%': { transform: 'translateX(-4px)' } }, float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }, scanline: { '0%': { backgroundPosition: '0 0' }, '100%': { backgroundPosition: '0 100%' } }, glitch: { '0%, 100%': { textShadow: '2px 0 #00ff9d, -2px 0 #ff003c' }, '25%': { textShadow: '-2px 0 #00ff9d, 2px 0 #ff003c' }, '50%': { textShadow: 'none' } }, blink: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } } } } } }
+    </script>
+    <style>
+        /* ═══════════════════════════════════════════════
+           FONT
+        ═══════════════════════════════════════════════ */
+        body { font-family: 'Sarabun', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .thai-display { font-family: 'Mitr', sans-serif; }
+
+        /* ═══════════════════════════════════════════════
+           LIGHT MODE — Soft Luxury Pastel
+        ═══════════════════════════════════════════════ */
+        :root {
+            --bg: #f0f4ff;
+            --bg2: #e8eeff;
+            --card: rgba(255,255,255,0.85);
+            --card-border: rgba(99,102,241,0.12);
+            --text: #1e1b4b;
+            --text-muted: #6b7280;
+            --accent: #6366f1;
+            --accent2: #a855f7;
+            --accent3: #ec4899;
+            --glow: rgba(99,102,241,0.25);
+            --nav-bg: rgba(255,255,255,0.9);
+            --nav-border: rgba(99,102,241,0.15);
+            --input-bg: rgba(255,255,255,0.9);
+            --chip-bg: rgba(99,102,241,0.08);
+            --progress-track: #e0e7ff;
+            --shadow: 0 8px 32px rgba(99,102,241,0.12);
+        }
+
+        /* ═══════════════════════════════════════════════
+           DARK MODE — Cyberpunk Terminal
+        ═══════════════════════════════════════════════ */
+        .dark {
+            --bg: #020b12;
+            --bg2: #010810;
+            --card: rgba(0,20,35,0.92);
+            --card-border: rgba(0,255,157,0.15);
+            --text: #c8f5e0;
+            --text-muted: #4a7c63;
+            --accent: #00ff9d;
+            --accent2: #00cfff;
+            --accent3: #ff003c;
+            --glow: rgba(0,255,157,0.3);
+            --nav-bg: rgba(0,15,25,0.97);
+            --nav-border: rgba(0,255,157,0.2);
+            --input-bg: rgba(0,10,20,0.8);
+            --chip-bg: rgba(0,255,157,0.05);
+            --progress-track: rgba(0,255,157,0.1);
+            --shadow: 0 0 30px rgba(0,255,157,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.4s, color 0.4s;
+        }
+
+        /* ── Light BG gradient ── */
+        html.light body {
+            background-image: 
+                radial-gradient(ellipse at 20% 10%, rgba(139,92,246,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(236,72,153,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 40%, rgba(99,102,241,0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* ── Dark BG grid ── */
+        html.dark body {
+            background-image:
+                linear-gradient(rgba(0,255,157,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,157,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+        }
+
+        /* ── Scanline overlay on dark ── */
+        html.dark body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+            pointer-events: none;
+            z-index: 9999;
+            animation: scanline 8s linear infinite;
+        }
+
+        /* ════════════════════════
+           GLASS CARD
+        ════════════════════════ */
+        .glass {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+            transition: border-color 0.3s;
+        }
+
+        html.dark .glass {
+            box-shadow: 0 0 20px rgba(0,255,157,0.05), inset 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        html.dark .glass:hover {
+            border-color: rgba(0,255,157,0.3);
+            box-shadow: 0 0 30px rgba(0,255,157,0.12);
+        }
+
+        html.light .glass:hover {
+            box-shadow: 0 12px 40px rgba(99,102,241,0.18);
+        }
+
+        /* ════════════════════════
+           NAVIGATION
+        ════════════════════════ */
+        nav {
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--nav-border);
+            backdrop-filter: blur(20px);
+        }
+
+        /* ── Light nav logo ── */
+        html.light .nav-logo {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+
+        /* ── Dark nav logo: terminal bracket ── */
+        html.dark .nav-logo {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 15px rgba(0,255,157,0.4), inset 0 0 10px rgba(0,255,157,0.05);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ════════════════════════
+           TABS
+        ════════════════════════ */
+        .tab-btn {
+            color: var(--text-muted);
+            transition: all 0.2s;
+            position: relative;
+            padding-bottom: 12px;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-active {
+            color: var(--accent) !important;
+            font-weight: 800;
+        }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+        html.dark .tab-active::after {
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        /* ════════════════════════
+           ACCENT BUTTON
+        ════════════════════════ */
+        html.light .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+        }
+        html.light .btn-primary:hover {
+            box-shadow: 0 6px 28px rgba(99,102,241,0.45);
+            transform: translateY(-1px);
+        }
+        html.dark .btn-primary {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(0,255,157,0.2), inset 0 0 8px rgba(0,255,157,0.05);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        html.dark .btn-primary:hover {
+            background: rgba(0,255,157,0.1);
+            box-shadow: 0 0 25px rgba(0,255,157,0.4);
+        }
+
+        /* ════════════════════════
+           INPUT
+        ════════════════════════ */
+        .themed-input {
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            transition: all 0.2s;
+            outline: none;
+        }
+        .themed-input::placeholder { color: var(--text-muted); }
+        .themed-input:focus {
+            border-color: var(--accent);
+        }
+        html.dark .themed-input:focus {
+            box-shadow: 0 0 15px rgba(0,255,157,0.2);
+        }
+        html.light .themed-input:focus {
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        }
+
+        /* ════════════════════════
+           HW CARD
+        ════════════════════════ */
+        html.light .hw-card {
+            border-top: 3px solid var(--accent);
+        }
+        html.dark .hw-card {
+            border-left: 2px solid var(--accent);
+        }
+        html.dark .hw-card.done-card {
+            border-left-color: rgba(0,255,157,0.2);
+        }
+
+        /* ════════════════════════
+           SUBJECT CHIP
+        ════════════════════════ */
+        .subject-chip {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: var(--chip-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        html.light .subject-chip.active {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+        html.dark .subject-chip.active {
+            background: rgba(0,255,157,0.1);
+            color: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(0,255,157,0.25);
+        }
+        .subject-chip:hover { border-color: var(--accent); }
+
+        /* ════════════════════════
+           PROGRESS BAR
+        ════════════════════════ */
+        .progress-track {
+            background: var(--progress-track);
+            height: 4px;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        html.light .progress-fill {
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+        }
+        html.dark .progress-fill {
+            background: linear-gradient(90deg, #00ff9d, #00cfff);
+            box-shadow: 0 0 8px rgba(0,255,157,0.5);
+        }
+
+        /* ════════════════════════
+           DARK SPECIFIC TEXT
+        ════════════════════════ */
+        html.dark .cyber-title {
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(0,255,157,0.5);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        html.dark .cyber-section-label {
+            color: var(--accent2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+        html.light .cyber-title { color: var(--accent); }
+        html.light .cyber-section-label { color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.15em; }
+
+        /* ════════════════════════
+           LEADERBOARD
+        ════════════════════════ */
+        html.dark .lb-card { border-left: 2px solid var(--accent); }
+        html.light .lb-card { border-left: 3px solid var(--accent); }
+
+        /* ════════════════════════
+           DARK CURSOR BLINK
+        ════════════════════════ */
+        html.dark .cursor-blink::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            color: var(--accent);
+            font-size: 0.6em;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        /* ════════════════════════
+           MISC
+        ════════════════════════ */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        /* Light profile avatar */
+        html.light .profile-avatar {
+            background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+            color: #6366f1;
+        }
+        html.dark .profile-avatar {
+            background: rgba(0,255,157,0.08);
+            border: 1px solid rgba(0,255,157,0.2);
+            color: var(--accent);
+        }
+
+        /* Theme toggle */
+        .theme-btn-light { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .theme-btn-dark { background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.3); color: var(--accent); }
+
+        /* Admin badge */
+        html.dark #btn-adminTab { color: var(--accent3); font-family: 'JetBrains Mono', monospace; }
+
+        /* Maintenance/delete button */
+        html.dark .btn-danger { border: 1px solid var(--accent3); color: var(--accent3); background: rgba(255,0,60,0.05); }
+        html.dark .btn-danger:hover { background: rgba(255,0,60,0.15); box-shadow: 0 0 15px rgba(255,0,60,0.2); }
+        html.light .btn-danger { background: #fff1f2; color: #f43f5e; }
+        html.light .btn-danger:hover { background: #ffe4e6; }
+
+        /* HW complete button */
+        html.light .btn-complete { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; }
+        html.dark .btn-complete { background: rgba(0,255,157,0.1); border: 1px solid var(--accent); color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+        html.dark .btn-complete:hover { background: rgba(0,255,157,0.2); box-shadow: 0 0 15px rgba(0,255,157,0.3); }
+
+        html.light .btn-revert { background: #f1f5f9; color: #94a3b8; }
+        html.dark .btn-revert { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: rgba(200,245,224,0.3); font-family: 'JetBrains Mono', monospace; }
+
+        /* Filter buttons */
+        html.dark .filter-active {
+            background: rgba(0,255,157,0.1) !important;
+            border: 1px solid var(--accent) !important;
+            color: var(--accent) !important;
+            box-shadow: 0 0 10px rgba(0,255,157,0.2) !important;
+        }
+        html.light .filter-active {
+            background: white !important;
+            color: var(--accent) !important;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.15) !important;
+        }
+
+        /* stat boxes */
+        html.light .stat-box { background: linear-gradient(135deg, #f0f4ff, #e8eeff); border: 1px solid rgba(99,102,241,0.1); }
+        html.dark .stat-box { background: rgba(0,255,157,0.04); border: 1px solid rgba(0,255,157,0.1); }
+
+        /* EXP color */
+        html.dark .exp-color { color: var(--accent); text-shadow: 0 0 10px rgba(0,255,157,0.5); }
+        html.light .exp-color { color: #a855f7; }
+
+        /* Overlay */
+        #processingOverlay .spinner-ring { stroke: var(--accent); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- ── GRADUATION OVERLAY ── -->
+<div id="gradOverlay" class="hidden fixed inset-0 z-[1000] bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
+    <div class="animate-float text-7xl mb-4">🎓</div>
+    <h1 class="text-4xl font-black mb-2 italic uppercase" style="color:var(--accent)">MISSION ACCOMPLISHED</h1>
+    <div class="w-full max-w-3xl aspect-video rounded-3xl overflow-hidden flex items-center justify-center mb-8 glass">
+        <p class="text-[10px] animate-pulse mono" style="color:var(--text-muted)">AWAITING_CINEMATIC_REEL.MP4</p>
+    </div>
+    <button onclick="document.getElementById('gradOverlay').remove()" class="btn-primary px-8 py-3 rounded-full font-bold text-[10px] mono transition-all">BYPASS_LOCK</button>
+</div>
+
+<!-- ── MAINTENANCE OVERLAY ── -->
+<div id="maintenanceOverlay" class="hidden fixed inset-0 z-[600] flex flex-col items-center justify-center p-8 text-center" style="background:var(--bg)">
+    <div class="glass w-20 h-20 rounded-3xl flex items-center justify-center text-5xl mb-6 animate-pulse">⚙️</div>
+    <h1 class="text-2xl font-black mb-2 mono uppercase cyber-title">System_Offline</h1>
+    <p class="text-xs mb-6 mono" style="color:var(--text-muted)">[ maintenance in progress ]</p>
+    <button onclick="handleLogout()" class="btn-primary px-8 py-3 rounded-xl font-black text-[10px] mono uppercase transition-all">Disconnect</button>
+</div>
+
+<!-- ── PROCESSING OVERLAY ── -->
+<div id="processingOverlay" class="hidden fixed inset-0 backdrop-blur-sm z-[500] flex items-center justify-center" style="background:rgba(0,0,0,0.15)">
+    <div class="glass p-8 rounded-[2.5rem] flex flex-col items-center gap-3">
+        <svg class="animate-spin h-10 w-10" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+            <path class="spinner-ring opacity-80" fill="none" stroke="var(--accent)" stroke-width="3" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <p class="text-[10px] font-black tracking-widest uppercase mono" style="color:var(--accent)">Processing...</p>
+    </div>
+</div>
+
+<!-- ── HEADER ── -->
+<nav class="sticky top-0 z-50 px-5 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+        <div class="nav-logo w-9 h-9 flex items-center justify-center rounded-lg font-black text-xs text-white mono">6/4</div>
+        <div>
+            <h1 class="text-sm font-black tracking-tighter uppercase cyber-title cursor-blink" style="line-height:1">Smart Hub</h1>
+            <p class="text-[9px] mono hidden sm:block" style="color:var(--text-muted)">v24.0 · <span id="userDisplayName">--</span></p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <button onclick="toggleDarkMode()" id="themeBtn" class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base">🌙</button>
+        <button onclick="handleLogout()" class="px-3 py-1.5 btn-danger rounded-lg text-xs font-bold uppercase mono tracking-tighter transition-all">Exit</button>
+    </div>
+</nav>
+
+<!-- ── LOGIN ── -->
+<div id="loginSection" class="flex-1 flex items-center justify-center p-4">
+    <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in">
+        <!-- Light header -->
+        <div class="text-center mb-8 block dark-hide">
+            <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-4" style="background:linear-gradient(135deg,#6366f1,#a855f7);box-shadow:0 8px 24px rgba(99,102,241,0.35)">⚡</div>
+            <h1 class="text-2xl font-black tracking-tighter" style="color:var(--text)"><span class="thai-display">ม.6/4</span> Smart Hub</h1>
+            <p class="text-[10px] mt-1 font-semibold" style="color:var(--text-muted)">วิทยาศาสตร์-คอมพิวเตอร์ · 2567</p>
+        </div>
+        <!-- Dark header -->
+        <div class="text-center mb-8 hidden dark-show">
+            <p class="mono text-[10px] mb-2" style="color:var(--text-muted)">> SYSTEM_BOOT v24.0_STABLE</p>
+            <h1 class="text-2xl font-black tracking-tight mono cyber-title">M6/4_TERMINAL</h1>
+            <p class="text-[9px] mt-1 mono animate-pulse" style="color:var(--text-muted)">[AWAITING CREDENTIALS...]</p>
+        </div>
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+            <input type="text" id="login-u" placeholder="Student ID / เลขที่" required class="themed-input w-full px-5 py-4 rounded-xl text-sm mono">
+            <input type="password" id="login-p" placeholder="Password" required class="themed-input w-full px-5 py-4 rounded-xl text-sm mono">
+            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs mono transition-all active:scale-95">
+                <span class="light-text">🔐 เข้าสู่ระบบ</span>
+                <span class="dark-text hidden">[ AUTHENTICATE ]</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ── FIRST PW CHANGE ── -->
+<div id="firstPwSection" class="hidden flex-1 flex items-center justify-center p-4">
+    <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in text-center space-y-6">
+        <div>
+            <p class="text-[10px] mono mb-1" style="color:var(--text-muted)">> SECURITY_UPDATE_REQUIRED</p>
+            <h3 class="text-lg font-black uppercase cyber-title mono">Set New Key</h3>
+        </div>
+        <form onsubmit="handleSetFirstPassword(event)" class="space-y-3">
+            <input type="password" id="fp-new" placeholder="New Password (8+ chars)" required class="themed-input w-full px-5 py-4 rounded-xl text-xs mono">
+            <input type="password" id="fp-confirm" placeholder="Verify Password" required class="themed-input w-full px-5 py-4 rounded-xl text-xs mono">
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ CONFIRM_KEY ]</button>
+        </form>
+    </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div id="mainSection" class="hidden flex-1 flex flex-col">
+    <!-- TABS -->
+    <div class="max-w-7xl mx-auto w-full px-5 mt-2 flex gap-1 overflow-x-auto no-scrollbar" style="border-bottom: 1px solid var(--card-border)">
+        <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="tab-btn tab-active text-[10px] font-black whitespace-nowrap uppercase tracking-widest mono px-4 pb-3">Dashboard</button>
+        <button onclick="switchTab('statsTab')" id="btn-statsTab" class="tab-btn text-[10px] font-black whitespace-nowrap uppercase tracking-widest mono px-4 pb-3">Analytics</button>
+        <button onclick="switchTab('profileTab')" id="btn-profileTab" class="tab-btn text-[10px] font-black whitespace-nowrap uppercase tracking-widest mono px-4 pb-3">Personal</button>
+        <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden tab-btn text-[10px] font-black whitespace-nowrap uppercase tracking-widest mono px-4 pb-3" style="color:#f43f5e">Root_CMD</button>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-5 py-5 pb-20">
+
+        <!-- HOMEWORK TAB -->
+        <div id="homeworkTab" class="space-y-5 fade-in">
+            <!-- Subject chips -->
+            <div id="subjectChipRow" class="flex flex-wrap gap-1.5 pb-1"></div>
+
+            <!-- Filter bar -->
+            <div class="glass p-3 rounded-2xl flex justify-between items-center gap-3">
+                <div class="flex gap-1 p-1 rounded-xl" style="background:var(--chip-bg)">
+                    <button onclick="setStatusFilter('all')" id="sfilter-all" class="filter-active px-5 py-2 rounded-lg text-[10px] font-black mono transition-all">ALL</button>
+                    <button onclick="setStatusFilter('pending')" id="sfilter-pending" class="px-5 py-2 rounded-lg text-[10px] font-bold transition-all" style="color:var(--text-muted)">PENDING</button>
+                </div>
+                <button onclick="openAddHomeworkModal()" class="btn-primary px-6 py-2.5 rounded-xl text-[10px] font-black mono uppercase transition-all">+ New_Task</button>
+            </div>
+
+            <!-- Cards -->
+            <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- STATS TAB -->
+        <div id="statsTab" class="hidden fade-in space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="lg:col-span-2 glass p-6 rounded-[2rem]">
+                    <p class="cyber-section-label mb-4">// Success_Probability (%)</p>
+                    <div class="h-72"><canvas id="completionRateChart"></canvas></div>
+                </div>
+                <div class="glass p-6 rounded-[2rem] flex flex-col">
+                    <p class="cyber-section-label mb-4 text-center">// Top XP Contributors</p>
+                    <div id="leaderboardContainer" class="flex-1 space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="profileTab" class="hidden fade-in">
+            <div class="max-w-md mx-auto glass p-8 rounded-[2rem] text-center space-y-6">
+                <div class="w-20 h-20 profile-avatar rounded-2xl flex items-center justify-center text-3xl mx-auto">👤</div>
+                <div>
+                    <h2 id="prof-name" class="text-2xl font-black tracking-tighter thai-display cyber-title">-</h2>
+                    <p id="prof-role" class="text-[10px] mono mt-1" style="color:var(--text-muted)">STUDENT_NODE</p>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="stat-box p-4 rounded-xl">
+                        <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">TASKS_DONE</p>
+                        <p id="prof-done" class="text-2xl font-black cyber-title">0</p>
+                    </div>
+                    <div class="stat-box p-4 rounded-xl">
+                        <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">TOTAL_EXP</p>
+                        <p id="prof-exp" class="text-2xl font-black exp-color">0</p>
+                    </div>
+                </div>
+                <!-- Change password -->
+                <div class="pt-2 border-t" style="border-color:var(--card-border)">
+                    <button onclick="openChangePwModal()" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ Change_Password ]</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="adminTab" class="hidden fade-in space-y-5">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+                <div class="glass p-5 rounded-[2rem] space-y-5">
+                    <p class="mono text-[10px] font-black uppercase" style="color:var(--accent3)">/ Master_Control</p>
+                    <button id="maintenanceToggleBtn" onclick="toggleMaintenanceServer()" class="w-full py-3 rounded-xl text-[9px] font-black uppercase mono shadow-lg transition-all"></button>
+                    <div class="pt-4" style="border-top: 1px solid var(--card-border)">
+                        <p class="cyber-section-label mb-3">// Add_User_Node</p>
+                        <form onsubmit="handleAdminAddUser(event)" class="space-y-3">
+                            <input type="text" id="adm-new-u" placeholder="Student ID" required class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
+                            <input type="text" id="adm-new-n" placeholder="Name" required class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ Execute_Init ]</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 glass p-6 rounded-[2rem] h-[600px] flex flex-col">
+                    <p class="cyber-section-label mb-4">// Node_Directory</p>
+                    <div id="adminUserContainer" class="flex-1 overflow-y-auto space-y-2 no-scrollbar pr-1"></div>
+                </div>
+            </div>
+            <!-- Logs -->
+            <div class="glass p-6 rounded-[2rem]">
+                <p class="cyber-section-label mb-4">// System_Logs</p>
+                <div id="logContainer" class="space-y-1 max-h-64 overflow-y-auto no-scrollbar mono text-[9px]" style="color:var(--text-muted)"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ══════ MODAL: ADD TASK ══════ -->
+<div id="addHwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.3)">
+    <div class="glass p-8 rounded-[2rem] w-full max-w-md space-y-5 relative fade-in">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-black italic uppercase cyber-title mono">Assign_Mission</h3>
+            <button onclick="closeAddHomeworkModal()" class="text-xl" style="color:var(--text-muted)">✕</button>
+        </div>
+        <!-- Subject chips in modal -->
+        <div>
+            <p class="cyber-section-label mb-2">// Select Subject</p>
+            <div id="modalSubjectChips" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto no-scrollbar"></div>
+        </div>
+        <div class="space-y-3">
+            <input type="text" id="modal-subject" readonly class="themed-input w-full px-5 py-3 rounded-xl text-sm mono font-bold" placeholder="Select subject above..." style="color:var(--accent)">
+            <input type="text" id="modal-task" class="themed-input w-full px-5 py-3 rounded-xl text-sm" placeholder="Assignment description...">
+            <div class="grid grid-cols-2 gap-3">
+                <input type="date" id="modal-date" class="themed-input w-full px-4 py-3 rounded-xl text-xs mono">
+                <input type="text" id="modal-note" class="themed-input w-full px-4 py-3 rounded-xl text-xs" placeholder="Note / Link">
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="closeAddHomeworkModal()" class="flex-1 py-3 text-[10px] font-black uppercase mono transition-all" style="color:var(--text-muted)">[ Abort ]</button>
+            <button onclick="handleQuickAddHomework()" class="flex-1 btn-primary py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ COMMIT ]</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════ MODAL: CHANGE PASSWORD ══════ -->
+<div id="changePwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.3)">
+    <div class="glass p-8 rounded-[2rem] w-full max-w-sm space-y-5 fade-in">
+        <div class="flex justify-between items-center">
+            <h3 class="text-sm font-black uppercase mono cyber-title">Change_Password</h3>
+            <button onclick="closeChangePwModal()" style="color:var(--text-muted)">✕</button>
+        </div>
+        <form onsubmit="handleChangePassword(event)" class="space-y-3">
+            <input type="password" id="cp-old" placeholder="Old Password" required class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
+            <input type="password" id="cp-new" placeholder="New Password" required class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ CONFIRM ]</button>
+        </form>
+    </div>
+</div>
+
+<!-- ════════════ SCRIPT ════════════ -->
+<script>
+'use strict';
+
+// --- CONFIG ---
+const _kd = [50,73,75,32,44,42,47,58,45,32,44,58,60,45,58,43,32,77,79,77,73];
+const _ks = 127;
+const getApiKey = () => _kd.map(c => String.fromCharCode(c ^ _ks)).join('');
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-UCXW-QirHbdDHA7L5B8of1OeDhOKT_1cguwhtt0ENT6mF8pml0rtmA_eyHlDqvTfoQ/exec";
+
+const TOTAL_STUDENTS = 23;
+const SUBJECTS = [
+    { label:'คณิตประยุกต์ 5', color:'bg-blue-50 text-blue-600' },
+    { label:'คณิตพื้นฐาน 5', color:'bg-cyan-50 text-cyan-600' },
+    { label:'ฟิสิกส์ 4', color:'bg-indigo-50 text-indigo-600' },
+    { label:'เคมี 4', color:'bg-emerald-50 text-emerald-600' },
+    { label:'ชีววิทยา 2', color:'bg-green-50 text-green-600' },
+    { label:'อังกฤษพื้นฐาน 5', color:'bg-yellow-50 text-yellow-600' },
+    { label:'อังกฤษวิชาการ 5', color:'bg-amber-50 text-amber-600' },
+    { label:'ไอโอที (IoT)', color:'bg-purple-50 text-purple-600' },
+    { label:'อิเล็กฯเบื้องต้น', color:'bg-violet-50 text-violet-600' },
+    { label:'เทคโนโลยี 5', color:'bg-slate-100 text-slate-600' },
+    { label:'โครงงาน', color:'bg-rose-50 text-rose-600' },
+    { label:'ภาษาไทย 1', color:'bg-orange-50 text-orange-600' },
+    { label:'ประวัติศาสตร์ 2', color:'bg-stone-100 text-stone-600' },
+    { label:'อื่นๆ', color:'bg-slate-800 text-white' }
+];
+
+let currentUser = null, allHomework = [], currentSubjectFilter = 'all', currentStatusFilter = 'all', charts = {}, isMaintenance = false;
+
+/* ── INIT ── */
+window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') applyTheme(true);
+    else applyTheme(false);
+    initSubjectChips();
+    checkAuth();
+});
+
+/* ── THEME ── */
+function applyTheme(dark) {
+    const root = document.documentElement;
+    const btn = document.getElementById('themeBtn');
+    if (dark) {
+        root.classList.remove('light'); root.classList.add('dark');
+        if (btn) { btn.textContent = '☀️'; btn.className = 'w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-dark text-base'; }
+        document.querySelectorAll('.light-text').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dark-text').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.dark-show').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.dark-hide').forEach(el => el.classList.add('hidden'));
+    } else {
+        root.classList.remove('dark'); root.classList.add('light');
+        if (btn) { btn.textContent = '🌙'; btn.className = 'w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base'; }
+        document.querySelectorAll('.light-text').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.dark-text').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dark-show').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dark-hide').forEach(el => el.classList.remove('hidden'));
+    }
+}
+
+function toggleDarkMode() {
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    applyTheme(!isDark);
+    if (allHomework.length > 0 && !document.getElementById('statsTab').classList.contains('hidden')) {
+        setTimeout(renderAdvancedAnalytics, 50);
+    }
+}
+
+/* ── API ── */
+async function apiCall(payload) {
+    try {
+        document.getElementById('processingOverlay').classList.remove('hidden');
+        payload.apiKey = getApiKey();
+        if (currentUser) { payload.username = currentUser.username; payload.token = currentUser.token; }
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        document.getElementById('processingOverlay').classList.add('hidden');
+        if (json.updating && currentUser && currentUser.role !== 'admin') {
+            document.getElementById('maintenanceOverlay').classList.remove('hidden');
+        }
+        return json;
+    } catch (e) {
+        document.getElementById('processingOverlay').classList.add('hidden');
+        return { success: false, message: 'Server Connection Error' };
+    }
+}
+
+/* ── AUTH ── */
+async function handleLogin(e) {
+    e.preventDefault();
+    const res = await apiCall({ action:'login', username:document.getElementById('login-u').value, password:document.getElementById('login-p').value });
+    if (res.success) {
+        if (res.isNewUser) {
+            sessionStorage.setItem('m64_tmp_u', res.username);
+            sessionStorage.setItem('m64_tmp_t', res.token);
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('firstPwSection').classList.remove('hidden');
+        } else {
+            currentUser = res;
+            localStorage.setItem('m64_usr', JSON.stringify(res));
+            sessionStorage.setItem('m64_tok', res.token);
+            showMainDashboard();
+        }
+    } else alert(res.message || 'Login Failed');
+}
+
+async function handleSetFirstPassword(e) {
+    e.preventDefault();
+    const n = document.getElementById('fp-new').value, c = document.getElementById('fp-confirm').value;
+    if (n.length < 8) return alert('Password must be at least 8 characters');
+    if (n !== c) return alert('Passwords do not match');
+    const res = await apiCall({ action:'setInitialPassword', username:sessionStorage.getItem('m64_tmp_u'), token:sessionStorage.getItem('m64_tmp_t'), newPassword:n });
+    if (res.success) { alert('Success. Please login again.'); location.reload(); }
+}
+
+function handleLogout() { localStorage.clear(); sessionStorage.clear(); location.reload(); }
+function checkAuth() {
+    const s = localStorage.getItem('m64_usr'), t = sessionStorage.getItem('m64_tok');
+    if (s && t) { currentUser = JSON.parse(s); currentUser.token = t; showMainDashboard(); }
+}
+
+/* ── DASHBOARD ── */
+function showMainDashboard() {
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('mainSection').classList.remove('hidden');
+    document.getElementById('userDisplayName').innerText = currentUser.name;
+    if (currentUser.role === 'admin') document.getElementById('btn-adminTab').classList.remove('hidden');
+    switchTab('homeworkTab');
+}
+
+async function switchTab(id) {
+    ['homeworkTab','statsTab','profileTab','adminTab'].forEach(t => {
+        document.getElementById(t).classList.add('hidden');
+        const b = document.getElementById('btn-'+t); if(b) b.classList.remove('tab-active');
+    });
+    document.getElementById(id).classList.remove('hidden');
+    const b = document.getElementById('btn-'+id); if(b) b.classList.add('tab-active');
+    if (id === 'homeworkTab') loadHomework();
+    if (id === 'statsTab') { if(!allHomework.length) await loadHomework(); setTimeout(renderAdvancedAnalytics, 50); }
+    if (id === 'profileTab') { if(!allHomework.length) await loadHomework(); renderProfile(); }
+    if (id === 'adminTab') { loadAdminPanel(); }
+}
+
+/* ── HOMEWORK ── */
+async function loadHomework() {
+    const res = await apiCall({ action: 'getHomework' });
+    if (res.success) { allHomework = res.data; renderHomework(); }
+}
+
+function renderHomework() {
+    const container = document.getElementById('homeworkContainer');
+    container.innerHTML = '';
+    const me = currentUser.username.toLowerCase();
+    const filtered = allHomework.filter(h => {
+        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
+        const sMatch = currentSubjectFilter === 'all' || h['วิชา'] === currentSubjectFilter;
+        const stMatch = currentStatusFilter === 'all' || (currentStatusFilter === 'pending' ? !done : done);
+        return sMatch && stMatch;
+    });
+
+    if (!filtered.length) {
+        container.innerHTML = `<p class="col-span-full text-center py-20 mono text-xs uppercase tracking-widest italic" style="color:var(--text-muted)">// Stack_Empty</p>`;
+        return;
+    }
+
+    filtered.forEach(h => {
+        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
+        const doneCount = h['ผู้ทำเสร็จ'] ? h['ผู้ทำเสร็จ'].split(',').filter(Boolean).length : 0;
+        const progress = Math.round((doneCount / TOTAL_STUDENTS) * 100);
+
+        // Calculate days left
+        const due = h['กำหนดส่ง'];
+        let daysLabel = due ? due : '-';
+        if (due) {
+            const diff = Math.ceil((new Date(due) - new Date()) / 86400000);
+            if (diff < 0) daysLabel = `<span style="color:#f43f5e">OVERDUE</span>`;
+            else if (diff === 0) daysLabel = `<span style="color:#f59e0b">TODAY</span>`;
+            else if (diff <= 3) daysLabel = `<span style="color:#f59e0b">${diff}d LEFT</span>`;
+            else daysLabel = `<span>${due}</span>`;
+        }
+
+        const div = document.createElement('div');
+        div.className = `glass p-5 rounded-[1.75rem] space-y-3 fade-in transition-all hw-card ${done ? 'done-card' : ''}`;
+        if (done) div.style.opacity = '0.45';
+        div.innerHTML = `
+            <div class="flex justify-between items-start gap-2">
+                <span class="subject-chip active text-[9px]">${h['วิชา']}</span>
+                <span class="mono text-[8px] font-black">${daysLabel}</span>
+            </div>
+            <h4 class="text-sm font-bold leading-snug" style="color:var(--text)">${h['การบ้าน']}</h4>
+            <div>
+                <div class="flex justify-between text-[8px] font-black uppercase mono mb-1" style="color:var(--text-muted)">
+                    <span>Room_Sync</span><span style="color:var(--accent)">${progress}%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill h-full rounded-full" style="width:${progress}%;transition:width 1s ease;"></div>
+                </div>
+                <p class="text-[8px] mono mt-1" style="color:var(--text-muted)">${doneCount}/${TOTAL_STUDENTS} nodes confirmed</p>
+            </div>
+            ${h['หมายเหตุ'] ? `<p class="text-[9px] px-3 py-2 rounded-lg italic truncate" style="background:var(--chip-bg);color:var(--text-muted)">📎 ${h['หมายเหตุ']}</p>` : ''}
+            <div class="flex gap-2 pt-1">
+                <button onclick="toggleHwStatus('${h.rowNum}', ${done})"
+                    class="${done ? 'btn-revert' : 'btn-complete'} flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase mono transition-all">
+                    ${done ? '[ REVERT ]' : '[ COMPLETE ]'}
+                </button>
+                ${currentUser.role === 'admin' ? `<button onclick="handleDeleteHomework(${h.rowNum})" class="btn-danger px-3 py-2 rounded-xl transition-all text-xs">🗑</button>` : ''}
+            </div>`;
+        container.appendChild(div);
+    });
+}
+
+async function toggleHwStatus(rowNum, currentStatus) {
+    const res = await apiCall({ action: 'togglePersonalStatus', rowNum });
+    if (res.success) {
+        if (!currentStatus) confetti({ particleCount:120, spread:80, origin:{y:0.6}, colors:['#6366f1','#a855f7','#00ff9d','#00cfff'] });
+        loadHomework();
+    }
+}
+
+async function handleDeleteHomework(rowNum) {
+    if (confirm('Delete this task permanently?')) {
+        const res = await apiCall({ action: 'deleteHomework', rowNum });
+        if (res.success) loadHomework();
+    }
+}
+
+/* ── ANALYTICS ── */
+function renderAdvancedAnalytics() {
+    const ctx = document.getElementById('completionRateChart')?.getContext('2d');
+    if (!ctx) return;
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#4a7c63' : '#94a3b8';
+    const gridColor = isDark ? 'rgba(0,255,157,0.05)' : 'rgba(99,102,241,0.08)';
+    const accentColor = isDark ? '#00ff9d' : '#6366f1';
+    const fillColor = isDark ? 'rgba(0,255,157,0.06)' : 'rgba(99,102,241,0.08)';
+
+    const labels = allHomework.slice(-10).map(h => h['การบ้าน'].substring(0, 10));
+    const data = allHomework.slice(-10).map(h =>
+        Math.round(((h['ผู้ทำเสร็จ'] ? h['ผู้ทำเสร็จ'].split(',').filter(Boolean).length : 0) / TOTAL_STUDENTS) * 100)
+    );
+
+    if (charts.advanced) charts.advanced.destroy();
+    charts.advanced = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{ label:'Success %', data, borderColor: accentColor, tension: 0.4, fill: true, backgroundColor: fillColor, pointBackgroundColor: accentColor, pointRadius: 4 }] },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero:true, max:100, ticks:{color:textColor, font:{family:'JetBrains Mono', size:10}}, grid:{color:gridColor} },
+                x: { ticks:{color:textColor, font:{family:'JetBrains Mono', size:9}, maxRotation:45}, grid:{color:gridColor} }
+            },
+            plugins: { legend: { labels: { color:textColor, font:{family:'JetBrains Mono', size:10} } } }
+        }
+    });
+    renderLeaderboard();
+}
+
+function renderLeaderboard() {
+    const scores = {};
+    allHomework.forEach(h => {
+        if (h['ผู้ทำเสร็จ']) h['ผู้ทำเสร็จ'].split(',').forEach(u => {
+            const un = u.trim().toLowerCase();
+            if (un) scores[un] = (scores[un] || 0) + 10;
+        });
+    });
+    const medals = ['🥇','🥈','🥉','④','⑤'];
+    const sorted = Object.entries(scores).sort((a,b) => b[1]-a[1]).slice(0,5);
+    document.getElementById('leaderboardContainer').innerHTML = sorted.map(([user, exp], i) => `
+        <div class="lb-card flex justify-between items-center p-3 rounded-xl ${user === currentUser.username.toLowerCase() ? 'ring-1' : ''} glass" 
+             style="${user === currentUser.username.toLowerCase() ? 'ring-color:var(--accent)' : ''}">
+            <p class="text-[9px] font-black uppercase mono" style="color:var(--text)">
+                <span style="color:var(--accent)" class="mr-1">${medals[i]}</span>${user}
+            </p>
+            <p class="font-black mono text-sm exp-color">${exp}</p>
+        </div>`).join('');
+}
+
+/* ── PROFILE ── */
+function renderProfile() {
+    const me = currentUser.username.toLowerCase();
+    const doneTasks = allHomework.filter(h => h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me));
+    document.getElementById('prof-name').innerText = currentUser.name;
+    document.getElementById('prof-done').innerText = doneTasks.length;
+    document.getElementById('prof-exp').innerText = doneTasks.length * 10;
+}
+
+/* ── CHANGE PASSWORD ── */
+function openChangePwModal() { document.getElementById('changePwModal').classList.remove('hidden'); }
+function closeChangePwModal() { document.getElementById('changePwModal').classList.add('hidden'); }
+async function handleChangePassword(e) {
+    e.preventDefault();
+    const res = await apiCall({ action:'changePassword', oldPassword:document.getElementById('cp-old').value, newPassword:document.getElementById('cp-new').value });
+    if (res.success) { alert('Password changed successfully!'); closeChangePwModal(); }
+    else alert(res.message || 'Failed');
+}
+
+/* ── ADMIN ── */
+
+// โหลดทุกอย่างใน admin panel ทีเดียว — เพื่อไม่ให้ processingOverlay ค้าง
+async function loadAdminPanel() {
+    const overlay = document.getElementById('processingOverlay');
+    overlay.classList.remove('hidden');
+    try {
+        // เรียก 3 API ต่อกันเป็น sequence ไม่ใช่ parallel
+        const [usersRes, statusRes, logsRes] = await Promise.all([
+            _rawCall({ action: 'getUsers' }),
+            _rawCall({ action: 'adminGetStatus' }),
+            _rawCall({ action: 'getSystemLogs' }),
+        ]);
+        renderAdminUsers(usersRes);
+        renderMaintenanceBtn(statusRes);
+        renderLogs(logsRes);
+    } finally {
+        overlay.classList.add('hidden');
+    }
+}
+
+// apiCall แบบไม่ยุ่งกับ overlay (ใช้ภายใน loadAdminPanel เท่านั้น)
+async function _rawCall(payload) {
+    try {
+        payload.apiKey = getApiKey();
+        if (currentUser) { payload.username = currentUser.username; payload.token = currentUser.token; }
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        return await res.json();
+    } catch (e) { return { success: false, message: 'Connection Error' }; }
+}
+
+function renderAdminUsers(res) {
+    if (!res.success) return;
+    document.getElementById('adminUserContainer').innerHTML = res.users.map(u => `
+        <div class="flex justify-between items-center p-3 rounded-xl glass">
+            <div>
+                <p class="text-[10px] font-black uppercase mono" style="color:var(--text)">${u.username}</p>
+                <p class="text-[9px] font-bold" style="color:var(--text-muted)">${u.name}</p>
+            </div>
+            <button onclick="adminResetPw('${u.username}')" class="px-3 py-1.5 rounded-lg text-[9px] font-black mono uppercase transition-all" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#f59e0b">Reset_PW</button>
+        </div>`).join('');
+}
+
+function renderMaintenanceBtn(res) {
+    if (!res.success) return;
+    isMaintenance = res.maintenance;
+    const b = document.getElementById('maintenanceToggleBtn');
+    b.innerText = isMaintenance ? '[ BRING SYSTEM ONLINE ]' : '[ FORCE MAINTENANCE MODE ]';
+    b.style.cssText = isMaintenance
+        ? 'background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.4);color:#10b981;width:100%;padding:12px;border-radius:12px;font-size:9px;font-weight:900;font-family:JetBrains Mono,monospace;text-transform:uppercase;cursor:pointer'
+        : 'background:rgba(255,0,60,0.08);border:1px solid rgba(255,0,60,0.3);color:#f43f5e;width:100%;padding:12px;border-radius:12px;font-size:9px;font-weight:900;font-family:JetBrains Mono,monospace;text-transform:uppercase;cursor:pointer';
+}
+
+function renderLogs(res) {
+    if (!res.success) return;
+    document.getElementById('logContainer').innerHTML = res.logs.length
+        ? res.logs.map(l => `<p><span style="color:var(--accent)">${new Date(l.timestamp).toLocaleString('th')}</span> · <span style="color:var(--text)">${l.username}</span> · ${l.action} · ${l.details||''}</p>`).join('')
+        : `<p style="color:var(--text-muted)">> no logs yet</p>`;
+}
+
+async function adminResetPw(t) {
+    if (!confirm(`Reset password ของ "${t}" เป็น 1234 ?`)) return;
+    const res = await apiCall({ action:'adminResetPassword', targetUsername:t });
+    if (res.success) alert(`✅ Reset สำเร็จ — ${t} ต้องเปลี่ยนรหัสใหม่ตอน login`);
+    else alert('❌ ' + res.message);
+}
+
+async function checkMaintenanceStatus() {
+    const res = await apiCall({ action: 'adminGetStatus' });
+    renderMaintenanceBtn(res);
+}
+
+async function toggleMaintenanceServer() {
+    if (!confirm('เปลี่ยน Maintenance Mode?')) return;
+    await apiCall({ action:'adminToggleStatus', maintenance: !isMaintenance });
+    checkMaintenanceStatus();
+}
+
+async function handleAdminAddUser(e) {
+    e.preventDefault();
+    const u = document.getElementById('adm-new-u').value.trim();
+    const n = document.getElementById('adm-new-n').value.trim();
+    if (!u || !n) return alert('กรุณากรอกข้อมูลให้ครบ');
+    const res = await apiCall({ action:'adminAddUser', newUsername:u, newName:n });
+    if (res.success) {
+        alert(`✅ เพิ่ม "${u}" สำเร็จ`);
+        document.getElementById('adm-new-u').value = '';
+        document.getElementById('adm-new-n').value = '';
+        loadAdminPanel();
+    } else alert('❌ ' + res.message);
+}
+
+/* ── SUBJECT CHIPS ── */
+function initSubjectChips() {
+    const row = document.getElementById('subjectChipRow');
+    const modalRow = document.getElementById('modalSubjectChips');
+    row.innerHTML = ''; modalRow.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'subject-chip active';
+    allBtn.innerText = 'ALL';
+    allBtn.onclick = () => setSubjectFilter('all');
+    row.appendChild(allBtn);
+
+    SUBJECTS.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'subject-chip';
+        btn.innerText = s.label;
+        btn.onclick = () => setSubjectFilter(s.label);
+        row.appendChild(btn);
+
+        const mBtn = document.createElement('button');
+        mBtn.className = 'subject-chip';
+        mBtn.innerText = s.label;
+        mBtn.onclick = () => {
+            document.getElementById('modal-subject').value = s.label;
+            document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c => c.classList.remove('active'));
+            mBtn.classList.add('active');
+        };
+        modalRow.appendChild(mBtn);
+    });
+}
+
+function setSubjectFilter(l) {
+    currentSubjectFilter = l;
+    document.querySelectorAll('#subjectChipRow .subject-chip').forEach(c =>
+        c.classList.toggle('active', c.innerText === l || (l==='all' && c.innerText==='ALL'))
+    );
+    renderHomework();
+}
+
+function setStatusFilter(s) {
+    currentStatusFilter = s;
+    const all = document.getElementById('sfilter-all');
+    const pend = document.getElementById('sfilter-pending');
+    if (s === 'all') { all.classList.add('filter-active'); pend.classList.remove('filter-active'); pend.style.color='var(--text-muted)'; }
+    else { pend.classList.add('filter-active'); all.classList.remove('filter-active'); all.style.color='var(--text-muted)'; }
+    renderHomework();
+}
+
+function openAddHomeworkModal() { document.getElementById('addHwModal').classList.remove('hidden'); }
+function closeAddHomeworkModal() { document.getElementById('addHwModal').classList.add('hidden'); }
+
+async function handleQuickAddHomework() {
+    const subj = document.getElementById('modal-subject').value;
+    if (!subj) { alert('Please select a subject'); return; }
+    const res = await apiCall({
+        action:'addHomework',
+        subject: subj,
+        task: document.getElementById('modal-task').value,
+        dueDate: document.getElementById('modal-date').value,
+        note: document.getElementById('modal-note').value
+    });
+    if (res.success) {
+        closeAddHomeworkModal();
+        document.getElementById('modal-subject').value='';
+        document.getElementById('modal-task').value='';
+        document.getElementById('modal-date').value='';
+        document.getElementById('modal-note').value='';
+        document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c => c.classList.remove('active'));
+        loadHomework();
+    }
+}
+</script>
+</body>
+</html>
