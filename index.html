@@ -638,642 +638,430 @@
 
 <!-- ════════════════════════════ SCRIPT ════════════════════════════ -->
 <script>
-'use strict';
+// ══════════════════════════════════════════════════════════
+// 🌐 โค้ด JavaScript ระบบหน้าบ้าน (ต่อยอดเสร็จสมบูรณ์)
+// ══════════════════════════════════════════════════════════
 
-const _kd = [50,73,75,32,44,42,47,58,45,32,44,58,60,45,58,43,32,77,79,77,73];
-const _ks = 127;
-const getApiKey = () => _kd.map(c => String.fromCharCode(c ^ _ks)).join('');
+// 1. ตั้งค่าการเชื่อมต่อหลัก
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxccAV50YxE9QuQJyJQT9TAR4zWVJh2TrAHzdf_Tor_qC_d9hGzR7GAQV9bQkMAefTW/exec"; 
+const API_KEY = "M64_SUPER_SECRET_2026"; // API Key ที่ตรงกับฝั่งหลังบ้าน
 
-// 🔴 URL สื่อสารหลักกับ Google Apps Script ของคุณ
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxccAV50YxE9QuQJyJQT9TAR4zWVJh2TrAHzdf_Tor_qC_d9hGzR7GAQV9bQkMAefTW/exec";
-
-const TOTAL_STUDENTS = 23;
-const MAX_XP = TOTAL_STUDENTS * 10;
-
-const SUBJECTS = [
-    { label:'คณิตประยุกต์ 5' }, { label:'คณิตพื้นฐาน 5' }, { label:'ฟิสิกส์ 4' },
-    { label:'เคมี 4' }, { label:'ชีววิทยา 2' }, { label:'อังกฤษพื้นฐาน 5' },
-    { label:'อังกฤษวิชาการ 5' }, { label:'ไอโอที (IoT)' }, { label:'อิเล็กฯเบื้องต้น' },
-    { label:'เทคโนโลยี 5' }, { label:'โครงงาน' }, { label:'ภาษาไทย 1' },
-    { label:'ประวัติศาสตร์ 2' }, { label:'อื่นๆ' }
-];
-
+// 2. ตัวแปรควบคุมสถานะของแอป (Global State)
 let currentUser = null;
-let allHomework = [];
-let allAdminUsers = [];
-let currentSubjectFilter = 'all';
+let currentUsername = "";
+let homeworkList = [];
 let currentStatusFilter = 'all';
-let charts = {};
-let isMaintenance = false;
+let currentSubjectFilter = 'all';
 
-window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('theme');
-    applyTheme(saved === 'dark');
-    initSubjectChips();
-    checkAuth();
-    document.getElementById('fp-new').addEventListener('input', checkPwStrength);
-});
-
-function showToast(msg, color = 'var(--accent)') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.color = color;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-function applyTheme(dark) {
-    const root = document.documentElement;
-    const btn = document.getElementById('themeBtn');
-    if (dark) {
-        root.classList.remove('light'); root.classList.add('dark');
-        if (btn) { btn.textContent = '☀️'; btn.className = 'w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-dark text-base'; }
-        document.querySelectorAll('.light-text').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.dark-text').forEach(el => el.classList.remove('hidden'));
-        document.querySelectorAll('.dark-show').forEach(el => el.classList.remove('hidden'));
-        document.querySelectorAll('.dark-hide').forEach(el => el.classList.add('hidden'));
-    } else {
-        root.classList.remove('dark'); root.classList.add('light');
-        if (btn) { btn.textContent = '🌙'; btn.className = 'w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base'; }
-        document.querySelectorAll('.light-text').forEach(el => el.classList.remove('hidden'));
-        document.querySelectorAll('.dark-text').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.dark-show').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.dark-hide').forEach(el => el.classList.remove('hidden'));
-    }
-}
-
-function toggleDarkMode() {
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    applyTheme(!isDark);
-    if (allHomework.length > 0 && !document.getElementById('statsTab').classList.contains('hidden')) {
-        setTimeout(renderAdvancedAnalytics, 50);
-    }
-}
-
-function checkPwStrength() {
-    const pw = document.getElementById('fp-new').value;
-    const bar = document.getElementById('pwStrengthBar');
-    const label = document.getElementById('pwStrengthLabel');
-    let score = 0;
-    if (pw.length >= 8) score++;
-    if (pw.length >= 12) score++;
-    if (/[A-Z]/.test(pw)) score++;
-    if (/[0-9]/.test(pw)) score++;
-    if (/[^A-Za-z0-9]/.test(pw)) score++;
-    const levels = [
-        { w:'0%', c:'#f43f5e', t:'// strength: very weak' },
-        { w:'20%', c:'#f43f5e', t:'// strength: weak' },
-        { w:'40%', c:'#f59e0b', t:'// strength: fair' },
-        { w:'65%', c:'#f59e0b', t:'// strength: good' },
-        { w:'85%', c:'#10b981', t:'// strength: strong' },
-        { w:'100%', c:'#00ff9d', t:'// strength: VERY STRONG ✓' }
-    ];
-    const l = levels[score] || levels[0];
-    bar.style.width = l.w;
-    bar.style.background = l.c;
-    label.textContent = l.t;
-    label.style.color = l.c;
-}
-
-async function apiCall(payload) {
+// ═══════════════════════════
+// CORE API CALL FUNCTION
+// ═══════════════════════════
+async function apiCall(data) {
+    showOverlay();
     try {
-        document.getElementById('processingOverlay').classList.remove('hidden');
-        payload.apiKey = getApiKey();
-        if (currentUser) { payload.username = currentUser.username; payload.token = currentUser.token; }
-        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-        const json = await res.json();
-        document.getElementById('processingOverlay').classList.add('hidden');
-        if (json.updating && currentUser && currentUser.role !== 'admin') {
-            document.getElementById('maintenanceOverlay').classList.remove('hidden');
-        }
-        return json;
-    } catch (e) {
-        document.getElementById('processingOverlay').classList.add('hidden');
-        return { success: false, message: 'Server Connection Error' };
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ 
+                ...data, 
+                apiKey: API_KEY 
+            })
+        });
+        return await response.json();
+    } catch (err) {
+        console.error("API Error:", err);
+        return { success: false, message: "การเชื่อมต่อเครือข่ายขัดข้อง กรุณาลองใหม่" };
+    } finally {
+        hideOverlay();
     }
 }
 
-async function _rawCall(payload) {
-    try {
-        payload.apiKey = getApiKey();
-        if (currentUser) { payload.username = currentUser.username; payload.token = currentUser.token; }
-        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-        return await res.json();
-    } catch (e) { return { success: false, message: 'Connection Error' }; }
-}
-
-async function handleLogin(e) {
-    e.preventDefault();
+// ═══════════════════════════
+// AUTHENTICATION LOGIC (ระบบเข้าสู่ระบบ)
+// ═══════════════════════════
+async function handleLogin(event) {
+    event.preventDefault();
+    const uInput = document.getElementById('login-u').value.trim();
+    const pInput = document.getElementById('login-p').value.trim();
     const errEl = document.getElementById('loginError');
+    
+    if (!uInput || !pInput) return;
     errEl.classList.add('hidden');
+
     const res = await apiCall({
         action: 'login',
-        username: document.getElementById('login-u').value.trim(),
-        password: document.getElementById('login-p').value
+        username: uInput,
+        password: pInput
     });
+
     if (res.success) {
-        if (res.isNewUser) {
-            sessionStorage.setItem('m64_tmp_u', res.username);
-            sessionStorage.setItem('m64_tmp_t', res.token);
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('firstPwSection').classList.remove('hidden');
+        currentUsername = uInput;
+        currentUser = res.name;
+        
+        if (res.isFirstTime) {
+            // บังคับเปลี่ยนรหัสผ่านในครั้งแรก (กรณีรหัสเดิมเป็น 1234)
+            switchSection('firstPwSection');
         } else {
-            currentUser = res;
-            localStorage.setItem('m64_usr', JSON.stringify(res));
-            sessionStorage.setItem('m64_tok', res.token);
-            showMainDashboard();
+            // เข้าสู่หน้าหลักสำเร็จ
+            loginSuccessActions();
         }
     } else {
-        errEl.textContent = '⚠ ' + (res.message || 'Login Failed');
+        errEl.innerText = res.message || "Student ID หรือรหัสผ่านไม่ถูกต้อง";
         errEl.classList.remove('hidden');
+        document.getElementById('loginSection').classList.add('animate-shake');
+        setTimeout(() => document.getElementById('loginSection').classList.remove('animate-shake'), 500);
     }
 }
 
-async function handleSetFirstPassword(e) {
-    e.preventDefault();
-    const n = document.getElementById('fp-new').value;
-    const c = document.getElementById('fp-confirm').value;
-    if (n.length < 8) return showToast('⚠ Password must be at least 8 characters', 'var(--danger)');
-    if (n !== c) return showToast('⚠ Passwords do not match', 'var(--danger)');
+function loginSuccessActions() {
+    document.getElementById('userDisplayName').innerText = currentUser;
+    switchSection('mainSection');
+    showToast(`⚡ ยินดีต้อนรับคุณ ${currentUser}`);
+    loadHomework();
+}
+
+function handleLogout() {
+    currentUser = null;
+    currentUsername = "";
+    homeworkList = [];
+    document.getElementById('login-u').value = "";
+    document.getElementById('login-p').value = "";
+    switchSection('loginSection');
+    showToast("✓ ออกจากระบบเรียบร้อย");
+}
+
+// 🔐 ระบบเปลี่ยนรหัสผ่านครั้งแรก
+async function handleSetFirstPassword(event) {
+    event.preventDefault();
+    const newPw = document.getElementById('fp-new').value;
+    const confirmPw = document.getElementById('fp-confirm').value;
+
+    if (newPw.length < 8) {
+        return showToast("⚠ รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร", "var(--danger)");
+    }
+    if (newPw !== confirmPw) {
+        return showToast("⚠ รหัสผ่านไม่ตรงกัน", "var(--danger)");
+    }
+
     const res = await apiCall({
-        action: 'setInitialPassword',
-        username: sessionStorage.getItem('m64_tmp_u'),
-        token: sessionStorage.getItem('m64_tmp_t'),
-        newPassword: n
+        action: 'setFirstPassword',
+        username: currentUsername,
+        newPassword: newPw
     });
+
     if (res.success) {
-        showToast('✓ Password set! Please login again.');
-        setTimeout(() => location.reload(), 1500);
+        showToast("✓ เปลี่ยนรหัสผ่านสำเร็จ!");
+        loginSuccessActions();
     } else {
-        showToast('✕ ' + (res.message || 'Failed'), 'var(--danger)');
+        showToast("✕ เกิดข้อผิดพลาด: " + res.message, "var(--danger)");
     }
 }
 
-function handleLogout() { localStorage.clear(); sessionStorage.clear(); location.reload(); }
-function checkAuth() {
-    const s = localStorage.getItem('m64_usr');
-    const t = sessionStorage.getItem('m64_tok');
-    if (s && t) { currentUser = JSON.parse(s); currentUser.token = t; showMainDashboard(); }
-}
-
-function showMainDashboard() {
-    document.getElementById('loginSection').classList.add('hidden');
-    document.getElementById('mainSection').classList.remove('hidden');
-    document.getElementById('userDisplayName').textContent = currentUser.name;
-    if (currentUser.role === 'admin') document.getElementById('btn-adminTab').classList.remove('hidden');
-    switchTab('homeworkTab');
-}
-
-async function switchTab(id) {
-    ['homeworkTab','statsTab','profileTab','adminTab'].forEach(t => {
-        document.getElementById(t).classList.add('hidden');
-        const b = document.getElementById('btn-' + t); if (b) b.classList.remove('tab-active');
-    });
-    document.getElementById(id).classList.remove('hidden');
-    const b = document.getElementById('btn-' + id); if (b) b.classList.add('tab-active');
-
-    if (id === 'homeworkTab') loadHomework();
-    if (id === 'statsTab') { if (!allHomework.length) await loadHomework(); setTimeout(renderAdvancedAnalytics, 50); }
-    if (id === 'profileTab') { if (!allHomework.length) await loadHomework(); renderProfile(); }
-    if (id === 'adminTab') loadAdminPanel();
-}
-
+// ═══════════════════════════
+// HOMEWORK MANAGEMENT (ระบบจัดการการบ้าน)
+// ═══════════════════════════
 async function loadHomework() {
     const res = await apiCall({ action: 'getHomework' });
-    if (res.success) { allHomework = res.data; renderHomework(); updateNavBadge(); renderSummaryStrip(); }
+    if (res.success) {
+        homeworkList = res.data;
+        renderSubjectChips();
+        renderHomework();
+        updateSummaryStrip();
+    } else {
+        showToast("✕ ดึงข้อมูลล้มเหลว", "var(--danger)");
+    }
 }
 
-function renderSummaryStrip() {
-    const me = currentUser.username.toLowerCase();
-    const total = allHomework.length;
-    const doneCount = allHomework.filter(h => h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me)).length;
-    const pendingCount = total - doneCount;
-    const overdueCount = allHomework.filter(h => {
-        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
-        if (done || !h['กำหนดส่ง']) return false;
-        return Math.ceil((new Date(h['กำหนดส่ง']) - new Date()) / 86400000) < 0;
-    }).length;
+async function handleQuickAddHomework() {
+    const subj = document.getElementById('modal-subject').value;
+    const task = document.getElementById('modal-task').value.trim();
+    const dueDate = document.getElementById('modal-date').value;
+    const note = document.getElementById('modal-note').value;
 
-    document.getElementById('summaryStrip').innerHTML = `
-        <div class="glass p-4 rounded-2xl text-center">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">Total Tasks</p>
-            <p class="text-2xl font-black cyber-title">${total}</p>
-        </div>
-        <div class="glass p-4 rounded-2xl text-center">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">Pending</p>
-            <p class="text-2xl font-black" style="color:var(--warning)">${pendingCount}</p>
-        </div>
-        <div class="glass p-4 rounded-2xl text-center">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">Overdue</p>
-            <p class="text-2xl font-black ${overdueCount > 0 ? 'badge-urgent' : ''}" style="color:${overdueCount > 0 ? 'var(--danger)' : 'var(--success)'}">${overdueCount}</p>
-        </div>`;
-}
+    if (!subj) return showToast('⚠ กรุณาเลือกวิชา', 'var(--warning)');
+    if (!task) return showToast('⚠ กรุณากรอกรายละเอียดงาน', 'var(--warning)');
 
-function updateNavBadge() {
-    const me = currentUser.username.toLowerCase();
-    const pending = allHomework.filter(h => !h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me)).length;
-    document.getElementById('navPendingCount').textContent = pending;
-    document.getElementById('navPendingBadge').classList.toggle('hidden', pending === 0);
-}
-
-function renderHomework() {
-    const container = document.getElementById('homeworkContainer');
-    container.innerHTML = '';
-    const me = currentUser.username.toLowerCase();
-    const filtered = allHomework.filter(h => {
-        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
-        const sMatch = currentSubjectFilter === 'all' || h['วิชา'] === currentSubjectFilter;
-        let stMatch = true;
-        if (currentStatusFilter === 'pending') stMatch = !done;
-        else if (currentStatusFilter === 'done') stMatch = done;
-        return sMatch && stMatch;
+    const res = await apiCall({
+        action: 'addHomework',
+        subject: subj,
+        task: task,
+        dueDate: dueDate,
+        note: note
     });
 
-    if (!filtered.length) {
+    if (res.success) {
+        showToast('✓ เพิ่มงานใหม่เรียบร้อยแล้ว!');
+        closeAddHomeworkModal();
+        loadHomework();
+        if (typeof confetti === 'function') confetti();
+    } else {
+        showToast('✕ เพิ่มงานไม่สำเร็จ: ' + res.message, 'var(--danger)');
+    }
+}
+
+async function toggleHomeworkStatus(id, currentStatus) {
+    const nextStatus = currentStatus === 'done' ? 'pending' : 'done';
+    const res = await apiCall({
+        action: 'updateStatus',
+        id: id,
+        status: nextStatus
+    });
+
+    if (res.success) {
+        showToast(nextStatus === 'done' ? '✓ ส่งงานแล้ว 🎉' : '🔄 เปลี่ยนเป็นค้างส่ง');
+        loadHomework();
+        if (nextStatus === 'done' && typeof confetti === 'function') confetti();
+    } else {
+        showToast('✕ อัปเดตสถานะล้มเหลว', 'var(--danger)');
+    }
+}
+
+// ═══════════════════════════
+// RENDERING & UI CONTROL (การแสดงผลบนหน้าจอ)
+// ═══════════════════════════
+function renderHomework() {
+    const container = document.getElementById('homeworkContainer');
+    container.innerHTML = "";
+
+    const filtered = homeworkList.filter(hw => {
+        const matchStatus = currentStatusFilter === 'all' || hw.status === currentStatusFilter;
+        const matchSubject = currentSubjectFilter === 'all' || hw.subject === currentSubjectFilter;
+        return matchStatus && matchSubject;
+    });
+
+    if (filtered.length === 0) {
         container.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center py-20 gap-3">
-                <p class="text-4xl">📭</p>
-                <p class="mono text-xs uppercase tracking-widest italic" style="color:var(--text-muted)">// Stack_Empty — No tasks found</p>
+            <div class="col-span-full py-12 text-center text-xs mono" style="color:var(--text-muted)">
+                [ ไม่พบรายการค้างส่งหรือข้อมูลการบ้านในหมวดนี้ ]
             </div>`;
         return;
     }
 
-    filtered.forEach((h, i) => {
-        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
-        const doneCount = h['ผู้ทำเสร็จ'] ? h['ผู้ทำเสร็จ'].split(',').filter(Boolean).length : 0;
-        const progress = Math.round((doneCount / TOTAL_STUDENTS) * 100);
-
-        const due = h['กำหนดส่ง'];
-        let duePill = '';
-        if (due) {
-            const diff = Math.ceil((new Date(due) - new Date()) / 86400000);
-            if (diff < 0) duePill = `<span class="due-pill due-overdue">⚠ OVERDUE</span>`;
-            else if (diff === 0) duePill = `<span class="due-pill due-today">🔥 TODAY</span>`;
-            else if (diff <= 3) duePill = `<span class="due-pill due-soon">⏰ ${diff}d LEFT</span>`;
-            else duePill = `<span class="due-pill due-normal">📅 ${due}</span>`;
+    filtered.forEach(hw => {
+        const isDone = hw.status === 'done';
+        const card = document.createElement('div');
+        card.className = `glass p-6 rounded-[2rem] hw-card relative flex flex-col justify-between stagger ${isDone ? 'done-card opacity-60' : ''}`;
+        
+        // คำนวณ Due Date Badge
+        let dueBadgeClass = "due-normal";
+        let dueText = hw.dueDate || "ไม่ระบุวันส่ง";
+        if (hw.dueDate && !isDone) {
+            const today = new Date().setHours(0,0,0,0);
+            const target = new Date(hw.dueDate).setHours(0,0,0,0);
+            if (target < today) { dueBadgeClass = "due-overdue"; dueText = "เลยกำหนดส่ง! ⚠️"; }
+            else if (target === today) { dueBadgeClass = "due-today"; dueText = "ส่งวันนี้! 🔥"; }
+            else if (target - today <= 86400000 * 2) { dueBadgeClass = "due-soon"; dueText = "ส่งเร็วๆ นี้ ⏳"; }
         }
 
-        const div = document.createElement('div');
-        div.className = `glass p-5 rounded-[1.75rem] space-y-3 hw-card ${done ? 'done-card' : ''}`;
-        div.style.cssText = `opacity:${done ? '0.42' : '1'};animation-delay:${i * 40}ms`;
-        div.classList.add('fade-in');
-        
-        // 🚨 ส่งทั้ง h.id (Task ID หลัก) และ h.rowNum ไปพร้อมกันแบบถอดสไตล์โครงสร้างเดิมมาครบถ้วน
-        div.innerHTML = `
-            <div class="flex justify-between items-start gap-2">
-                <span class="subject-chip active text-[9px]">${h['วิชา']}</span>
-                ${duePill}
-            </div>
-            <h4 class="text-sm font-bold leading-snug" style="color:var(--text)">${h['การบ้าน']}</h4>
+        card.innerHTML = `
             <div>
-                <div class="flex justify-between text-[8px] font-black uppercase mono mb-1.5" style="color:var(--text-muted)">
-                    <span>Room Sync</span>
-                    <span style="color:var(--accent)">${progress}%</span>
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md" style="background:var(--chip-bg); color:var(--accent)">
+                        ${hw.subject}
+                    </span>
+                    <span class="due-pill ${dueBadgeClass}">${dueText}</span>
                 </div>
-                <div class="progress-track">
-                    <div class="progress-fill h-full rounded-full" style="width:${progress}%;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);"></div>
-                </div>
-                <p class="text-[8px] mono mt-1" style="color:var(--text-muted)">${doneCount} / ${TOTAL_STUDENTS} nodes confirmed</p>
+                <h3 class="text-sm font-bold mb-2 ${isDone ? 'line-through text-slate-400' : ''}" style="color:var(--text)">
+                    ${hw.task}
+                </h3>
+                ${hw.note ? `<p class="text-[11px] mb-4 opacity-70 italic" style="color:var(--text-muted)">* ${hw.note}</p>` : ''}
             </div>
-            ${h['หมายเหตุ'] ? `<p class="text-[9px] px-3 py-2 rounded-lg italic truncate" style="background:var(--chip-bg);color:var(--text-muted);border:1px solid var(--chip-border)">📎 ${h['หมายเหตุ']}</p>` : ''}
-            <div class="flex gap-2 pt-1">
-                <button onclick="toggleHwStatus('${h.id || ''}', '${h.rowNum}', ${done})" class="${done ? 'btn-revert' : 'btn-complete'} flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase mono transition-all active:scale-95">
-                    ${done ? '[ REVERT ]' : '[ COMPLETE ]'}
+            <div class="mt-4 pt-3 border-t flex justify-end items-center" style="border-color:var(--card-border)">
+                <button onclick="toggleHomeworkStatus('${hw.id}', '${hw.status}')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all ${isDone ? 'btn-revert' : 'btn-primary'}">
+                    ${isDone ? '↩️ คืนค่าค้างส่ง' : '✓ ทำเครื่องหมายว่าเสร็จสิ้น'}
                 </button>
-                ${currentUser.role === 'admin' ? `<button onclick="handleDeleteHomework('${h.id || ''}', '${h.rowNum}')" class="btn-danger px-3 py-2.5 rounded-xl transition-all text-xs">🗑</button>` : ''}
-            </div>`;
-        container.appendChild(div);
+            </div>
+        `;
+        container.appendChild(card);
     });
 }
 
-async function toggleHwStatus(id, rowNum, currentStatus) {
-    const res = await apiCall({ action: 'togglePersonalStatus', id: id, rowNum: rowNum });
-    if (res.success) {
-        if (!currentStatus) {
-            confetti({ particleCount: 130, spread: 85, origin: { y: 0.6 }, colors: ['#5b5ef4','#a259f7','#00ff9d','#00d4ff','#f24f87'] });
-            showToast('🎉 Task completed! +10 XP');
-        } else {
-            showToast('↩ Task reverted', 'var(--text-muted)');
+function renderSubjectChips() {
+    const row = document.getElementById('subjectChipRow');
+    if (!row) return;
+    
+    // ดึงรายชื่อวิชาที่ไม่ซ้ำกันออกมา
+    const subjects = ['all', ...new Set(homeworkList.map(h => h.subject))];
+    row.innerHTML = "";
+
+    subjects.forEach(sub => {
+        const chip = document.createElement('span');
+        chip.className = `subject-chip ${currentSubjectFilter === sub ? 'active' : ''}`;
+        chip.innerText = sub === 'all' ? '📊 ALL SUBJECTS' : sub.toUpperCase();
+        chip.onclick = () => {
+            currentSubjectFilter = sub;
+            renderSubjectChips();
+            renderHomework();
+        };
+        row.appendChild(chip);
+    });
+}
+
+function updateSummaryStrip() {
+    const pending = homeworkList.filter(h => h.status !== 'done').length;
+    const done = homeworkList.filter(h => h.status === 'done').length;
+    
+    // อัปเดตตัวเลขแจ้งเตือนบนแถบเมนูด้านบน (Navbar)
+    const badge = document.getElementById('navPendingBadge');
+    const countEl = document.getElementById('navPendingCount');
+    if(badge && countEl) {
+        countEl.innerText = pending;
+        if(pending > 0) badge.classList.remove('hidden');
+        else badge.classList.add('hidden');
+    }
+
+    const strip = document.getElementById('summaryStrip');
+    if (!strip) return;
+    strip.innerHTML = `
+        <div class="glass p-4 rounded-2xl text-center stat-box">
+            <p class="cyber-section-label text-[8px]">// TOTAL_TASKS</p>
+            <p class="text-lg font-black mt-0.5">${homeworkList.length}</p>
+        </div>
+        <div class="glass p-4 rounded-2xl text-center stat-box">
+            <p class="cyber-section-label text-[8px]" style="color:var(--warning)">// PENDING</p>
+            <p class="text-lg font-black mt-0.5 text-amber-500">${pending}</p>
+        </div>
+        <div class="glass p-4 rounded-2xl text-center stat-box">
+            <p class="cyber-section-label text-[8px]" style="color:var(--success)">// COMPLETED</p>
+            <p class="text-lg font-black mt-0.5 text-emerald-500">${done}</p>
+        </div>
+    `;
+    
+    // บิ้วการทำงานระบบกราฟ Analytics ร่วมด้วย
+    updateAnalyticsChart(done, pending);
+}
+
+// 📊 จัดการระบบกราฟแท่งความสำเร็จ
+let analyticsChart = null;
+function updateAnalyticsChart(done, pending) {
+    const ctx = document.getElementById('completionRateChart');
+    if (!ctx) return;
+    
+    if (analyticsChart) analyticsChart.destroy();
+    
+    analyticsChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['เสร็จสิ้น (Done)', 'ค้างส่ง (Pending)'],
+            datasets: [{
+                data: [done, pending],
+                backgroundColor: [getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#10b981', '#f59e0b'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
         }
-        loadHomework();
+    });
+}
+
+// ═══════════════════════════
+// UTILITIES UI ACTION HELPERS
+// ═══════════════════════════
+function setStatusFilter(status) {
+    currentStatusFilter = status;
+    ['all', 'pending', 'done'].forEach(s => {
+        const btn = document.getElementById(`sfilter-${s}`);
+        if(btn) {
+            if(s === status) btn.className = "filter-active px-4 py-2 rounded-lg text-[10px] font-black mono transition-all";
+            else btn.className = "px-4 py-2 rounded-lg text-[10px] font-bold transition-all";
+        }
+    });
+    renderHomework();
+}
+
+function switchSection(sectionId) {
+    ['loginSection', 'firstPwSection', 'mainSection'].forEach(s => {
+        const el = document.getElementById(s);
+        if(el) {
+            if(s === sectionId) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+    });
+}
+
+function switchTab(tabId) {
+    ['homeworkTab', 'statsTab', 'profileTab', 'adminTab'].forEach(t => {
+        const el = document.getElementById(t);
+        const btn = document.getElementById(`btn-${t}`);
+        if(el && btn) {
+            if(t === tabId) {
+                el.classList.remove('hidden');
+                btn.classList.add('tab-active');
+            } else {
+                el.classList.add('hidden');
+                btn.classList.remove('tab-active');
+            }
+        }
+    });
+}
+
+// ระบบหน้าต่าง Modal (เพิ่มการบ้าน)
+function openAddHomeworkModal() { document.getElementById('addHomeworkModal')?.classList.remove('hidden'); }
+function closeAddHomeworkModal() {
+    document.getElementById('addHomeworkModal')?.classList.add('hidden');
+    document.getElementById('modal-subject').value = '';
+    document.getElementById('modal-task').value = '';
+    document.getElementById('modal-date').value = '';
+    document.getElementById('modal-note').value = '';
+}
+
+// พลอยระบบเปิดปิด Dark Mode / Light Mode
+function toggleDarkMode() {
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        if(themeBtn) { themeBtn.innerText = "🌙"; themeBtn.className = "w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base"; }
     } else {
-        showToast('✕ Failed: ' + (res.message || 'Error'), 'var(--danger)');
+        html.classList.remove('light');
+        html.classList.add('dark');
+        if(themeBtn) { themeBtn.innerText = "☀️"; themeBtn.className = "w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-dark text-base"; }
     }
 }
 
-async function handleDeleteHomework(id, rowNum) {
-    if (!confirm('Delete this task permanently?')) return;
-    const res = await apiCall({ action: 'deleteHomework', id: id, rowNum: rowNum });
-    if (res.success) { showToast('🗑 Task deleted'); loadHomework(); }
-    else { showToast('✕ Delete failed', 'var(--danger)'); }
+// ตัวชี้วัดการโหลด / แจ้งเตือนสั้น (Toast)
+function showOverlay() { document.getElementById('processingOverlay')?.classList.remove('hidden'); }
+function hideOverlay() { document.getElementById('processingOverlay')?.classList.add('hidden'); }
+
+function showToast(msg, color = 'var(--accent)') {
+    const toast = document.getElementById('toast');
+    if(!toast) return;
+    toast.innerText = msg;
+    toast.style.borderColor = color;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-function renderAdvancedAnalytics() {
-    const ctx = document.getElementById('completionRateChart')?.getContext('2d');
-    if (!ctx) return;
-    const isDark = document.documentElement.classList.contains('dark');
-    const textColor = isDark ? '#3e6a52' : '#94a3b8';
-    const gridColor = isDark ? 'rgba(0,255,157,0.05)' : 'rgba(91,94,244,0.07)';
-    const accentColor = isDark ? '#00ff9d' : '#5b5ef4';
-    const accent2Color = isDark ? '#00d4ff' : '#a259f7';
-    const fillGrad = ctx.createLinearGradient(0, 0, 0, 300);
-    fillGrad.addColorStop(0, isDark ? 'rgba(0,255,157,0.15)' : 'rgba(91,94,244,0.12)');
-    fillGrad.addColorStop(1, 'rgba(0,0,0,0)');
+// เช็กความแรงของรหัสผ่านในช่องเปลี่ยนรหัสครั้งแรก
+document.getElementById('fp-new')?.addEventListener('input', e => {
+    const val = e.target.value;
+    const bar = document.getElementById('pwStrengthBar');
+    const lbl = document.getElementById('pwStrengthLabel');
+    if(!bar || !lbl) return;
+    
+    let strength = 0;
+    if(val.length >= 8) strength += 30;
+    if(/[A-Z]/.test(val)) strength += 25;
+    if(/[a-z]/.test(val)) strength += 20;
+    if(/[0-9]/.test(val)) strength += 25;
 
-    const labels = allHomework.slice(-12).map(h => (h['การบ้าน'] || '').substring(0, 12));
-    const data = allHomework.slice(-12).map(h => Math.round(((h['ผู้ทำเสร็จ'] ? h['ผู้ทำเสร็จ'].split(',').filter(Boolean).length : 0) / TOTAL_STUDENTS) * 100));
+    bar.style.width = strength + "%";
+    if(strength < 50) { lbl.innerText = "// strength: อ่อนแอ ❌"; bar.style.background = "var(--danger)"; }
+    else if(strength < 80) { lbl.innerText = "// strength: ปานกลาง ⚡"; bar.style.background = "var(--warning)"; }
+    else { lbl.innerText = "// strength: ปลอดภัยดีเยี่ยม 🛡️"; bar.style.background = "var(--success)"; }
+});
 
-    if (charts.advanced) charts.advanced.destroy();
-    charts.advanced = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Success %', data, borderColor: accentColor, tension: 0.45, fill: true, backgroundColor: fillGrad,
-                pointBackgroundColor: accentColor, pointBorderColor: isDark ? '#050d17' : '#fff', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, max: 100, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
-                x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 40 }, grid: { color: gridColor } }
-            },
-            plugins: {
-                legend: { labels: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } } },
-                tooltip: {
-                    backgroundColor: isDark ? 'rgba(6,18,32,0.95)' : 'rgba(255,255,255,0.95)',
-                    borderColor: accentColor, borderWidth: 1, titleColor: accentColor, bodyColor: textColor,
-                    titleFont: { family: 'JetBrains Mono', size: 11 }, bodyFont: { family: 'JetBrains Mono', size: 10 }, padding: 12
-                }
-            }
-        }
-    });
-
-    renderLeaderboard();
-    renderSubjectChart(isDark, textColor, gridColor, accentColor, accent2Color);
-}
-
-function renderSubjectChart(isDark, textColor, gridColor, accentColor, accent2Color) {
-    const ctx2 = document.getElementById('subjectChart')?.getContext('2d');
-    if (!ctx2) return;
-    const subjectCounts = {};
-    allHomework.forEach(h => { const s = h['วิชา'] || 'อื่นๆ'; subjectCounts[s] = (subjectCounts[s] || 0) + 1; });
-    const entries = Object.entries(subjectCounts).sort((a, b) => b[1] - a[1]);
-    const palette = isDark
-        ? ['#00ff9d','#00d4ff','#f24f87','#ffca3a','#a259f7','#ff6b35','#4ade80','#38bdf8','#fb7185','#fbbf24','#c084fc','#6366f1']
-        : ['#5b5ef4','#a259f7','#f24f87','#f59e0b','#10b981','#3b82f6','#06b6d4','#84cc16','#ef4444','#8b5cf6','#14b8a6','#f97316'];
-
-    if (charts.subject) charts.subject.destroy();
-    charts.subject = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: entries.map(([k]) => k),
-            datasets: [{
-                label: 'Tasks', data: entries.map(([, v]) => v),
-                backgroundColor: entries.map((_, i) => palette[i % palette.length] + (isDark ? '99' : 'cc')),
-                borderColor: entries.map((_, i) => palette[i % palette.length]), borderWidth: 1, borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: {
-                x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 35 }, grid: { display: false } },
-                y: { beginAtZero: true, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 }, grid: { color: gridColor } }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: isDark ? 'rgba(6,18,32,0.95)' : 'rgba(255,255,255,0.95)',
-                    borderColor: accentColor, borderWidth: 1, titleColor: accentColor, bodyColor: textColor,
-                    titleFont: { family: 'JetBrains Mono', size: 11 }, bodyFont: { family: 'JetBrains Mono', size: 10 }, padding: 12
-                }
-            }
-        }
-    });
-}
-
-function renderLeaderboard() {
-    const scores = {};
-    allHomework.forEach(h => {
-        if (h['ผู้ทำเสร็จ']) {
-            h['ผู้ทำเสร็จ'].split(',').forEach(u => {
-                const un = u.trim().toLowerCase(); if (un) scores[un] = (scores[un] || 0) + 10;
-            });
-        }
-    });
-    const medals = ['🥇','🥈','🥉','🏅','🎖'];
-    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const isSelf = un => currentUser && un === currentUser.username.toLowerCase();
-    document.getElementById('leaderboardContainer').innerHTML = sorted.length
-        ? sorted.map(([user, exp], i) => `
-            <div class="lb-card flex justify-between items-center p-3 rounded-xl glass ${isSelf(user) ? 'ring-1 ring-current' : ''}" style="${isSelf(user) ? 'border-color:var(--accent);box-shadow:0 0 15px var(--glow)' : ''}">
-                <div class="flex items-center gap-2">
-                    <span class="text-base">${medals[i] || '•'}</span>
-                    <p class="text-[9px] font-black uppercase mono" style="color:${isSelf(user) ? 'var(--accent)' : 'var(--text)'}">
-                        ${user}${isSelf(user) ? ' ◄ YOU' : ''}
-                    </p>
-                </div>
-                <p class="font-black mono text-sm exp-color">${exp} XP</p>
-            </div>`).join('')
-        : `<p class="text-center py-8 mono text-xs" style="color:var(--text-muted)">// No data yet</p>`;
-}
-
-function renderProfile() {
-    const me = currentUser.username.toLowerCase();
-    const doneTasks = allHomework.filter(h => h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me));
-    const total = allHomework.length;
-    const pending = total - doneTasks.length;
-    const rate = total > 0 ? Math.round((doneTasks.length / total) * 100) : 0;
-    const exp = doneTasks.length * 10;
-
-    let rank = 'RECRUIT';
-    if (rate >= 90) rank = 'LEGEND';
-    else if (rate >= 75) rank = 'ELITE';
-    else if (rate >= 50) rank = 'VETERAN';
-    else if (rate >= 25) rank = 'OPERATIVE';
-
-    document.getElementById('prof-name').textContent = currentUser.name;
-    document.getElementById('prof-done').textContent = doneTasks.length;
-    document.getElementById('prof-exp').textContent = exp;
-    document.getElementById('prof-pending').textContent = pending;
-    document.getElementById('prof-rate').textContent = rate + '%';
-    document.getElementById('prof-rank').textContent = `// RANK: ${rank}`;
-    document.getElementById('prof-xp-label').textContent = `${exp} / ${MAX_XP} XP`;
-    setTimeout(() => { document.getElementById('prof-xp-bar').style.width = Math.min((exp / MAX_XP) * 100, 100) + '%'; }, 100);
-    document.getElementById('prof-role').textContent = currentUser.role === 'admin' ? 'ADMIN_NODE · ROOT_ACCESS' : 'STUDENT_NODE · M.6/4';
-}
-
-function openChangePwModal() { document.getElementById('changePwModal').classList.remove('hidden'); }
-function closeChangePwModal() {
-    document.getElementById('changePwModal').classList.add('hidden');
-    document.getElementById('cp-old').value = ''; document.getElementById('cp-new').value = '';
-}
-async function handleChangePassword(e) {
-    e.preventDefault();
-    const res = await apiCall({ action: 'changePassword', oldPassword: document.getElementById('cp-old').value, newPassword: document.getElementById('cp-new').value });
-    if (res.success) { showToast('✓ Password changed successfully!'); closeChangePwModal(); }
-    else { showToast('✕ ' + (res.message || 'Failed'), 'var(--danger)'); }
-}
-
-async function loadAdminPanel() {
-    const overlay = document.getElementById('processingOverlay');
-    overlay.classList.remove('hidden');
-    try {
-        const [usersRes, statusRes, logsRes] = await Promise.all([
-            _rawCall({ action: 'getUsers' }), _rawCall({ action: 'adminGetStatus' }), _rawCall({ action: 'getSystemLogs' }),
-        ]);
-        allAdminUsers = usersRes.users || [];
-        renderAdminUsers(usersRes); renderMaintenanceBtn(statusRes); renderLogs(logsRes);
-    } finally { overlay.classList.add('hidden'); }
-}
-
-function renderAdminUsers(res, filterText = '') {
-    if (!res.success && !allAdminUsers.length) return;
-    const users = (res.users || allAdminUsers).filter(u =>
-        !filterText || u.username.toLowerCase().includes(filterText.toLowerCase()) || u.name.toLowerCase().includes(filterText.toLowerCase())
-    );
-    document.getElementById('adminUserContainer').innerHTML = users.map(u => `
-        <div class="flex justify-between items-center p-3 rounded-xl glass transition-all">
-            <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs" style="background:var(--chip-bg);border:1px solid var(--chip-border);color:var(--accent)">
-                    ${u.name?.charAt(0) || '?'}
-                </div>
-                <div>
-                    <p class="text-[10px] font-black uppercase mono" style="color:var(--text)">${u.username}</p>
-                    <p class="text-[9px] font-bold" style="color:var(--text-muted)">${u.name}</p>
-                </div>
-            </div>
-            <button onclick="adminResetPw('${u.username}')" class="px-3 py-1.5 rounded-lg text-[9px] font-black mono uppercase transition-all hover:scale-105" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#f59e0b">
-                Reset_PW
-            </button>
-        </div>`).join('') || `<p class="text-center py-8 mono text-xs" style="color:var(--text-muted)">// No users found</p>`;
-}
-
-function filterAdminUsers(text) { renderAdminUsers({ success: true, users: allAdminUsers }, text); }
-
-function renderMaintenanceBtn(res) {
-    if (!res.success) return;
-    isMaintenance = res.maintenance;
-    const b = document.getElementById('maintenanceToggleBtn');
-    b.textContent = isMaintenance ? '[ BRING SYSTEM ONLINE ]' : '[ FORCE MAINTENANCE Mode ]';
-    b.style.cssText = isMaintenance
-        ? 'background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#10b981;width:100%;padding:12px;border-radius:12px;font-size:9px;font-weight:900;font-family:JetBrains Mono,monospace;text-transform:uppercase;cursor:pointer;'
-        : 'background:rgba(255,45,109,0.07);border:1px solid rgba(255,45,109,0.25);color:#f43f5e;width:100%;padding:12px;border-radius:12px;font-size:9px;font-weight:900;font-family:JetBrains Mono,monospace;text-transform:uppercase;cursor:pointer;';
-}
-
-function renderLogs(res) {
-    if (!res.success) return;
-    document.getElementById('logContainer').innerHTML = res.logs?.length
-        ? res.logs.map(l => `
-            <p class="flex gap-2">
-                <span style="color:var(--accent)">${new Date(l.timestamp).toLocaleString('th')}</span>
-                <span style="color:var(--accent2)">·</span>
-                <span style="color:var(--text)">${l.username}</span>
-                <span style="color:var(--accent2)">·</span>
-                <span>${l.action}</span>
-                ${l.details ? `<span style="color:var(--text-muted)">· ${l.details}</span>` : ''}
-            </p>`).join('')
-        : `<p style="color:var(--text-muted)">> no logs yet</p>`;
-}
-
-async function adminResetPw(t) {
-    if (!confirm(`Reset password ของ "${t}" เป็น 1234?`)) return;
-    const res = await apiCall({ action: 'adminResetPassword', targetUsername: t });
-    if (res.success) showToast(`✓ Reset "${t}" → 1234 สำเร็จ`);
-    else showToast('✕ ' + res.message, 'var(--danger)');
-}
-
-async function checkMaintenanceStatus() { const res = await apiCall({ action: 'adminGetStatus' }); renderMaintenanceBtn(res); }
-async function toggleMaintenanceServer() {
-    if (!confirm('เปลี่ยน Maintenance Mode?')) return;
-    await apiCall({ action: 'adminToggleStatus', maintenance: !isMaintenance });
-    checkMaintenanceStatus();
-}
-
-async function handleAdminAddUser(e) {
-    e.preventDefault();
-    const u = document.getElementById('adm-new-u').value.trim();
-    const n = document.getElementById('adm-new-n').value.trim();
-    if (!u || !n) return showToast('⚠ กรุณากรอกข้อมูลให้ครบ', 'var(--warning)');
-    const res = await apiCall({ action: 'adminAddUser', newUsername: u, newName: n });
-    if (res.success) {
-        showToast(`✓ เพิ่ม "${u}" สำเร็จ`);
-        document.getElementById('adm-new-u').value = ''; document.getElementById('adm-new-n').value = '';
-        loadAdminPanel();
-    } else { showToast('✕ ' + res.message, 'var(--danger)'); }
-}
-
-function initSubjectChips() {
-    const row = document.getElementById('subjectChipRow');
-    const modalRow = document.getElementById('modalSubjectChips');
-    row.innerHTML = ''; modalRow.innerHTML = '';
-
-    const allBtn = document.createElement('button');
-    allBtn.className = 'subject-chip active'; allBtn.textContent = 'ALL';
-    allBtn.onclick = () => setSubjectFilter('all');
-    row.appendChild(allBtn);
-
-    SUBJECTS.forEach(s => {
-        const btn = document.createElement('button');
-        btn.className = 'subject-chip'; btn.textContent = s.label;
-        btn.onclick = () => setSubjectFilter(s.label);
-        row.appendChild(btn);
-
-        const mBtn = document.createElement('button');
-        mBtn.className = 'subject-chip'; mBtn.textContent = s.label;
-        mBtn.onclick = () => {
-            document.getElementById('modal-subject').value = s.label;
-            document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c => c.classList.remove('active'));
-            mBtn.classList.add('active');
-        };
-        modalRow.appendChild(mBtn);
-    });
-}
-
-function setSubjectFilter(l) {
-    currentSubjectFilter = l;
-    document.querySelectorAll('#subjectChipRow .subject-chip').forEach(c =>
-        c.classList.toggle('active', c.textContent === l || (l === 'all' && c.textContent === 'ALL'))
-    );
-    renderHomework();
-}
-
-function setStatusFilter(s) {
-    currentStatusFilter = s;
-    ['all','pending','done'].forEach(id => {
-        const el = document.getElementById('sfilter-' + id);
-        if (el) {
-            if (id === s) el.classList.add('filter-active');
-            else { el.classList.remove('filter-active'); el.style.color = 'var(--text-muted)'; }
-        }
-    });
-    renderHomework();
-}
-
-function openAddHomeworkModal() { document.getElementById('addHwModal').classList.remove('hidden'); }
-function closeAddHomeworkModal() {
-    document.getElementById('addHwModal').classList.add('hidden');
-    document.getElementById('modal-subject').value = ''; document.getElementById('modal-task').value = '';
-    document.getElementById('modal-date').value = ''; document.getElementById('modal-note').value = '';
-    document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c => c.classList.remove('active'));
-}
-
-async function handleQuickAddHomework() {
-    const subj = document.getElementById('modal-subject').value; if (!subj) return showToast('⚠ Please select a subject', 'var(--warning)');
-    const task = document.getElementById('modal-task').value.trim(); if (!task) return showToast('⚠ Please enter task description', 'var(--warning)');
-    const res = await apiCall({
-        action: 'addHomework', subject: subj, task,
-        dueDate: document.getElementById('modal-date').value, note: document.getElementById('modal-note').value
-    });
-    if (res.success) { showToast('✓ Task added!'); closeAddHomeworkModal(); loadHomework(); }
-    else { showToast('✕ ' + (res.message || 'Failed'), 'var(--danger)'); }
-}
-
+// คีย์ลัดด่วน (Ctrl + K หรือ Cmd + K) เพื่อเปิดหน้าต่างส่งการบ้านใหม่
 document.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); if (!document.getElementById('mainSection').classList.contains('hidden')) openAddHomeworkModal(); }
-    if (e.key === 'Escape') { closeAddHomeworkModal(); closeChangePwModal(); }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (!document.getElementById('mainSection').classList.contains('hidden')) {
+            openAddHomeworkModal();
+        }
+    }
 });
 </script>
 </body>
