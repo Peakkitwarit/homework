@@ -1,729 +1,1280 @@
 <!DOCTYPE html>
-<html lang="th" class="dark">
+<html lang="th" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none';">
     <title>⚡ M.6/4 SMART HUB v25.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Sarabun', 'JetBrains Mono', sans-serif;
-        }
-        .terminal-glow {
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
-        }
-        .cyber-border {
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        .cyber-border:hover {
-            border-color: rgba(16, 185, 129, 0.5);
-        }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen transition-colors duration-300">
-
-    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-content-center justify-items-center justify-self-center p-8 transition-opacity duration-500 flex items-center justify-center">
-        <div class="text-center">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent mb-4"></div>
-            <p class="text-emerald-400 font-mono text-sm tracking-widest">INITIALIZING CYBER_SYSTEM v25.0...</p>
-        </div>
-    </div>
-
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 border border-emerald-500 text-emerald-400 px-5 py-3 rounded-xl shadow-lg font-mono text-sm">
-        Notification Message
-    </div>
-
-    <section id="loginSection" class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-slate-900/50 backdrop-blur-md rounded-2xl p-8 border border-slate-800 terminal-glow">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent font-mono mb-2">M.6/4 SMART HUB</h1>
-                <p class="text-xs text-slate-400 font-mono">SECURE ACCESS TERMINAL</p>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
-                <div>
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Student ID / Username</label>
-                    <input type="text" id="loginUsername" required class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 font-mono transition-colors text-white" placeholder="e.g. 6701">
-                </div>
-                <div>
-                    <label class="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">Password</label>
-                    <input type="password" id="loginPassword" required class="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500 font-mono transition-colors text-white" placeholder="••••••••">
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-slate-950 font-bold py-3 rounded-xl transition-all duration-200 transform hover:scale-[1.01] font-mono text-sm tracking-wider">
-                    CONNECT_TO_HUB
-                </button>
-            </form>
-        </div>
-    </section>
-
-    <div id="forcePasswordModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-slate-900 border border-amber-500/30 rounded-2xl p-6 shadow-2xl">
-            <h2 class="text-xl font-bold text-amber-400 font-mono mb-2">⚠ SECURITY PROTOCOL</h2>
-            <p class="text-sm text-slate-400 mb-6">คุณเข้าสู่ระบบด้วยรหัสผ่านเริ่มต้น กรุณาตั้งรหัสผ่านใหม่เพื่อความปลอดภัยของบัญชีคุณ</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-mono text-slate-400 mb-2">รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)</label>
-                    <input type="password" id="newInitialPassword" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 font-mono">
-                </div>
-                <button onclick="submitInitialPassword()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl font-mono text-sm transition-colors">
-                    UPDATE_PASSWORD
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <section id="mainSection" class="hidden min-h-screen flex flex-col">
-        <nav class="border-b border-slate-900 bg-slate-900/20 backdrop-blur-md sticky top-0 z-30 px-4 lg:px-8 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="text-xl font-bold font-mono tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">M.6/4 HUB</span>
-                <span id="maintenanceBadge" class="hidden bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono px-2 py-0.5 rounded uppercase">Maintenance Active</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <div class="text-right hidden sm:block">
-                    <p id="userDisplayName" class="text-sm font-semibold text-slate-200">Loading User...</p>
-                    <p id="userRoleBadge" class="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">STUDENT</p>
-                </div>
-                <button onclick="openChangePasswordModal()" class="p-2 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-400 transition-colors" title="เปลี่ยนรหัสผ่าน">
-                    🔑
-                </button>
-                <button id="adminPanelBtn" onclick="toggleAdminPanel()" class="hidden p-2 bg-slate-900 border border-slate-800 hover:border-emerald-500/30 rounded-xl text-emerald-400 transition-colors" title="แผงควบคุมแอดมิน">
-                    ⚙
-                </button>
-                <button onclick="handleLogout()" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500 text-rose-400 hover:text-slate-950 font-mono text-xs border border-rose-500/20 rounded-xl transition-all duration-200">
-                    LOGOUT
-                </button>
-            </div>
-        </nav>
-
-        <main class="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto space-y-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-slate-900/30 rounded-2xl p-6 border border-slate-900 flex flex-col justify-between">
-                    <div>
-                        <p class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">ภาพรวมภารกิจ</p>
-                        <h3 class="text-3xl font-bold font-mono text-slate-100" id="statTotalTasks">0</h3>
-                    </p>
-                    <p class="text-xs text-slate-500 mt-2">การบ้านทั้งหมดที่ลงทะเบียนในระบบ</p>
-                </div>
-                <div class="bg-slate-900/30 rounded-2xl p-6 border border-slate-900 flex flex-col justify-between">
-                    <div>
-                        <p class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-1">ความคืบหน้าส่วนตัว</p>
-                        <div class="flex items-baseline space-x-2">
-                            <h3 class="text-3xl font-bold font-mono text-emerald-400" id="statCompletedTasks">0</h3>
-                            <span class="text-slate-500 text-sm font-mono">งานเสร็จแล้ว</span>
-                        </div>
-                    </div>
-                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-4 border border-slate-900">
-                        <div id="personalProgressBar" class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full w-0 transition-all duration-500"></div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/30 rounded-2xl p-6 border border-slate-900">
-                    <p class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">สถิติการส่งงานของห้อง</p>
-                    <div class="h-24 flex items-center justify-center">
-                        <canvas id="miniAnalyticsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-900/20 rounded-2xl border border-slate-900 p-6 space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-100 font-mono flex items-center gap-2">
-                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            MISSION_BOARD (รายการการบ้าน)
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">กดปุ่มสถานะเพื่อสลับเป็น [ COMPLETE ] เมื่อทำงานเสร็จสิ้น</p>
-                    </div>
-                    <button onclick="openAddHomeworkModal()" class="sm:self-center px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl font-mono text-xs tracking-wider transition-all shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-2">
-                        ➕ ADD_NEW_MISSION (Ctrl+K)
-                    </button>
-                </div>
-
-                <div class="flex space-x-2 border-b border-slate-900 pb-3 overflow-x-auto">
-                    <button onclick="filterHomework('all')" id="tab-all" class="px-4 py-2 font-mono text-xs rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ALL_TASKS</button>
-                    <button onclick="filterHomework('pending')" id="tab-pending" class="px-4 py-2 font-mono text-xs rounded-lg hover:bg-slate-900 text-slate-400">PENDING</button>
-                    <button onclick="filterHomework('completed')" id="tab-completed" class="px-4 py-2 font-mono text-xs rounded-lg hover:bg-slate-900 text-slate-400">COMPLETED</button>
-                </div>
-
-                <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="col-span-full text-center py-12 text-slate-500 font-mono text-sm">
-                        LOADING ACTIVE PROTOCOLS...
-                    </div>
-                </div>
-            </div>
-
-            <div id="adminSection" class="hidden bg-slate-900/40 rounded-2xl border border-emerald-500/20 p-6 space-y-8 terminal-glow">
-                <div>
-                    <h2 class="text-xl font-bold text-emerald-400 font-mono">⚙ SYSTEM OVERRIDE (แผงควบคุมผู้ดูแลระบบ)</h2>
-                    <p class="text-xs text-slate-400 mt-1">สิทธิ์การเข้าถึงระดับสูงสุดเฉพาะแอดมินห้อง ม.6/4 เท่านั้น</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-900 space-y-4">
-                        <h3 class="text-sm font-mono text-slate-300 uppercase tracking-wider">ระบบความปลอดภัยส่วนกลาง</h3>
-                        <div class="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                            <div>
-                                <p class="text-xs font-semibold text-slate-200">โหมดปิดปรับปรุงระบบ (Maintenance)</p>
-                                <p class="text-[10px] text-slate-400 font-mono">บล็อกไม่ให้นักเรียนทั่วไปเข้าใช้ระบบชั่วคราว</p>
-                            </div>
-                            <input type="checkbox" id="maintenanceToggle" onchange="handleAdminToggleMaintenance(this)" class="w-10 h-5 bg-slate-800 checked:bg-emerald-500 rounded-full appearance-none cursor-pointer relative transition-colors before:content-[''] before:absolute before:h-4 before:w-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-5 before:transition-transform">
-                        </div>
-                        <div class="pt-2">
-                            <h4 class="text-xs font-mono text-slate-400 mb-2">ล้างและกู้คืนรหัสผ่านนักเรียน</h4>
-                            <div class="flex gap-2">
-                                <select id="adminUserSelect" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                                    <option value="">เลือกรายชื่อนักเรียน...</option>
-                                </select>
-                                <button onclick="handleAdminResetPassword()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold font-mono text-xs rounded-xl transition-colors">
-                                    RESET_TO_1234
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-900 space-y-4">
-                        <h3 class="text-sm font-mono text-slate-300 uppercase tracking-wider">ลงทะเบียนนักเรียนใหม่</h3>
-                        <div class="space-y-3">
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="adminNewUsername" placeholder="รหัสนักเรียน (เช่น 6745)" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
-                                <input type="text" id="adminNewName" placeholder="ชื่อ-นามสกุล" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <button onclick="handleAdminAddUser()" class="w-full py-2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold font-mono text-xs rounded-xl transition-colors">
-                                REGISTER_STUDENT
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-950/40 border border-slate-900 rounded-xl p-4">
-                    <h3 class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">SECURITY LOGS (บันทึกกิจกรรมล่าสุด 50 รายการ)</h3>
-                    <div id="systemLogsContainer" class="h-48 overflow-y-auto font-mono text-[11px] space-y-1.5 text-slate-400 bg-slate-950 p-3 rounded-lg border border-slate-900/60">
-                        Loading core system audit trail...
-                    </div>
-                </div>
-            </div>
-        </main>
-    </section>
-
-    <div id="addHomeworkModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold font-mono text-emerald-400">🚨 CREATE NEW MISSION</h3>
-                <button onclick="closeAddHomeworkModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-mono text-slate-400 mb-2">กลุ่มสาระการเรียนรู้ / วิชา</label>
-                    <select id="modal-subject" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <option value="">เลือกวิชา...</option>
-                        <option value="คณิตศาสตร์">คณิตศาสตร์</option>
-                        <option value="ฟิสิกส์">ฟิสิกส์</option>
-                        <option value="เคมี">เคมี</option>
-                        <option value="ชีววิทยา">ชีววิทยา</option>
-                        <option value="ภาษาไทย">ภาษาไทย</option>
-                        <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
-                        <option value="สังคมศึกษา">สังคมศึกษา</option>
-                        <option value="ศิลปะ/ดนตรี">ศิลปะ/ดนตรี</option>
-                        <option value="การงานอาชีพ/คอม">การงานอาชีพ/คอม</option>
-                        <option value="สุขศึกษา/พละ">สุขศึกษา/พละ</option>
-                        <option value="แนะแนว/กิจกรรม">แนะแนว/กิจกรรม</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-mono text-slate-400 mb-2">รายละเอียดงาน/คำอธิบายการบ้าน</label>
-                    <input type="text" id="modal-task" placeholder="เช่น ทำแบบฝึกหัดท้ายบทที่ 3 ข้อ 1-5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-mono text-slate-400 mb-2">กำหนดส่ง (Due Date)</label>
-                        <input type="date" id="modal-date" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-mono text-slate-400 mb-2">หมายเหตุเพิ่มเติม</label>
-                        <input type="text" id="modal-note" placeholder="เช่น ส่งที่โต๊ะครู, ทำลงสมุด" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-                <button onclick="handleQuickAddHomework()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl font-mono text-sm tracking-wider transition-colors">
-                    PUBLISH_MISSION
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="changePasswordModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between">
-                <h3 class="text-base font-bold font-mono text-slate-200">🔐 CHANGE PROFILE PASSWORD</h3>
-                <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-white">✕</button>
-            </div>
-            <div class="space-y-3">
-                <input type="password" id="oldPassword" placeholder="รหัสผ่านเดิมปัจจุบัน" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                <input type="password" id="newPassword" placeholder="รหัสผ่านใหม่" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono">
-                <button onclick="handleChangePassword()" class="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-bold font-mono text-xs rounded-xl transition-all">
-                    CONFIRM_MODIFICATION
-                </button>
-            </div>
-        </div>
-    </div>
-
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Sarabun:wght@300;400;600;700;800&family=Mitr:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <script>
-        // 🚨 นำลิงก์ Web App URL ที่ได้จากขั้นตอนการ Deploy ของ Google Apps Script มาใส่ตรงนี้ครับ
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxccAV50YxE9QuQJyJQT9TAR4zWVJh2TrAHzdf_Tor_qC_d9hGzR7GAQV9bQkMAefTW/exec';
-        const API_KEY = 'M64_SUPER_SECRET_2024'; // ตรงกับระบบความปลอดภัยหลังบ้านแบบ 100%
-
-        let currentUser = null;
-        let homeworkList = [];
-        let currentFilter = 'all';
-        let chartInstance = null;
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('m64_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-            } else {
-                hideElement('loadingOverlay');
-            }
-        });
-
-        // 📡 CORE API PIPELINE Wrapper
-        async function apiCall(payload) {
-            try {
-                payload.apiKey = API_KEY;
-                if (currentUser) {
-                    payload.username = currentUser.username;
-                    payload.token = currentUser.token;
-                }
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                });
-                const resData = await response.json();
-                
-                if (resData.updating) {
-                    showToast('⚠ ระบบกำลังปิดปรับปรุงโดยผู้ดูแลระบบ', 'var(--warning)');
-                    handleLogout();
-                    return { success: false };
-                }
-                return resData;
-            } catch (err) {
-                console.error("API Pipeline Error:", err);
-                showToast('✕ API Connection Lost', '#f43f5e');
-                return { success: false, message: 'การเชื่อมต่อขัดข้อง' };
-            }
-        }
-
-        // 🔐 SECURITY & ACCOUNT OPERATIONS
-        async function handleLogin(e) {
-            e.preventDefault();
-            showElement('loadingOverlay');
-            const res = await apiCall({
-                action: 'login',
-                username: document.getElementById('loginUsername').value.trim(),
-                password: document.getElementById('loginPassword').value
-            });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                currentUser = res;
-                localStorage.setItem('m64_user', JSON.stringify(res));
-                
-                if (res.isNewUser) {
-                    showElement('forcePasswordModal');
-                } else {
-                    showDashboard();
-                }
-            } else {
-                showToast('✕ ' + res.message, '#f43f5e');
-            }
-        }
-
-        async function submitInitialPassword() {
-            const newPwd = document.getElementById('newInitialPassword').value;
-            if (newPwd.length < 6) return showToast('⚠ รหัสผ่านต้องไม่ต่ำกว่า 6 ตัวอักษร', '#f59e0b');
-            
-            showElement('loadingOverlay');
-            const res = await apiCall({ action: 'setInitialPassword', newPassword: newPwd });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast('✓ ตั้งรหัสผ่านใหม่เรียบร้อยแล้ว');
-                hideElement('forcePasswordModal');
-                currentUser.isNewUser = false;
-                localStorage.setItem('m64_user', JSON.stringify(currentUser));
-                showDashboard();
-            } else {
-                showToast('✕ เกิดข้อผิดพลาดกรุณาลองใหม่', '#f43f5e');
-            }
-        }
-
-        async function handleChangePassword() {
-            const oldPass = document.getElementById('oldPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            if (!oldPass || newPass.length < 6) return showToast('⚠ รหัสผ่านใหม่ต้องไม่ต่ำกว่า 6 ตัวอักษร', '#f59e0b');
-
-            showElement('loadingOverlay');
-            const res = await apiCall({ action: 'changePassword', oldPassword: oldPass, newPassword: newPass });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast('✓ อัปเดตรหัสผ่านใหม่เรียบร้อย');
-                closeChangePasswordModal();
-            } else {
-                showToast('✕ ' + (res.message || 'รหัสผ่านเดิมไม่ถูกต้อง'), '#f43f5e');
-            }
-        }
-
-        function handleLogout() {
-            localStorage.removeItem('m64_user');
-            currentUser = null;
-            hideElement('mainSection');
-            showElement('loginSection');
-            document.getElementById('loginForm').reset();
-            hideElement('loadingOverlay');
-        }
-
-        // 📊 DISPLAY INTERFACE MANAGER
-        async function showDashboard() {
-            hideElement('loginSection');
-            showElement('mainSection');
-            
-            document.getElementById('userDisplayName').textContent = currentUser.name;
-            document.getElementById('userRoleBadge').textContent = currentUser.role.toUpperCase();
-            
-            if (currentUser.role === 'admin') {
-                showElement('adminPanelBtn');
-            } else {
-                hideElement('adminPanelBtn');
-                hideElement('adminSection');
-            }
-            
-            showElement('loadingOverlay');
-            await loadHomework();
-            if (currentUser.role === 'admin') await loadAdminUtilities();
-            hideElement('loadingOverlay');
-        }
-
-        // 📝 MISSION BOARD ENGINE (HOMEWORK UTILITIES)
-        async function loadHomework() {
-            const res = await apiCall({ action: 'getHomework' });
-            if (res.success) {
-                homeworkList = res.data;
-                renderHomework();
-                calculateDashboardAnalytics();
-            }
-        }
-
-        function renderHomework() {
-            const container = document.getElementById('homeworkContainer');
-            container.innerHTML = '';
-
-            const filtered = homeworkList.filter(item => {
-                const doneStr = item.ผู้ทำเสร็จ || '';
-                const isDone = doneStr.toString().split(',').map(u=>u.trim()).includes(currentUser.username);
-                if (currentFilter === 'pending') return !isDone;
-                if (currentFilter === 'completed') return isDone;
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-500 font-mono text-xs">NO CHANNELS ACTIVE IN THIS FILTER</div>`;
-                return;
-            }
-
-            filtered.forEach(item => {
-                const doneStr = item.ผู้ทำเสร็จ || '';
-                const doneList = doneStr.toString().split(',').map(u=>u.trim()).filter(Boolean);
-                const isDone = doneList.includes(currentUser.username);
-
-                const card = document.createElement('div');
-                card.className = `p-5 rounded-xl border transition-all duration-200 ${isDone ? 'bg-slate-900/10 border-emerald-500/20 opacity-75' : 'bg-slate-900/40 border-slate-900 cyber-border'}`;
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-start gap-4">
-                        <div class="space-y-1 flex-1">
-                            <span class="inline-block px-2 py-0.5 bg-slate-950 text-[10px] font-mono text-slate-400 border border-slate-800 rounded uppercase">${item.วิชา}</span>
-                            <h4 class="text-sm font-semibold text-slate-100">${item.การบ้าน}</h4>
-                            ${item.หมายเหตุ ? `<p class="text-xs text-slate-400">📝 ${item.หมายเหตุ}</p>` : ''}
-                            <p class="text-[11px] font-mono ${isDone ? 'text-emerald-500/60' : 'text-cyan-400'} pt-1">📅 กำหนดส่ง: ${item.กำหนดส่ง ? formatDate(item.กำหนดส่ง) : 'ไม่ระบุ'}</p>
-                        </div>
-                        <div class="flex flex-col items-end space-y-2">
-                            <button onclick="handleToggleTask('${item.id}', ${item.rowNum}, this)" class="px-3 py-1.5 font-mono text-[10px] font-bold rounded-lg transition-all ${isDone ? 'bg-emerald-500 text-slate-950' : 'bg-slate-950 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/10'}">
-                                ${isDone ? '[ COMPLETE ]' : 'MARK_DONE'}
-                            </button>
-                            ${currentUser.role === 'admin' ? `
-                                <button onclick="handleDeleteTask('${item.id}', ${item.rowNum})" class="text-xs p-1 opacity-40 hover:opacity-100 text-rose-400 transition-opacity" title="ลบภารกิจ">
-                                    🗑
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        async function handleToggleTask(id, rowNum, btn) {
-            // อัปเดต UI ทันทีแบบก้าวหน้า (Optimistic UI update) เพื่อลดความรู้สึกดีเลย์
-            const originalText = btn.textContent;
-            btn.textContent = 'WAITING...';
-            btn.disabled = true;
-
-            // บังคับส่งคู่พารามิเตอร์เพื่อความปลอดภัยในการอ้างอิงตำแหน่งแถวใน Google Sheet
-            const res = await apiCall({ action: 'togglePersonalStatus', id: id, rowNum: rowNum });
-            
-            if (res.success) {
-                if (originalText.trim() === 'MARK_DONE') {
-                    confetti({ particleCount: 40, spread: 60, origin: { y: 0.85 } });
-                }
-                await loadHomework();
-            } else {
-                btn.textContent = originalText;
-                btn.disabled = false;
-                showToast('✕ อัปเดตสถานะล้มเหลว', '#f43f5e');
-            }
-        }
-
-        async function handleQuickAddHomework() {
-            const subj = document.getElementById('modal-subject').value;
-            const task = document.getElementById('modal-task').value.trim();
-            if (!subj || !task) return showToast('⚠ กรุณากรอกวิชาและรายละเอียดภารกิจให้ครบถ้วน', '#f59e0b');
-
-            showElement('loadingOverlay');
-            const res = await apiCall({
-                action: 'addHomework',
-                subject: subj,
-                task: task,
-                dueDate: document.getElementById('modal-date').value,
-                note: document.getElementById('modal-note').value.trim()
-            });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast('✓ เพิ่มงานลงกระดานเรียบร้อยแล้ว');
-                closeAddHomeworkModal();
-                await loadHomework();
-            }
-        }
-
-        async function handleDeleteTask(id, rowNum) {
-            if (!confirm('ยืนยันรื้อถอนภารกิจการบ้านนี้ใช่หรือไม่? ข้อมูลผู้ส่งทั้งหมดจะหายไปทันที')) return;
-            
-            showElement('loadingOverlay');
-            const res = await apiCall({ action: 'deleteHomework', id: id, rowNum: rowNum });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast('✓ ลบข้อมูลภารกิจเรียบร้อย');
-                await loadHomework();
-            }
-        }
-
-        function filterHomework(type) {
-            currentFilter = type;
-            document.querySelectorAll('[id^="tab-"]').forEach(btn => {
-                btn.className = "px-4 py-2 font-mono text-xs rounded-lg hover:bg-slate-900 text-slate-400";
-            });
-            document.getElementById('tab-' + type).className = "px-4 py-2 font-mono text-xs rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-            renderHomework();
-        }
-
-        // 📈 DATA ANALYTICS & VISUALIZATION ENGINE
-        function calculateDashboardAnalytics() {
-            const total = homeworkList.length;
-            document.getElementById('statTotalTasks').textContent = total;
-
-            let myDoneCount = 0;
-            homeworkList.forEach(item => {
-                const doneList = (item.ผู้ทำเสร็จ || '').toString().split(',').map(u=>u.trim());
-                if (doneList.includes(currentUser.username)) myDoneCount++;
-            });
-
-            document.getElementById('statCompletedTasks').textContent = myDoneCount;
-            const pct = total > 0 ? Math.round((myDoneCount / total) * 100) : 0;
-            document.getElementById('personalProgressBar').style.width = pct + '%';
-
-            // เรนเดอร์กราฟสถิติรวมของชั้นเรียน
-            let totalDoneActions = 0;
-            homeworkList.forEach(item => {
-                totalDoneActions += (item.ผู้ทำเสร็จ || '').toString().split(',').map(u=>u.trim()).filter(Boolean).length;
-            });
-
-            const ctx = document.getElementById('miniAnalyticsChart').getContext('2d');
-            if (chartInstance) chartInstance.destroy();
-            
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Pending', 'Completed Operations'],
-                    datasets: [{
-                        data: [total * 35 - totalDoneActions, totalDoneActions],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { x: { display: false }, y: { display: false } }
-                }
-            });
-        }
-
-        // ⚙ ADMIN EXCLUSIVE CONTROL PIPELINE
-        async function loadAdminUtilities() {
-            const resStatus = await apiCall({ action: 'adminGetStatus' });
-            if (resStatus.success) {
-                document.getElementById('maintenanceToggle').checked = resStatus.maintenance;
-                if (resStatus.maintenance) showElement('maintenanceBadge');
-                else hideElement('maintenanceBadge');
-            }
-
-            const resUsers = await apiCall({ action: 'getUsers' });
-            if (resUsers.success) {
-                const select = document.getElementById('adminUserSelect');
-                select.innerHTML = '<option value="">เลือกรายชื่อนักเรียน...</option>';
-                resUsers.users.forEach(u => {
-                    select.innerHTML += `<option value="${u.username}">[${u.username}] ${u.name}</option>`;
-                });
-            }
-
-            const resLogs = await apiCall({ action: 'getSystemLogs' });
-            if (resLogs.success) {
-                const logContainer = document.getElementById('systemLogsContainer');
-                logContainer.innerHTML = '';
-                resLogs.logs.forEach(l => {
-                    const p = document.createElement('p');
-                    p.className = "py-0.5 border-b border-slate-900/40 text-slate-400";
-                    p.innerHTML = `<span class="text-slate-600">[${formatTime(l.timestamp)}]</span> <span class="text-emerald-500">${l.username}</span> -> <span class="text-cyan-400">${l.action}</span>: ${l.details}`;
-                    logContainer.appendChild(p);
-                });
-            }
-        }
-
-        async function handleAdminToggleMaintenance(chk) {
-            showElement('loadingOverlay');
-            const res = await apiCall({ action: 'adminToggleStatus', maintenance: chk.checked });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast(`✓ บันทึก: เปลี่ยนสถานะปิดปรับปรุงเป็น ${chk.checked}`);
-                if (chk.checked) showElement('maintenanceBadge');
-                else hideElement('maintenanceBadge');
-            }
-        }
-
-        async function handleAdminResetPassword() {
-            const userVal = document.getElementById('adminUserSelect').value;
-            if (!userVal) return showToast('⚠ กรุณาเลือกรายชื่อเป้าหมายเพื่อสั่งการ', '#f59e0b');
-
-            if (!confirm(`ยืนยันการฟอร์แมต ล้างรหัสผ่านของนักเรียนรหัส ${userVal} กลับเป็น 1234 ใช่หรือไม่?`)) return;
-
-            showElement('loadingOverlay');
-            const res = await apiCall({ action: 'adminResetPassword', targetUsername: userVal });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast('✓ รหัสผ่านถูกกู้คืนและบังคับเปลี่ยนเรียบร้อย');
-                await loadAdminUtilities();
-            }
-        }
-
-        async function handleAdminAddUser() {
-            const newUid = document.getElementById('adminNewUsername').value.trim();
-            const newName = document.getElementById('adminNewName').value.trim();
-            if (!newUid || !newName) return showToast('⚠ กรุณากรอกข้อมูลนักเรียนใหม่ให้ครบถ้วน', '#f59e0b');
-
-            showElement('loadingOverlay');
-            const res = await apiCall({ action: 'adminAddUser', newUsername: newUid, newName: newName });
-            hideElement('loadingOverlay');
-
-            if (res.success) {
-                showToast('✓ บันทึกสิทธิ์และลงทะเบียนนักเรียนสำเร็จ');
-                document.getElementById('adminNewUsername').value = '';
-                document.getElementById('adminNewName').value = '';
-                await loadAdminUtilities();
-            } else {
-                showToast('✕ ' + res.message, '#f43f5e');
-            }
-        }
-
-        // 🛠 SYSTEM UI LOGISTICS & UTILITIES
-        function toggleAdminPanel() {
-            const sec = document.getElementById('adminSection');
-            if (sec.classList.contains('hidden')) {
-                sec.classList.remove('hidden');
-                loadAdminUtilities();
-                sec.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                sec.classList.add('hidden');
-            }
-        }
-
-        function showToast(msg, bgColor = '#10b981') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-            t.style.borderColor = bgColor;
-            t.style.color = bgColor;
-            t.classList.remove('translate-y-20', 'opacity-0');
-            
-            setTimeout(() => {
-                t.classList.add('translate-y-20', 'opacity-0');
-            }, 3500);
-        }
-
-        function openAddHomeworkModal() { showElement('addHomeworkModal'); document.getElementById('modal-subject').focus(); }
-        function closeAddHomeworkModal() {
-            hideElement('addHomeworkModal');
-            document.getElementById('modal-subject').value = '';
-            document.getElementById('modal-task').value = '';
-            document.getElementById('modal-date').value = '';
-            document.getElementById('modal-note').value = '';
-        }
-        function openChangePasswordModal() { showElement('changePasswordModal'); }
-        function closeChangePasswordModal() {
-            hideElement('changePasswordModal');
-            document.getElementById('oldPassword').value = '';
-            document.getElementById('newPassword').value = '';
-        }
-
-        // KEYBOARD HOTKEYS CONTROL (Ctrl + K หรือ Cmd + K)
-        document.addEventListener('keydown', e => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                if (!document.getElementById('mainSection').classList.contains('hidden')) {
-                    openAddHomeworkModal();
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'shake': 'shake 0.5s ease-in-out',
+                        'float': 'float 4s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'scanline': 'scanline 10s linear infinite',
+                        'glitch': 'glitch 3s infinite',
+                        'blink': 'blink 1s step-end infinite',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both',
+                        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        shake: { '0%,100%': {transform:'translateX(0)'}, '20%,60%': {transform:'translateX(-4px)'}, '40%,80%': {transform:'translateX(4px)'} },
+                        float: { '0%,100%': {transform:'translateY(0) rotate(0deg)'}, '50%': {transform:'translateY(-12px) rotate(1deg)'} },
+                        scanline: { '0%': {backgroundPosition:'0 0'}, '100%': {backgroundPosition:'0 100%'} },
+                        glitch: { '0%,100%': {textShadow:'2px 0 #00ff9d,-2px 0 #ff003c'}, '25%': {textShadow:'-2px 0 #00ff9d,2px 0 #ff003c'}, '50%': {textShadow:'none'} },
+                        blink: { '0%,100%': {opacity:'1'}, '50%': {opacity:'0'} },
+                        slideUp: { 'from': {opacity:'0',transform:'translateY(20px)'}, 'to': {opacity:'1',transform:'translateY(0)'} },
+                        glowPulse: { '0%,100%': {boxShadow:'0 0 15px rgba(0,255,157,0.3)'}, '50%': {boxShadow:'0 0 35px rgba(0,255,157,0.6)'} },
+                    }
                 }
             }
-        });
-
-        function showElement(id) { document.getElementById(id).classList.remove('hidden'); }
-        function hideElement(id) { document.getElementById(id).classList.add('hidden'); }
-        
-        function formatDate(dStr) {
-            try {
-                const d = new Date(dStr);
-                if (isNaN(d.getTime())) return dStr;
-                return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
-            } catch(e) { return dStr; }
-        }
-
-        function formatTime(isoStr) {
-            try {
-                const d = new Date(isoStr);
-                return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            } catch(e) { return isoStr; }
         }
     </script>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .thai-display { font-family: 'Mitr', sans-serif; }
+        .display { font-family: 'Space Grotesk', sans-serif; }
+
+        :root {
+            --bg: #f4f6ff;
+            --bg2: #eaedff;
+            --card: rgba(255,255,255,0.82);
+            --card-border: rgba(99,102,241,0.14);
+            --card-border-hover: rgba(99,102,241,0.35);
+            --text: #18163a;
+            --text-muted: #7c7f9e;
+            --accent: #5b5ef4;
+            --accent2: #a259f7;
+            --accent3: #f24f87;
+            --accent4: #12d8a0;
+            --glow: rgba(91,94,244,0.22);
+            --nav-bg: rgba(255,255,255,0.88);
+            --nav-border: rgba(91,94,244,0.14);
+            --input-bg: rgba(255,255,255,0.95);
+            --chip-bg: rgba(91,94,244,0.07);
+            --chip-border: rgba(91,94,244,0.18);
+            --progress-track: #dde2ff;
+            --shadow-sm: 0 2px 12px rgba(91,94,244,0.08);
+            --shadow: 0 8px 32px rgba(91,94,244,0.13);
+            --shadow-lg: 0 20px 60px rgba(91,94,244,0.18);
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        .dark {
+            --bg: #050d17;
+            --bg2: #030a13;
+            --card: rgba(6,18,32,0.94);
+            --card-border: rgba(0,255,157,0.13);
+            --card-border-hover: rgba(0,255,157,0.35);
+            --text: #c4f0e0;
+            --text-muted: #3e6a52;
+            --accent: #00ff9d;
+            --accent2: #00d4ff;
+            --accent3: #ff2d6d;
+            --accent4: #ffca3a;
+            --glow: rgba(0,255,157,0.28);
+            --nav-bg: rgba(3,10,20,0.97);
+            --nav-border: rgba(0,255,157,0.18);
+            --input-bg: rgba(2,10,20,0.85);
+            --chip-bg: rgba(0,255,157,0.04);
+            --chip-border: rgba(0,255,157,0.15);
+            --progress-track: rgba(0,255,157,0.08);
+            --shadow-sm: 0 2px 12px rgba(0,0,0,0.5);
+            --shadow: 0 0 30px rgba(0,255,157,0.07);
+            --shadow-lg: 0 0 60px rgba(0,255,157,0.12);
+            --danger: #ff2d6d;
+            --warning: #ffca3a;
+            --success: #00ff9d;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background-color 0.35s, color 0.35s;
+            min-height: 100vh;
+        }
+
+        html.light body {
+            background-image:
+                radial-gradient(ellipse 80% 60% at 5% -10%, rgba(162,89,247,0.1) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 95% 90%, rgba(242,79,135,0.07) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(91,94,244,0.04) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        html.dark body {
+            background-image:
+                linear-gradient(rgba(0,255,157,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,157,0.025) 1px, transparent 1px),
+                radial-gradient(ellipse 70% 50% at 15% 20%, rgba(0,212,255,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 85% 80%, rgba(0,255,157,0.03) 0%, transparent 60%);
+            background-size: 44px 44px, 44px 44px, 100% 100%, 100% 100%;
+            background-attachment: fixed;
+        }
+
+        html.dark body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+            pointer-events: none;
+            z-index: 9999;
+            animation: scanline 10s linear infinite;
+        }
+
+        .glass {
+            background: var(--card);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--shadow);
+            transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+        }
+        .glass:hover { border-color: var(--card-border-hover); }
+        html.dark .glass { box-shadow: 0 0 25px rgba(0,255,157,0.04), inset 0 0 30px rgba(0,0,0,0.15); }
+        html.dark .glass:hover { box-shadow: 0 0 40px rgba(0,255,157,0.1), inset 0 0 20px rgba(0,0,0,0.1); }
+        html.light .glass:hover { box-shadow: var(--shadow-lg); }
+
+        nav {
+            background: var(--nav-bg);
+            border-bottom: 1px solid var(--nav-border);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+        }
+        html.light .nav-logo {
+            background: linear-gradient(135deg, #5b5ef4, #a259f7);
+            box-shadow: 0 4px 16px rgba(91,94,244,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        html.dark .nav-logo {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 18px rgba(0,255,157,0.35), inset 0 0 12px rgba(0,255,157,0.06);
+            font-family: 'JetBrains Mono', monospace;
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        .tab-btn {
+            color: var(--text-muted);
+            transition: color 0.2s;
+            position: relative;
+            padding-bottom: 14px;
+            white-space: nowrap;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-active {
+            color: var(--accent) !important;
+            font-weight: 800;
+        }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2.5px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        html.dark .tab-active::after { box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0,255,157,0.3); }
+        html.light .tab-active::after { background: linear-gradient(90deg, #5b5ef4, #a259f7); }
+
+        html.light .btn-primary {
+            background: linear-gradient(135deg, #5b5ef4, #a259f7);
+            color: white;
+            box-shadow: 0 4px 20px rgba(91,94,244,0.38), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition: all 0.2s;
+        }
+        html.light .btn-primary:hover {
+            box-shadow: 0 6px 28px rgba(91,94,244,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+        html.light .btn-primary:active { transform: translateY(0); box-shadow: 0 2px 10px rgba(91,94,244,0.3); }
+
+        html.dark .btn-primary {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 18px rgba(0,255,157,0.18), inset 0 0 10px rgba(0,255,157,0.05);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: all 0.2s;
+        }
+        html.dark .btn-primary:hover {
+            background: rgba(0,255,157,0.1);
+            box-shadow: 0 0 30px rgba(0,255,157,0.4), inset 0 0 15px rgba(0,255,157,0.08);
+        }
+        html.dark .btn-primary:active { transform: scale(0.97); }
+
+        html.dark .btn-danger { border: 1px solid var(--accent3); color: var(--accent3); background: rgba(255,45,109,0.04); transition: all 0.2s; }
+        html.dark .btn-danger:hover { background: rgba(255,45,109,0.14); box-shadow: 0 0 18px rgba(255,45,109,0.25); }
+        html.light .btn-danger { background: #fff1f2; color: var(--danger); border: 1px solid rgba(244,63,94,0.15); transition: all 0.2s; }
+        html.light .btn-danger:hover { background: #ffe4e6; }
+
+        html.light .btn-complete { background: linear-gradient(135deg, #5b5ef4, #a259f7); color: white; box-shadow: 0 4px 16px rgba(91,94,244,0.3); }
+        html.dark .btn-complete { background: rgba(0,255,157,0.08); border: 1px solid var(--accent); color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+        html.dark .btn-complete:hover { background: rgba(0,255,157,0.18); box-shadow: 0 0 20px rgba(0,255,157,0.35); }
+        html.light .btn-revert { background: #f1f5f9; color: #94a3b8; border: 1px solid rgba(0,0,0,0.05); }
+        html.dark .btn-revert { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: rgba(196,240,224,0.25); font-family: 'JetBrains Mono', monospace; }
+
+        .themed-input {
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            transition: all 0.2s;
+            outline: none;
+        }
+        .themed-input::placeholder { color: var(--text-muted); }
+        .themed-input:focus { border-color: var(--accent); }
+        html.dark .themed-input:focus { box-shadow: 0 0 18px rgba(0,255,157,0.18); }
+        html.light .themed-input:focus { box-shadow: 0 0 0 3px rgba(91,94,244,0.12); }
+
+        html.light .hw-card { border-top: 3px solid var(--accent); border-radius: 1.75rem; }
+        html.dark .hw-card { border-left: 2px solid var(--accent); }
+        html.dark .hw-card.done-card { border-left-color: rgba(0,255,157,0.15); }
+        .hw-card { transition: opacity 0.3s, transform 0.2s; }
+        .hw-card:hover { transform: translateY(-2px); }
+        .hw-card.done-card:hover { transform: none; }
+
+        .subject-chip {
+            padding: 0.3rem 0.7rem;
+            border-radius: 7px;
+            font-size: 0.62rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: var(--chip-bg);
+            border: 1px solid var(--chip-border);
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            user-select: none;
+        }
+        html.light .subject-chip.active {
+            background: linear-gradient(135deg, #5b5ef4, #a259f7);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 3px 10px rgba(91,94,244,0.35);
+        }
+        html.dark .subject-chip.active {
+            background: rgba(0,255,157,0.1);
+            color: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(0,255,157,0.22);
+        }
+        .subject-chip:hover { border-color: var(--accent); color: var(--text); }
+
+        .progress-track { background: var(--progress-track); height: 5px; border-radius: 99px; overflow: hidden; }
+        html.light .progress-fill { background: linear-gradient(90deg, #5b5ef4, #a259f7); }
+        html.dark .progress-fill { background: linear-gradient(90deg, #00ff9d, #00d4ff); box-shadow: 0 0 8px rgba(0,255,157,0.5); }
+
+        html.dark .cyber-title { color: var(--accent); text-shadow: 0 0 25px rgba(0,255,157,0.45); font-family: 'JetBrains Mono', monospace; }
+        html.dark .cyber-section-label { color: var(--accent2); font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.22em; }
+        html.light .cyber-title { color: var(--accent); }
+        html.light .cyber-section-label { color: var(--text-muted); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.18em; font-family: 'JetBrains Mono', monospace; }
+
+        html.dark .lb-card { border-left: 2px solid var(--accent); }
+        html.light .lb-card { border-left: 3px solid var(--accent); }
+
+        html.dark .cursor-blink::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            color: var(--accent);
+            font-size: 0.55em;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+
+        html.light .profile-avatar { background: linear-gradient(135deg, #e0e4ff, #ede9fe); color: #5b5ef4; }
+        html.dark .profile-avatar { background: rgba(0,255,157,0.07); border: 1px solid rgba(0,255,157,0.18); color: var(--accent); }
+        html.light .stat-box { background: linear-gradient(135deg, #f3f5ff, #eaeeff); border: 1px solid rgba(91,94,244,0.1); }
+        html.dark .stat-box { background: rgba(0,255,157,0.03); border: 1px solid rgba(0,255,157,0.1); }
+        html.dark .exp-color { color: var(--accent); text-shadow: 0 0 12px rgba(0,255,157,0.5); }
+        html.light .exp-color { color: #a259f7; }
+
+        html.dark .filter-active { background: rgba(0,255,157,0.1) !important; border: 1px solid var(--accent) !important; color: var(--accent) !important; box-shadow: 0 0 10px rgba(0,255,157,0.18) !important; }
+        html.light .filter-active { background: white !important; color: var(--accent) !important; box-shadow: 0 2px 10px rgba(91,94,244,0.15) !important; }
+
+        .theme-btn-light { background: linear-gradient(135deg, #fef3c7, #fde68a); box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
+        .theme-btn-dark { background: rgba(0,255,157,0.08); border: 1px solid rgba(0,255,157,0.25); color: var(--accent); }
+
+        #processingOverlay .spinner-ring { stroke: var(--accent); }
+
+        #toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: var(--card); border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px); padding: 12px 24px; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+            color: var(--text); z-index: 9999;
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.4s;
+            opacity: 0; pointer-events: none;
+            box-shadow: var(--shadow-lg);
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        html.dark #toast { box-shadow: 0 0 30px rgba(0,255,157,0.15); }
+
+        .badge-urgent { animation: pulse 1.5s ease-in-out infinite; }
+
+        .due-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px; border-radius: 6px; font-size: 0.65rem;
+            font-weight: 800; font-family: 'JetBrains Mono', monospace;
+        }
+        .due-overdue { background: rgba(244,63,94,0.12); color: #f43f5e; border: 1px solid rgba(244,63,94,0.25); }
+        .due-today { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); animation: pulse 1.5s ease-in-out infinite; }
+        .due-soon { background: rgba(245,158,11,0.07); color: #f59e0b; border: 1px solid rgba(245,158,11,0.15); }
+        .due-normal { background: var(--chip-bg); color: var(--text-muted); border: 1px solid var(--chip-border); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-in { animation: slide-up 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+
+        .stagger > * { animation: slide-up 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+        .stagger > *:nth-child(1) { animation-delay: 0ms; }
+        .stagger > *:nth-child(2) { animation-delay: 60ms; }
+        .stagger > *:nth-child(3) { animation-delay: 120ms; }
+        .stagger > *:nth-child(4) { animation-delay: 180ms; }
+        .stagger > *:nth-child(5) { animation-delay: 240ms; }
+        .stagger > *:nth-child(n+6) { animation-delay: 300ms; }
+
+        html.dark #btn-adminTab { color: var(--accent3); font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- ══════════════════════ TOAST ══════════════════════ -->
+<div id="toast">✓ Done</div>
+
+<!-- ══════════════════════ GRADUATION OVERLAY ══════════════════════ -->
+<div id="gradOverlay" class="hidden fixed inset-0 z-[1000] flex flex-col items-center justify-center p-6 text-center overflow-y-auto" style="background:var(--bg)">
+    <div class="animate-float text-7xl mb-4">🎓</div>
+    <h1 class="text-4xl font-black mb-2 uppercase display" style="color:var(--accent)">MISSION ACCOMPLISHED</h1>
+    <p class="mono text-xs mb-8" style="color:var(--text-muted)">CLASS OF 2567 · ม.6/4 · SCIENCE-COMPUTER</p>
+    <div class="w-full max-w-3xl aspect-video rounded-3xl overflow-hidden flex items-center justify-center mb-8 glass">
+        <p class="text-[10px] animate-pulse mono" style="color:var(--text-muted)">AWAITING_CINEMATIC_REEL.MP4</p>
+    </div>
+    <button onclick="document.getElementById('gradOverlay').remove()" class="btn-primary px-8 py-3 rounded-full font-bold text-xs mono transition-all">BYPASS_LOCK</button>
+</div>
+
+<!-- ══════════════════════ MAINTENANCE OVERLAY ══════════════════════ -->
+<div id="maintenanceOverlay" class="hidden fixed inset-0 z-[600] flex flex-col items-center justify-center p-8 text-center" style="background:var(--bg)">
+    <div class="glass w-20 h-20 rounded-3xl flex items-center justify-center text-5xl mb-6 animate-pulse">⚙️</div>
+    <h1 class="text-2xl font-black mb-2 mono uppercase cyber-title">System_Offline</h1>
+    <p class="text-xs mb-2 mono" style="color:var(--text-muted)">[ maintenance in progress — please stand by ]</p>
+    <p class="text-[10px] mb-8 mono" style="color:var(--text-muted)">ระบบกำลังปรับปรุง กรุณารอสักครู่</p>
+    <button onclick="handleLogout()" class="btn-primary px-8 py-3 rounded-xl font-black text-[10px] mono uppercase transition-all">Disconnect</button>
+</div>
+
+<!-- ══════════════════════ PROCESSING OVERLAY ══════════════════════ -->
+<div id="processingOverlay" class="hidden fixed inset-0 backdrop-blur-sm z-[500] flex items-center justify-center" style="background:rgba(0,0,0,0.2)">
+    <div class="glass p-8 rounded-[2.5rem] flex flex-col items-center gap-3">
+        <svg class="animate-spin h-10 w-10" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-15" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
+            <path class="spinner-ring opacity-90" fill="none" stroke="var(--accent)" stroke-width="3" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        <p class="text-[10px] font-black tracking-widest uppercase mono" style="color:var(--accent)">Processing...</p>
+    </div>
+</div>
+
+<!-- ══════════════════════ NAVIGATION ══════════════════════ -->
+<nav class="sticky top-0 z-50 px-5 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+        <div class="nav-logo w-9 h-9 flex items-center justify-center rounded-xl font-black text-xs text-white mono select-none">6/4</div>
+        <div>
+            <h1 class="text-sm font-black tracking-tighter uppercase cyber-title cursor-blink display" style="line-height:1.1">Smart Hub</h1>
+            <p class="text-[9px] mono hidden sm:flex items-center gap-1.5" style="color:var(--text-muted)">
+                v25.0 ·
+                <span id="onlineIndicator" class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" style="box-shadow:0 0 4px #4ade80"></span>
+                <span id="userDisplayName">--</span>
+            </p>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        <div id="navPendingBadge" class="hidden px-2.5 py-1 rounded-lg mono text-[9px] font-black" style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.2)">
+            <span id="navPendingCount">0</span> PENDING
+        </div>
+        <button onclick="toggleDarkMode()" id="themeBtn" class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base">🌙</button>
+        <button onclick="handleLogout()" class="px-3 py-1.5 btn-danger rounded-lg text-xs font-bold uppercase mono tracking-tighter transition-all">Exit</button>
+    </div>
+</nav>
+
+<!-- ══════════════════════ LOGIN ══════════════════════ -->
+<div id="loginSection" class="flex-1 flex items-center justify-center p-4">
+    <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in">
+        <div class="text-center mb-8 block dark-hide">
+            <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-4 select-none" style="background:linear-gradient(135deg,#5b5ef4,#a259f7);box-shadow:0 8px 28px rgba(91,94,244,0.4),inset 0 1px 0 rgba(255,255,255,0.15)">⚡</div>
+            <h1 class="text-2xl font-black tracking-tighter display" style="color:var(--text)"><span class="thai-display">ม.6/4</span> Smart Hub</h1>
+            <p class="text-[10px] mt-1 font-semibold mono" style="color:var(--text-muted)">วิทยาศาสตร์-คอมพิวเตอร์ · 2567</p>
+        </div>
+        <div class="text-center mb-8 hidden dark-show">
+            <p class="mono text-[9px] mb-2 tracking-widest" style="color:var(--text-muted)">> SYSTEM_BOOT v25.0_STABLE</p>
+            <h1 class="text-2xl font-black tracking-tight mono cyber-title animate-glitch">M6/4_TERMINAL</h1>
+            <p class="text-[9px] mt-1 mono animate-pulse" style="color:var(--text-muted)">[AWAITING CREDENTIALS...]</p>
+        </div>
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+            <div class="space-y-1">
+                <label class="cyber-section-label block">// Student ID</label>
+                <input type="text" id="login-u" placeholder="เลขที่ / Student ID" autocomplete="username" required class="themed-input w-full px-5 py-4 rounded-xl text-sm mono">
+            </div>
+            <div class="space-y-1">
+                <label class="cyber-section-label block">// Password</label>
+                <input type="password" id="login-p" placeholder="Password" autocomplete="current-password" required class="themed-input w-full px-5 py-4 rounded-xl text-sm mono">
+            </div>
+            <button type="submit" class="btn-primary w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs mono transition-all active:scale-95 mt-2">
+                <span class="light-text">🔐 เข้าสู่ระบบ</span>
+                <span class="dark-text hidden">[ AUTHENTICATE ]</span>
+            </button>
+        </form>
+        <p id="loginError" class="hidden text-center mt-3 text-[10px] mono font-bold" style="color:var(--danger)"></p>
+    </div>
+</div>
+
+<!-- ══════════════════════ FIRST PW CHANGE ══════════════════════ -->
+<div id="firstPwSection" class="hidden flex-1 flex items-center justify-center p-4">
+    <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in text-center space-y-6">
+        <div>
+            <p class="text-[9px] mono mb-1 tracking-widest" style="color:var(--text-muted)">> SECURITY_UPDATE_REQUIRED</p>
+            <h3 class="text-lg font-black uppercase cyber-title mono">Set New Key</h3>
+            <p class="text-[10px] mt-1" style="color:var(--text-muted)">ตั้งรหัสผ่านใหม่ (อย่างน้อย 8 ตัวอักษร)</p>
+        </div>
+        <form onsubmit="handleSetFirstPassword(event)" class="space-y-3 text-left">
+            <div class="space-y-1">
+                <label class="cyber-section-label block">// New Password</label>
+                <input type="password" id="fp-new" placeholder="รหัสผ่านใหม่ (8+ ตัวอักษร)" required class="themed-input w-full px-5 py-4 rounded-xl text-xs mono">
+            </div>
+            <div class="space-y-1">
+                <label class="cyber-section-label block">// Confirm Password</label>
+                <input type="password" id="fp-confirm" placeholder="ยืนยันรหัสผ่าน" required class="themed-input w-full px-5 py-4 rounded-xl text-xs mono">
+            </div>
+            <div class="progress-track">
+                <div id="pwStrengthBar" class="progress-fill h-full rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+            <p id="pwStrengthLabel" class="text-[9px] mono" style="color:var(--text-muted)">// strength: —</p>
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all mt-1">[ CONFIRM_KEY ]</button>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════════════════ MAIN SECTION ══════════════════════ -->
+<div id="mainSection" class="hidden flex-1 flex flex-col">
+    <!-- TAB BAR -->
+    <div class="max-w-7xl mx-auto w-full px-5 mt-2 flex gap-1 overflow-x-auto no-scrollbar" style="border-bottom: 1px solid var(--card-border)">
+        <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="tab-btn tab-active text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Dashboard</button>
+        <button onclick="switchTab('statsTab')" id="btn-statsTab" class="tab-btn text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Analytics</button>
+        <button onclick="switchTab('profileTab')" id="btn-profileTab" class="tab-btn text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Personal</button>
+        <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden tab-btn text-[10px] font-black uppercase tracking-widest mono px-4 pb-3" style="color:#f43f5e">Root_CMD</button>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-5 py-5 pb-24">
+
+        <!-- DASHBOARD TAB -->
+        <div id="homeworkTab" class="space-y-5 fade-in">
+            <div id="summaryStrip" class="grid grid-cols-3 gap-3"></div>
+            <div id="subjectChipRow" class="flex flex-wrap gap-1.5 pb-1"></div>
+            <div class="glass p-3 rounded-2xl flex justify-between items-center gap-3">
+                <div class="flex gap-1 p-1 rounded-xl" style="background:var(--chip-bg)">
+                    <button onclick="setStatusFilter('all')" id="sfilter-all" class="filter-active px-4 py-2 rounded-lg text-[10px] font-black mono transition-all">ALL</button>
+                    <button onclick="setStatusFilter('pending')" id="sfilter-pending" class="px-4 py-2 rounded-lg text-[10px] font-bold transition-all" style="color:var(--text-muted)">PENDING</button>
+                    <button onclick="setStatusFilter('done')" id="sfilter-done" class="px-4 py-2 rounded-lg text-[10px] font-bold transition-all" style="color:var(--text-muted)">DONE</button>
+                </div>
+                <button onclick="openAddHomeworkModal()" class="btn-primary px-6 py-2.5 rounded-xl text-[10px] font-black mono uppercase transition-all">+ New_Task</button>
+            </div>
+            <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div id="statsTab" class="hidden fade-in space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <div class="lg:col-span-2 glass p-6 rounded-[2rem]">
+                    <p class="cyber-section-label mb-4">// Success_Probability (%)</p>
+                    <div class="h-72"><canvas id="completionRateChart"></canvas></div>
+                </div>
+                <div class="glass p-6 rounded-[2rem] flex flex-col">
+                    <p class="cyber-section-label mb-4 text-center">// Top XP Contributors</p>
+                    <div id="leaderboardContainer" class="flex-1 space-y-2.5 overflow-y-auto no-scrollbar"></div>
+                </div>
+            </div>
+            <div class="glass p-6 rounded-[2rem]">
+                <p class="cyber-section-label mb-4">// Subject_Load_Distribution</p>
+                <div class="h-56"><canvas id="subjectChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- PERSONAL TAB -->
+        <div id="profileTab" class="hidden fade-in">
+            <div class="max-w-md mx-auto glass p-8 rounded-[2rem] text-center space-y-6">
+                <div class="w-20 h-20 profile-avatar rounded-2xl flex items-center justify-center text-3xl mx-auto select-none">👤</div>
+                <div>
+                    <h2 id="prof-name" class="text-2xl font-black tracking-tighter thai-display cyber-title">-</h2>
+                    <p id="prof-role" class="text-[10px] mono mt-1" style="color:var(--text-muted)">STUDENT_NODE</p>
+                    <p id="prof-rank" class="text-[9px] mono mt-0.5" style="color:var(--accent2)"></p>
+                </div>
+                <div class="text-left">
+                    <div class="flex justify-between text-[9px] mono mb-1.5">
+                        <span style="color:var(--text-muted)">XP Progress</span>
+                        <span id="prof-xp-label" style="color:var(--accent)">0 / 230 XP</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="prof-xp-bar" class="progress-fill h-full rounded-full transition-all duration-700" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="stat-box p-4 rounded-xl">
+                        <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">TASKS_DONE</p>
+                        <p id="prof-done" class="text-2xl font-black cyber-title">0</p>
+                    </div>
+                    <div class="stat-box p-4 rounded-xl">
+                        <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">TOTAL_EXP</p>
+                        <p id="prof-exp" class="text-2xl font-black exp-color">0</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="stat-box p-4 rounded-xl">
+                        <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">PENDING</p>
+                        <p id="prof-pending" class="text-2xl font-black" style="color:var(--warning)">0</p>
+                    </div>
+                    <div class="stat-box p-4 rounded-xl">
+                        <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">RATE_%</p>
+                        <p id="prof-rate" class="text-2xl font-black" style="color:var(--success)">0%</p>
+                    </div>
+                </div>
+                <div class="pt-2 border-t" style="border-color:var(--card-border)">
+                    <button onclick="openChangePwModal()" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ Change_Password ]</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB -->
+        <div id="adminTab" class="hidden fade-in space-y-5">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-5">
+                <div class="glass p-5 rounded-[2rem] space-y-5">
+                    <p class="mono text-[10px] font-black uppercase" style="color:var(--accent3)">/ Master_Control</p>
+                    <button id="maintenanceToggleBtn" onclick="toggleMaintenanceServer()" class="w-full py-3 rounded-xl text-[9px] font-black uppercase mono shadow-lg transition-all"></button>
+                    <div class="pt-4" style="border-top: 1px solid var(--card-border)">
+                        <p class="cyber-section-label mb-3">// Add_User_Node</p>
+                        <form onsubmit="handleAdminAddUser(event)" class="space-y-3">
+                            <input type="text" id="adm-new-u" placeholder="Student ID" required class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
+                            <input type="text" id="adm-new-n" placeholder="ชื่อ-นามสกุล" required class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
+                            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ Execute_Init ]</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 glass p-6 rounded-[2rem] flex flex-col" style="height:600px">
+                    <p class="cyber-section-label mb-4">// Node_Directory</p>
+                    <div class="mb-3">
+                        <input type="text" id="adminSearch" placeholder="ค้นหา user..." class="themed-input w-full px-4 py-2.5 rounded-xl text-xs mono" oninput="filterAdminUsers(this.value)">
+                    </div>
+                    <div id="adminUserContainer" class="flex-1 overflow-y-auto space-y-2 no-scrollbar pr-1"></div>
+                </div>
+            </div>
+            <div class="glass p-6 rounded-[2rem]">
+                <div class="flex justify-between items-center mb-4">
+                    <p class="cyber-section-label">// System_Logs</p>
+                    <button onclick="loadAdminPanel()" class="text-[9px] mono font-black uppercase px-3 py-1.5 rounded-lg transition-all" style="color:var(--accent);border:1px solid var(--card-border)">↻ Refresh</button>
+                </div>
+                <div id="logContainer" class="space-y-1 max-h-64 overflow-y-auto no-scrollbar mono text-[9px]" style="color:var(--text-muted)"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ══════════════════════ MODAL: ADD TASK ══════════════════════ -->
+<div id="addHwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.35)">
+    <div class="glass p-8 rounded-[2rem] w-full max-w-md space-y-5 relative fade-in" style="max-height:90vh;overflow-y:auto">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="cyber-section-label">// new task</p>
+                <h3 class="text-lg font-black uppercase cyber-title mono">Assign_Mission</h3>
+            </div>
+            <button onclick="closeAddHomeworkModal()" class="w-8 h-8 flex items-center justify-center rounded-lg transition-all hover:scale-105" style="color:var(--text-muted);background:var(--chip-bg)">✕</button>
+        </div>
+        <div>
+            <p class="cyber-section-label mb-2">// Select Subject</p>
+            <div id="modalSubjectChips" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto no-scrollbar"></div>
+        </div>
+        <div class="space-y-3">
+            <input type="text" id="modal-subject" readonly class="themed-input w-full px-5 py-3 rounded-xl text-sm mono font-bold" placeholder="เลือกวิชาด้านบน..." style="color:var(--accent)">
+            <input type="text" id="modal-task" class="themed-input w-full px-5 py-3 rounded-xl text-sm" placeholder="รายละเอียดการบ้าน...">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="cyber-section-label block">// Due Date</label>
+                    <input type="date" id="modal-date" class="themed-input w-full px-4 py-3 rounded-xl text-xs mono">
+                </div>
+                <div class="space-y-1">
+                    <label class="cyber-section-label block">// Note / Link</label>
+                    <input type="text" id="modal-note" class="themed-input w-full px-4 py-3 rounded-xl text-xs" placeholder="หมายเหตุหรือลิงก์">
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-3 pt-1">
+            <button onclick="closeAddHomeworkModal()" class="flex-1 py-3 text-[10px] font-black uppercase mono transition-all rounded-xl" style="color:var(--text-muted);border:1px solid var(--card-border)">[ Abort ]</button>
+            <button onclick="handleQuickAddHomework()" class="flex-1 btn-primary py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ COMMIT ]</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════ MODAL: CHANGE PASSWORD ══════════════════════ -->
+<div id="changePwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.35)">
+    <div class="glass p-8 rounded-[2rem] w-full max-w-sm space-y-5 fade-in">
+        <div class="flex justify-between items-center">
+            <h3 class="text-sm font-black uppercase mono cyber-title">Change_Password</h3>
+            <button onclick="closeChangePwModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color:var(--text-muted);background:var(--chip-bg)">✕</button>
+        </div>
+        <form onsubmit="handleChangePassword(event)" class="space-y-3">
+            <input type="password" id="cp-old" placeholder="รหัสเดิม" required class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
+            <input type="password" id="cp-new" placeholder="รหัสใหม่ (8+ ตัวอักษร)" required class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
+            <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ CONFIRM ]</button>
+        </form>
+    </div>
+</div>
+
+<!-- ════════════════════════════ SCRIPT ════════════════════════════ -->
+<script>
+'use strict';
+
+const _kd = [50,73,75,32,44,42,47,58,45,32,44,58,60,45,58,43,32,77,79,77,73];
+const _ks = 127;
+const getApiKey = () => _kd.map(c => String.fromCharCode(c ^ _ks)).join('');
+
+// 🔴 URL สื่อสารหลักกับ Google Apps Script ของคุณ
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxccAV50YxE9QuQJyJQT9TAR4zWVJh2TrAHzdf_Tor_qC_d9hGzR7GAQV9bQkMAefTW/exec";
+
+const TOTAL_STUDENTS = 23;
+const MAX_XP = TOTAL_STUDENTS * 10;
+
+const SUBJECTS = [
+    { label:'คณิตประยุกต์ 5' }, { label:'คณิตพื้นฐาน 5' }, { label:'ฟิสิกส์ 4' },
+    { label:'เคมี 4' }, { label:'ชีววิทยา 2' }, { label:'อังกฤษพื้นฐาน 5' },
+    { label:'อังกฤษวิชาการ 5' }, { label:'ไอโอที (IoT)' }, { label:'อิเล็กฯเบื้องต้น' },
+    { label:'เทคโนโลยี 5' }, { label:'โครงงาน' }, { label:'ภาษาไทย 1' },
+    { label:'ประวัติศาสตร์ 2' }, { label:'อื่นๆ' }
+];
+
+let currentUser = null;
+let allHomework = [];
+let allAdminUsers = [];
+let currentSubjectFilter = 'all';
+let currentStatusFilter = 'all';
+let charts = {};
+let isMaintenance = false;
+
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('theme');
+    applyTheme(saved === 'dark');
+    initSubjectChips();
+    checkAuth();
+    document.getElementById('fp-new').addEventListener('input', checkPwStrength);
+});
+
+function showToast(msg, color = 'var(--accent)') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.color = color;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function applyTheme(dark) {
+    const root = document.documentElement;
+    const btn = document.getElementById('themeBtn');
+    if (dark) {
+        root.classList.remove('light'); root.classList.add('dark');
+        if (btn) { btn.textContent = '☀️'; btn.className = 'w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-dark text-base'; }
+        document.querySelectorAll('.light-text').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dark-text').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.dark-show').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.dark-hide').forEach(el => el.classList.add('hidden'));
+    } else {
+        root.classList.remove('dark'); root.classList.add('light');
+        if (btn) { btn.textContent = '🌙'; btn.className = 'w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base'; }
+        document.querySelectorAll('.light-text').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.dark-text').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dark-show').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.dark-hide').forEach(el => el.classList.remove('hidden'));
+    }
+}
+
+function toggleDarkMode() {
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    applyTheme(!isDark);
+    if (allHomework.length > 0 && !document.getElementById('statsTab').classList.contains('hidden')) {
+        setTimeout(renderAdvancedAnalytics, 50);
+    }
+}
+
+function checkPwStrength() {
+    const pw = document.getElementById('fp-new').value;
+    const bar = document.getElementById('pwStrengthBar');
+    const label = document.getElementById('pwStrengthLabel');
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const levels = [
+        { w:'0%', c:'#f43f5e', t:'// strength: very weak' },
+        { w:'20%', c:'#f43f5e', t:'// strength: weak' },
+        { w:'40%', c:'#f59e0b', t:'// strength: fair' },
+        { w:'65%', c:'#f59e0b', t:'// strength: good' },
+        { w:'85%', c:'#10b981', t:'// strength: strong' },
+        { w:'100%', c:'#00ff9d', t:'// strength: VERY STRONG ✓' }
+    ];
+    const l = levels[score] || levels[0];
+    bar.style.width = l.w;
+    bar.style.background = l.c;
+    label.textContent = l.t;
+    label.style.color = l.c;
+}
+
+async function apiCall(payload) {
+    try {
+        document.getElementById('processingOverlay').classList.remove('hidden');
+        payload.apiKey = getApiKey();
+        if (currentUser) { payload.username = currentUser.username; payload.token = currentUser.token; }
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const json = await res.json();
+        document.getElementById('processingOverlay').classList.add('hidden');
+        if (json.updating && currentUser && currentUser.role !== 'admin') {
+            document.getElementById('maintenanceOverlay').classList.remove('hidden');
+        }
+        return json;
+    } catch (e) {
+        document.getElementById('processingOverlay').classList.add('hidden');
+        return { success: false, message: 'Server Connection Error' };
+    }
+}
+
+async function _rawCall(payload) {
+    try {
+        payload.apiKey = getApiKey();
+        if (currentUser) { payload.username = currentUser.username; payload.token = currentUser.token; }
+        const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+        return await res.json();
+    } catch (e) { return { success: false, message: 'Connection Error' }; }
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const errEl = document.getElementById('loginError');
+    errEl.classList.add('hidden');
+    const res = await apiCall({
+        action: 'login',
+        username: document.getElementById('login-u').value.trim(),
+        password: document.getElementById('login-p').value
+    });
+    if (res.success) {
+        if (res.isNewUser) {
+            sessionStorage.setItem('m64_tmp_u', res.username);
+            sessionStorage.setItem('m64_tmp_t', res.token);
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('firstPwSection').classList.remove('hidden');
+        } else {
+            currentUser = res;
+            localStorage.setItem('m64_usr', JSON.stringify(res));
+            sessionStorage.setItem('m64_tok', res.token);
+            showMainDashboard();
+        }
+    } else {
+        errEl.textContent = '⚠ ' + (res.message || 'Login Failed');
+        errEl.classList.remove('hidden');
+    }
+}
+
+async function handleSetFirstPassword(e) {
+    e.preventDefault();
+    const n = document.getElementById('fp-new').value;
+    const c = document.getElementById('fp-confirm').value;
+    if (n.length < 8) return showToast('⚠ Password must be at least 8 characters', 'var(--danger)');
+    if (n !== c) return showToast('⚠ Passwords do not match', 'var(--danger)');
+    const res = await apiCall({
+        action: 'setInitialPassword',
+        username: sessionStorage.getItem('m64_tmp_u'),
+        token: sessionStorage.getItem('m64_tmp_t'),
+        newPassword: n
+    });
+    if (res.success) {
+        showToast('✓ Password set! Please login again.');
+        setTimeout(() => location.reload(), 1500);
+    } else {
+        showToast('✕ ' + (res.message || 'Failed'), 'var(--danger)');
+    }
+}
+
+function handleLogout() { localStorage.clear(); sessionStorage.clear(); location.reload(); }
+function checkAuth() {
+    const s = localStorage.getItem('m64_usr');
+    const t = sessionStorage.getItem('m64_tok');
+    if (s && t) { currentUser = JSON.parse(s); currentUser.token = t; showMainDashboard(); }
+}
+
+function showMainDashboard() {
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('mainSection').classList.remove('hidden');
+    document.getElementById('userDisplayName').textContent = currentUser.name;
+    if (currentUser.role === 'admin') document.getElementById('btn-adminTab').classList.remove('hidden');
+    switchTab('homeworkTab');
+}
+
+async function switchTab(id) {
+    ['homeworkTab','statsTab','profileTab','adminTab'].forEach(t => {
+        document.getElementById(t).classList.add('hidden');
+        const b = document.getElementById('btn-' + t); if (b) b.classList.remove('tab-active');
+    });
+    document.getElementById(id).classList.remove('hidden');
+    const b = document.getElementById('btn-' + id); if (b) b.classList.add('tab-active');
+
+    if (id === 'homeworkTab') loadHomework();
+    if (id === 'statsTab') { if (!allHomework.length) await loadHomework(); setTimeout(renderAdvancedAnalytics, 50); }
+    if (id === 'profileTab') { if (!allHomework.length) await loadHomework(); renderProfile(); }
+    if (id === 'adminTab') loadAdminPanel();
+}
+
+async function loadHomework() {
+    const res = await apiCall({ action: 'getHomework' });
+    if (res.success) { allHomework = res.data; renderHomework(); updateNavBadge(); renderSummaryStrip(); }
+}
+
+function renderSummaryStrip() {
+    const me = currentUser.username.toLowerCase();
+    const total = allHomework.length;
+    const doneCount = allHomework.filter(h => h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me)).length;
+    const pendingCount = total - doneCount;
+    const overdueCount = allHomework.filter(h => {
+        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
+        if (done || !h['กำหนดส่ง']) return false;
+        return Math.ceil((new Date(h['กำหนดส่ง']) - new Date()) / 86400000) < 0;
+    }).length;
+
+    document.getElementById('summaryStrip').innerHTML = `
+        <div class="glass p-4 rounded-2xl text-center">
+            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">Total Tasks</p>
+            <p class="text-2xl font-black cyber-title">${total}</p>
+        </div>
+        <div class="glass p-4 rounded-2xl text-center">
+            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">Pending</p>
+            <p class="text-2xl font-black" style="color:var(--warning)">${pendingCount}</p>
+        </div>
+        <div class="glass p-4 rounded-2xl text-center">
+            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">Overdue</p>
+            <p class="text-2xl font-black ${overdueCount > 0 ? 'badge-urgent' : ''}" style="color:${overdueCount > 0 ? 'var(--danger)' : 'var(--success)'}">${overdueCount}</p>
+        </div>`;
+}
+
+function updateNavBadge() {
+    const me = currentUser.username.toLowerCase();
+    const pending = allHomework.filter(h => !h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me)).length;
+    document.getElementById('navPendingCount').textContent = pending;
+    document.getElementById('navPendingBadge').classList.toggle('hidden', pending === 0);
+}
+
+function renderHomework() {
+    const container = document.getElementById('homeworkContainer');
+    container.innerHTML = '';
+    const me = currentUser.username.toLowerCase();
+    const filtered = allHomework.filter(h => {
+        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
+        const sMatch = currentSubjectFilter === 'all' || h['วิชา'] === currentSubjectFilter;
+        let stMatch = true;
+        if (currentStatusFilter === 'pending') stMatch = !done;
+        else if (currentStatusFilter === 'done') stMatch = done;
+        return sMatch && stMatch;
+    });
+
+    if (!filtered.length) {
+        container.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-20 gap-3">
+                <p class="text-4xl">📭</p>
+                <p class="mono text-xs uppercase tracking-widest italic" style="color:var(--text-muted)">// Stack_Empty — No tasks found</p>
+            </div>`;
+        return;
+    }
+
+    filtered.forEach((h, i) => {
+        const done = h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me);
+        const doneCount = h['ผู้ทำเสร็จ'] ? h['ผู้ทำเสร็จ'].split(',').filter(Boolean).length : 0;
+        const progress = Math.round((doneCount / TOTAL_STUDENTS) * 100);
+
+        const due = h['กำหนดส่ง'];
+        let duePill = '';
+        if (due) {
+            const diff = Math.ceil((new Date(due) - new Date()) / 86400000);
+            if (diff < 0) duePill = `<span class="due-pill due-overdue">⚠ OVERDUE</span>`;
+            else if (diff === 0) duePill = `<span class="due-pill due-today">🔥 TODAY</span>`;
+            else if (diff <= 3) duePill = `<span class="due-pill due-soon">⏰ ${diff}d LEFT</span>`;
+            else duePill = `<span class="due-pill due-normal">📅 ${due}</span>`;
+        }
+
+        const div = document.createElement('div');
+        div.className = `glass p-5 rounded-[1.75rem] space-y-3 hw-card ${done ? 'done-card' : ''}`;
+        div.style.cssText = `opacity:${done ? '0.42' : '1'};animation-delay:${i * 40}ms`;
+        div.classList.add('fade-in');
+        
+        // 🚨 ส่งทั้ง h.id (Task ID หลัก) และ h.rowNum ไปพร้อมกันแบบถอดสไตล์โครงสร้างเดิมมาครบถ้วน
+        div.innerHTML = `
+            <div class="flex justify-between items-start gap-2">
+                <span class="subject-chip active text-[9px]">${h['วิชา']}</span>
+                ${duePill}
+            </div>
+            <h4 class="text-sm font-bold leading-snug" style="color:var(--text)">${h['การบ้าน']}</h4>
+            <div>
+                <div class="flex justify-between text-[8px] font-black uppercase mono mb-1.5" style="color:var(--text-muted)">
+                    <span>Room Sync</span>
+                    <span style="color:var(--accent)">${progress}%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill h-full rounded-full" style="width:${progress}%;transition:width 1.2s cubic-bezier(0.16,1,0.3,1);"></div>
+                </div>
+                <p class="text-[8px] mono mt-1" style="color:var(--text-muted)">${doneCount} / ${TOTAL_STUDENTS} nodes confirmed</p>
+            </div>
+            ${h['หมายเหตุ'] ? `<p class="text-[9px] px-3 py-2 rounded-lg italic truncate" style="background:var(--chip-bg);color:var(--text-muted);border:1px solid var(--chip-border)">📎 ${h['หมายเหตุ']}</p>` : ''}
+            <div class="flex gap-2 pt-1">
+                <button onclick="toggleHwStatus('${h.id || ''}', '${h.rowNum}', ${done})" class="${done ? 'btn-revert' : 'btn-complete'} flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase mono transition-all active:scale-95">
+                    ${done ? '[ REVERT ]' : '[ COMPLETE ]'}
+                </button>
+                ${currentUser.role === 'admin' ? `<button onclick="handleDeleteHomework('${h.id || ''}', '${h.rowNum}')" class="btn-danger px-3 py-2.5 rounded-xl transition-all text-xs">🗑</button>` : ''}
+            </div>`;
+        container.appendChild(div);
+    });
+}
+
+async function toggleHwStatus(id, rowNum, currentStatus) {
+    const res = await apiCall({ action: 'togglePersonalStatus', id: id, rowNum: rowNum });
+    if (res.success) {
+        if (!currentStatus) {
+            confetti({ particleCount: 130, spread: 85, origin: { y: 0.6 }, colors: ['#5b5ef4','#a259f7','#00ff9d','#00d4ff','#f24f87'] });
+            showToast('🎉 Task completed! +10 XP');
+        } else {
+            showToast('↩ Task reverted', 'var(--text-muted)');
+        }
+        loadHomework();
+    } else {
+        showToast('✕ Failed: ' + (res.message || 'Error'), 'var(--danger)');
+    }
+}
+
+async function handleDeleteHomework(id, rowNum) {
+    if (!confirm('Delete this task permanently?')) return;
+    const res = await apiCall({ action: 'deleteHomework', id: id, rowNum: rowNum });
+    if (res.success) { showToast('🗑 Task deleted'); loadHomework(); }
+    else { showToast('✕ Delete failed', 'var(--danger)'); }
+}
+
+function renderAdvancedAnalytics() {
+    const ctx = document.getElementById('completionRateChart')?.getContext('2d');
+    if (!ctx) return;
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#3e6a52' : '#94a3b8';
+    const gridColor = isDark ? 'rgba(0,255,157,0.05)' : 'rgba(91,94,244,0.07)';
+    const accentColor = isDark ? '#00ff9d' : '#5b5ef4';
+    const accent2Color = isDark ? '#00d4ff' : '#a259f7';
+    const fillGrad = ctx.createLinearGradient(0, 0, 0, 300);
+    fillGrad.addColorStop(0, isDark ? 'rgba(0,255,157,0.15)' : 'rgba(91,94,244,0.12)');
+    fillGrad.addColorStop(1, 'rgba(0,0,0,0)');
+
+    const labels = allHomework.slice(-12).map(h => (h['การบ้าน'] || '').substring(0, 12));
+    const data = allHomework.slice(-12).map(h => Math.round(((h['ผู้ทำเสร็จ'] ? h['ผู้ทำเสร็จ'].split(',').filter(Boolean).length : 0) / TOTAL_STUDENTS) * 100));
+
+    if (charts.advanced) charts.advanced.destroy();
+    charts.advanced = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Success %', data, borderColor: accentColor, tension: 0.45, fill: true, backgroundColor: fillGrad,
+                pointBackgroundColor: accentColor, pointBorderColor: isDark ? '#050d17' : '#fff', pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, max: 100, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+                x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 40 }, grid: { color: gridColor } }
+            },
+            plugins: {
+                legend: { labels: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } } },
+                tooltip: {
+                    backgroundColor: isDark ? 'rgba(6,18,32,0.95)' : 'rgba(255,255,255,0.95)',
+                    borderColor: accentColor, borderWidth: 1, titleColor: accentColor, bodyColor: textColor,
+                    titleFont: { family: 'JetBrains Mono', size: 11 }, bodyFont: { family: 'JetBrains Mono', size: 10 }, padding: 12
+                }
+            }
+        }
+    });
+
+    renderLeaderboard();
+    renderSubjectChart(isDark, textColor, gridColor, accentColor, accent2Color);
+}
+
+function renderSubjectChart(isDark, textColor, gridColor, accentColor, accent2Color) {
+    const ctx2 = document.getElementById('subjectChart')?.getContext('2d');
+    if (!ctx2) return;
+    const subjectCounts = {};
+    allHomework.forEach(h => { const s = h['วิชา'] || 'อื่นๆ'; subjectCounts[s] = (subjectCounts[s] || 0) + 1; });
+    const entries = Object.entries(subjectCounts).sort((a, b) => b[1] - a[1]);
+    const palette = isDark
+        ? ['#00ff9d','#00d4ff','#f24f87','#ffca3a','#a259f7','#ff6b35','#4ade80','#38bdf8','#fb7185','#fbbf24','#c084fc','#6366f1']
+        : ['#5b5ef4','#a259f7','#f24f87','#f59e0b','#10b981','#3b82f6','#06b6d4','#84cc16','#ef4444','#8b5cf6','#14b8a6','#f97316'];
+
+    if (charts.subject) charts.subject.destroy();
+    charts.subject = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: entries.map(([k]) => k),
+            datasets: [{
+                label: 'Tasks', data: entries.map(([, v]) => v),
+                backgroundColor: entries.map((_, i) => palette[i % palette.length] + (isDark ? '99' : 'cc')),
+                borderColor: entries.map((_, i) => palette[i % palette.length]), borderWidth: 1, borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 35 }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1 }, grid: { color: gridColor } }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? 'rgba(6,18,32,0.95)' : 'rgba(255,255,255,0.95)',
+                    borderColor: accentColor, borderWidth: 1, titleColor: accentColor, bodyColor: textColor,
+                    titleFont: { family: 'JetBrains Mono', size: 11 }, bodyFont: { family: 'JetBrains Mono', size: 10 }, padding: 12
+                }
+            }
+        }
+    });
+}
+
+function renderLeaderboard() {
+    const scores = {};
+    allHomework.forEach(h => {
+        if (h['ผู้ทำเสร็จ']) {
+            h['ผู้ทำเสร็จ'].split(',').forEach(u => {
+                const un = u.trim().toLowerCase(); if (un) scores[un] = (scores[un] || 0) + 10;
+            });
+        }
+    });
+    const medals = ['🥇','🥈','🥉','🏅','🎖'];
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const isSelf = un => currentUser && un === currentUser.username.toLowerCase();
+    document.getElementById('leaderboardContainer').innerHTML = sorted.length
+        ? sorted.map(([user, exp], i) => `
+            <div class="lb-card flex justify-between items-center p-3 rounded-xl glass ${isSelf(user) ? 'ring-1 ring-current' : ''}" style="${isSelf(user) ? 'border-color:var(--accent);box-shadow:0 0 15px var(--glow)' : ''}">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">${medals[i] || '•'}</span>
+                    <p class="text-[9px] font-black uppercase mono" style="color:${isSelf(user) ? 'var(--accent)' : 'var(--text)'}">
+                        ${user}${isSelf(user) ? ' ◄ YOU' : ''}
+                    </p>
+                </div>
+                <p class="font-black mono text-sm exp-color">${exp} XP</p>
+            </div>`).join('')
+        : `<p class="text-center py-8 mono text-xs" style="color:var(--text-muted)">// No data yet</p>`;
+}
+
+function renderProfile() {
+    const me = currentUser.username.toLowerCase();
+    const doneTasks = allHomework.filter(h => h['ผู้ทำเสร็จ']?.toLowerCase().split(',').map(x=>x.trim()).includes(me));
+    const total = allHomework.length;
+    const pending = total - doneTasks.length;
+    const rate = total > 0 ? Math.round((doneTasks.length / total) * 100) : 0;
+    const exp = doneTasks.length * 10;
+
+    let rank = 'RECRUIT';
+    if (rate >= 90) rank = 'LEGEND';
+    else if (rate >= 75) rank = 'ELITE';
+    else if (rate >= 50) rank = 'VETERAN';
+    else if (rate >= 25) rank = 'OPERATIVE';
+
+    document.getElementById('prof-name').textContent = currentUser.name;
+    document.getElementById('prof-done').textContent = doneTasks.length;
+    document.getElementById('prof-exp').textContent = exp;
+    document.getElementById('prof-pending').textContent = pending;
+    document.getElementById('prof-rate').textContent = rate + '%';
+    document.getElementById('prof-rank').textContent = `// RANK: ${rank}`;
+    document.getElementById('prof-xp-label').textContent = `${exp} / ${MAX_XP} XP`;
+    setTimeout(() => { document.getElementById('prof-xp-bar').style.width = Math.min((exp / MAX_XP) * 100, 100) + '%'; }, 100);
+    document.getElementById('prof-role').textContent = currentUser.role === 'admin' ? 'ADMIN_NODE · ROOT_ACCESS' : 'STUDENT_NODE · M.6/4';
+}
+
+function openChangePwModal() { document.getElementById('changePwModal').classList.remove('hidden'); }
+function closeChangePwModal() {
+    document.getElementById('changePwModal').classList.add('hidden');
+    document.getElementById('cp-old').value = ''; document.getElementById('cp-new').value = '';
+}
+async function handleChangePassword(e) {
+    e.preventDefault();
+    const res = await apiCall({ action: 'changePassword', oldPassword: document.getElementById('cp-old').value, newPassword: document.getElementById('cp-new').value });
+    if (res.success) { showToast('✓ Password changed successfully!'); closeChangePwModal(); }
+    else { showToast('✕ ' + (res.message || 'Failed'), 'var(--danger)'); }
+}
+
+async function loadAdminPanel() {
+    const overlay = document.getElementById('processingOverlay');
+    overlay.classList.remove('hidden');
+    try {
+        const [usersRes, statusRes, logsRes] = await Promise.all([
+            _rawCall({ action: 'getUsers' }), _rawCall({ action: 'adminGetStatus' }), _rawCall({ action: 'getSystemLogs' }),
+        ]);
+        allAdminUsers = usersRes.users || [];
+        renderAdminUsers(usersRes); renderMaintenanceBtn(statusRes); renderLogs(logsRes);
+    } finally { overlay.classList.add('hidden'); }
+}
+
+function renderAdminUsers(res, filterText = '') {
+    if (!res.success && !allAdminUsers.length) return;
+    const users = (res.users || allAdminUsers).filter(u =>
+        !filterText || u.username.toLowerCase().includes(filterText.toLowerCase()) || u.name.toLowerCase().includes(filterText.toLowerCase())
+    );
+    document.getElementById('adminUserContainer').innerHTML = users.map(u => `
+        <div class="flex justify-between items-center p-3 rounded-xl glass transition-all">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs" style="background:var(--chip-bg);border:1px solid var(--chip-border);color:var(--accent)">
+                    ${u.name?.charAt(0) || '?'}
+                </div>
+                <div>
+                    <p class="text-[10px] font-black uppercase mono" style="color:var(--text)">${u.username}</p>
+                    <p class="text-[9px] font-bold" style="color:var(--text-muted)">${u.name}</p>
+                </div>
+            </div>
+            <button onclick="adminResetPw('${u.username}')" class="px-3 py-1.5 rounded-lg text-[9px] font-black mono uppercase transition-all hover:scale-105" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:#f59e0b">
+                Reset_PW
+            </button>
+        </div>`).join('') || `<p class="text-center py-8 mono text-xs" style="color:var(--text-muted)">// No users found</p>`;
+}
+
+function filterAdminUsers(text) { renderAdminUsers({ success: true, users: allAdminUsers }, text); }
+
+function renderMaintenanceBtn(res) {
+    if (!res.success) return;
+    isMaintenance = res.maintenance;
+    const b = document.getElementById('maintenanceToggleBtn');
+    b.textContent = isMaintenance ? '[ BRING SYSTEM ONLINE ]' : '[ FORCE MAINTENANCE Mode ]';
+    b.style.cssText = isMaintenance
+        ? 'background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#10b981;width:100%;padding:12px;border-radius:12px;font-size:9px;font-weight:900;font-family:JetBrains Mono,monospace;text-transform:uppercase;cursor:pointer;'
+        : 'background:rgba(255,45,109,0.07);border:1px solid rgba(255,45,109,0.25);color:#f43f5e;width:100%;padding:12px;border-radius:12px;font-size:9px;font-weight:900;font-family:JetBrains Mono,monospace;text-transform:uppercase;cursor:pointer;';
+}
+
+function renderLogs(res) {
+    if (!res.success) return;
+    document.getElementById('logContainer').innerHTML = res.logs?.length
+        ? res.logs.map(l => `
+            <p class="flex gap-2">
+                <span style="color:var(--accent)">${new Date(l.timestamp).toLocaleString('th')}</span>
+                <span style="color:var(--accent2)">·</span>
+                <span style="color:var(--text)">${l.username}</span>
+                <span style="color:var(--accent2)">·</span>
+                <span>${l.action}</span>
+                ${l.details ? `<span style="color:var(--text-muted)">· ${l.details}</span>` : ''}
+            </p>`).join('')
+        : `<p style="color:var(--text-muted)">> no logs yet</p>`;
+}
+
+async function adminResetPw(t) {
+    if (!confirm(`Reset password ของ "${t}" เป็น 1234?`)) return;
+    const res = await apiCall({ action: 'adminResetPassword', targetUsername: t });
+    if (res.success) showToast(`✓ Reset "${t}" → 1234 สำเร็จ`);
+    else showToast('✕ ' + res.message, 'var(--danger)');
+}
+
+async function checkMaintenanceStatus() { const res = await apiCall({ action: 'adminGetStatus' }); renderMaintenanceBtn(res); }
+async function toggleMaintenanceServer() {
+    if (!confirm('เปลี่ยน Maintenance Mode?')) return;
+    await apiCall({ action: 'adminToggleStatus', maintenance: !isMaintenance });
+    checkMaintenanceStatus();
+}
+
+async function handleAdminAddUser(e) {
+    e.preventDefault();
+    const u = document.getElementById('adm-new-u').value.trim();
+    const n = document.getElementById('adm-new-n').value.trim();
+    if (!u || !n) return showToast('⚠ กรุณากรอกข้อมูลให้ครบ', 'var(--warning)');
+    const res = await apiCall({ action: 'adminAddUser', newUsername: u, newName: n });
+    if (res.success) {
+        showToast(`✓ เพิ่ม "${u}" สำเร็จ`);
+        document.getElementById('adm-new-u').value = ''; document.getElementById('adm-new-n').value = '';
+        loadAdminPanel();
+    } else { showToast('✕ ' + res.message, 'var(--danger)'); }
+}
+
+function initSubjectChips() {
+    const row = document.getElementById('subjectChipRow');
+    const modalRow = document.getElementById('modalSubjectChips');
+    row.innerHTML = ''; modalRow.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'subject-chip active'; allBtn.textContent = 'ALL';
+    allBtn.onclick = () => setSubjectFilter('all');
+    row.appendChild(allBtn);
+
+    SUBJECTS.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'subject-chip'; btn.textContent = s.label;
+        btn.onclick = () => setSubjectFilter(s.label);
+        row.appendChild(btn);
+
+        const mBtn = document.createElement('button');
+        mBtn.className = 'subject-chip'; mBtn.textContent = s.label;
+        mBtn.onclick = () => {
+            document.getElementById('modal-subject').value = s.label;
+            document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c => c.classList.remove('active'));
+            mBtn.classList.add('active');
+        };
+        modalRow.appendChild(mBtn);
+    });
+}
+
+function setSubjectFilter(l) {
+    currentSubjectFilter = l;
+    document.querySelectorAll('#subjectChipRow .subject-chip').forEach(c =>
+        c.classList.toggle('active', c.textContent === l || (l === 'all' && c.textContent === 'ALL'))
+    );
+    renderHomework();
+}
+
+function setStatusFilter(s) {
+    currentStatusFilter = s;
+    ['all','pending','done'].forEach(id => {
+        const el = document.getElementById('sfilter-' + id);
+        if (el) {
+            if (id === s) el.classList.add('filter-active');
+            else { el.classList.remove('filter-active'); el.style.color = 'var(--text-muted)'; }
+        }
+    });
+    renderHomework();
+}
+
+function openAddHomeworkModal() { document.getElementById('addHwModal').classList.remove('hidden'); }
+function closeAddHomeworkModal() {
+    document.getElementById('addHwModal').classList.add('hidden');
+    document.getElementById('modal-subject').value = ''; document.getElementById('modal-task').value = '';
+    document.getElementById('modal-date').value = ''; document.getElementById('modal-note').value = '';
+    document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c => c.classList.remove('active'));
+}
+
+async function handleQuickAddHomework() {
+    const subj = document.getElementById('modal-subject').value; if (!subj) return showToast('⚠ Please select a subject', 'var(--warning)');
+    const task = document.getElementById('modal-task').value.trim(); if (!task) return showToast('⚠ Please enter task description', 'var(--warning)');
+    const res = await apiCall({
+        action: 'addHomework', subject: subj, task,
+        dueDate: document.getElementById('modal-date').value, note: document.getElementById('modal-note').value
+    });
+    if (res.success) { showToast('✓ Task added!'); closeAddHomeworkModal(); loadHomework(); }
+    else { showToast('✕ ' + (res.message || 'Failed'), 'var(--danger)'); }
+}
+
+document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); if (!document.getElementById('mainSection').classList.contains('hidden')) openAddHomeworkModal(); }
+    if (e.key === 'Escape') { closeAddHomeworkModal(); closeChangePwModal(); }
+});
+</script>
 </body>
 </html>
