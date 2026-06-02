@@ -10,14 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
-        // เปิดใช้งานระบบสลับโหมดของ Tailwind
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Kanit', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'Kanit', 'sans-serif'] }
                 }
             }
         }
@@ -25,21 +22,21 @@
     <style>
         body { transition: background-color 0.3s ease, color 0.3s ease; }
         .glass-panel {
-            @apply bg-white/80 dark:bg-slate-900/65 backdrop-blur-xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-2xl;
+            @apply bg-white/95 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-sm dark:shadow-2xl;
         }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-800 rounded-full; }
-        ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-700; }
+        ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-slate-700 rounded-full; }
+        ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-600; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 min-h-screen selection:bg-cyan-500/20 selection:text-cyan-800 dark:selection:text-cyan-200">
+<body class="bg-slate-50 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 min-h-screen selection:bg-cyan-500/20">
 
     <script>
-        // ⚠️ ลิงก์ API สู่ Google Apps Script ของคุณ
+        // ⚠️ สำคัญ: นำ Web App URL ของคุณมาใส่ตรงนี้
         const API_URL = "https://script.google.com/macros/s/AKfycbxbhnKdXeXCe0mfnaeRCYkcgXg1fiFJt9o7cLFvijkbu_GypWetnB4Z1IApaAgAU4xtTw/exec"; 
         
-        // ตรวจสอบโหมดเริ่มต้นจากเครื่องผู้ใช้
+        // โหลดธีมสีที่ผู้ใช้เคยตั้งค่าไว้
         if (localStorage.getItem('theme') === 'light') {
             document.documentElement.classList.remove('dark');
         } else {
@@ -47,65 +44,58 @@
         }
     </script>
 
-    <div id="loginPage" class="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-gradient-to-br from-slate-50 via-slate-100 to-zinc-200 dark:from-[#090d16] dark:via-[#0f172a] dark:to-slate-950">
+    <div id="loginPage" class="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-gradient-to-br from-slate-100 to-zinc-200 dark:from-[#090d16] dark:via-[#0f172a] dark:to-slate-950">
         <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-cyan-500/5 dark:bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-teal-500/5 dark:bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="glass-panel p-8 rounded-2xl w-full max-w-md relative z-10 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700/50">
+        
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-md relative z-10 transition-all shadow-xl dark:shadow-2xl">
             <div class="text-center mb-8">
                 <div class="inline-flex p-3.5 bg-cyan-500/10 rounded-xl mb-4 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shadow-inner">
                     <i class="fa-solid fa-layer-group text-3xl animate-pulse"></i>
                 </div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                    HOMEWORK HUB <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 ml-1 border border-cyan-500/30">ม.6/4</span>
-                </h1>
-                <p class="text-slate-500 dark:text-slate-400 text-xs mt-2 font-light tracking-wide">ระบบบริหารจัดการภาระงานและสารสนเทศกลาง</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">HOMEWORK HUB <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 ml-1">ม.6/4</span></h1>
+                <p class="text-slate-500 dark:text-slate-400 text-xs mt-2 font-light">ระบบศูนย์รวมภาระงานและสารสนเทศกลาง</p>
             </div>
             
             <form onsubmit="handleAuth(event)" class="space-y-5">
                 <div>
                     <label class="block text-[11px] font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-1.5">เลขประจำตัวนักเรียน / ผู้ดูแล</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500 text-xs"><i class="fa-solid fa-user"></i></span>
-                        <input type="text" id="username" required class="w-full bg-slate-100/60 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-slate-900 dark:text-white text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="ระบุเลขประจำตัว เช่น 34119">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-xs"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="username" required class="w-full bg-slate-100/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-slate-900 dark:text-white text-sm focus:border-cyan-500 focus:outline-none transition-all placeholder:text-slate-400" placeholder="เช่น 34119 หรือ admin">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-1.5">รหัสผ่านบัญชี</label>
+                    <label class="block text-[11px] font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-1.5">รหัสผ่าน</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500 text-xs"><i class="fa-solid fa-lock"></i></span>
-                        <input type="password" id="password" required class="w-full bg-slate-100/60 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-slate-900 dark:text-white text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600" placeholder="••••••••">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-xs"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="password" required class="w-full bg-slate-100/80 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-slate-900 dark:text-white text-sm focus:border-cyan-500 focus:outline-none transition-all placeholder:text-slate-400" placeholder="••••••••">
                     </div>
                 </div>
-                <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white dark:text-slate-950 font-bold py-3 rounded-xl text-sm hover:opacity-95 shadow-lg shadow-cyan-500/10 active:scale-[0.99] transition-all duration-150 mt-2">
-                    เข้าสู่ระบบรักษาความปลอดภัย
+                <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-cyan-600 to-teal-600 dark:from-cyan-500 dark:to-teal-500 text-white dark:text-slate-950 font-bold py-3 rounded-xl text-sm hover:opacity-90 shadow-lg active:scale-[0.99] transition-all duration-150">
+                    เข้าสู่ระบบ
                 </button>
             </form>
             
             <div class="mt-6 text-center">
-                <button onclick="triggerForgotPassword()" class="text-xs text-slate-500 dark:text-slate-400 hover:text-cyan-600 dark:hover:text-cyan-400 underline decoration-slate-300 dark:decoration-slate-700 transition-all">
-                    ลืมรหัสผ่าน? ส่งสัญญาณแจ้งแอดมินกลาง
-                </button>
+                <button onclick="triggerForgotPassword()" class="text-xs text-slate-500 hover:text-cyan-600 dark:hover:text-cyan-400 underline transition-all">ลืมรหัสผ่าน? แจ้งแอดมินกลุ่ม</button>
             </div>
         </div>
     </div>
 
     <div id="dashboardPage" class="hidden min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200">
-        <header class="glass-panel border-b border-slate-200 dark:border-slate-900 px-6 py-4 flex justify-between items-center sticky top-0 z-40 backdrop-blur-md shadow-sm">
+        <header class="glass-panel border-b border-slate-200 dark:border-slate-900 px-6 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
             <div class="flex items-center gap-3">
                 <span class="text-base font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 via-teal-600 to-emerald-600 dark:from-cyan-400 dark:via-teal-400 dark:to-emerald-400">⚡ ROOM 6/4 CENTER</span>
                 <span id="badgeRole" class="text-[9px] px-2 py-0.5 rounded-md font-extrabold tracking-widest uppercase"></span>
             </div>
             <div class="flex items-center gap-3.5">
-                <button onclick="toggleThemeMode()" class="bg-white dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-amber-500 px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm">
-                    <i class="fa-solid fa-circle-half-stroke text-[11px]"></i> สลับโหมด UI
+                <button onclick="toggleThemeMode()" class="bg-white dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/60 text-slate-600 dark:text-slate-400 px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-sm">
+                    <i class="fa-solid fa-circle-half-stroke"></i> สลับโหมด UI
                 </button>
                 <div class="text-right hidden sm:block border-l border-slate-200 dark:border-slate-800 pl-3.5">
                     <p id="userFullName" class="text-xs font-semibold text-slate-700 dark:text-slate-300"></p>
                 </div>
-                <button onclick="logout()" class="bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 text-rose-600 dark:text-rose-400 hover:text-white p-2 rounded-xl text-xs transition-all" title="ออกจากระบบ">
-                    <i class="fa-solid fa-power-off"></i>
-                </button>
+                <button onclick="logout()" class="bg-rose-500/10 hover:bg-rose-600 text-rose-600 dark:text-rose-400 hover:text-white p-2 rounded-xl text-xs transition-all"><i class="fa-solid fa-power-off"></i></button>
             </div>
         </header>
 
@@ -113,59 +103,408 @@
             
             <div class="space-y-6 lg:col-span-1">
                 <div class="glass-panel p-5 rounded-2xl relative overflow-hidden">
-                    <div class="absolute -right-4 -bottom-4 text-slate-200 dark:text-slate-800/20 text-7xl font-bold"><i class="fa-solid fa-chart-pie"></i></div>
-                    <h3 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3.5"><i class="fa-solid fa-chart-line text-cyan-500 mr-2"></i> ความคืบหน้างานของคุณ</h3>
+                    <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3.5"><i class="fa-solid fa-chart-line text-cyan-500 mr-2"></i> ความคืบหน้างาน</h3>
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-4xl font-black text-slate-900 dark:text-white tracking-tight" id="statPercent">0%</p>
                             <p class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 mt-1" id="statCount">สำเร็จ 0/0 งาน</p>
                         </div>
-                        <div class="h-12 w-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                            <i class="fa-solid fa-square-check text-xl"></i>
-                        </div>
+                        <div class="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-square-check text-xl"></i></div>
                     </div>
                 </div>
 
                 <div class="glass-panel p-5 rounded-2xl">
-                    <h3 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3.5"><i class="fa-solid fa-bullhorn text-amber-500 mr-2"></i> บอร์ดประกาศข่าวสาร</h3>
-                    <div id="announcementBox" class="space-y-3 max-h-64 overflow-y-auto pr-1 text-xs">
-                        </div>
+                    <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3.5"><i class="fa-solid fa-bullhorn text-amber-500 mr-2"></i> ประกาศข่าวสาร</h3>
+                    <div id="announcementBox" class="space-y-3 max-h-64 overflow-y-auto pr-1 text-xs"></div>
                 </div>
 
                 <div class="glass-panel p-5 rounded-2xl">
-                    <h3 class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3.5"><i class="fa-solid fa-user-gear text-purple-500 mr-2"></i> ความปลอดภัยและโปรไฟล์</h3>
+                    <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3.5"><i class="fa-solid fa-user-gear text-purple-500 mr-2"></i> อัปเดตข้อมูลส่วนตัว</h3>
                     <div class="space-y-3 text-xs">
-                        <div>
-                            <input type="text" id="profileName" placeholder="แก้ไขชื่อ - นามสกุล" class="w-full bg-slate-100/50 dark:bg-slate-950/80 p-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-purple-500 focus:outline-none transition-all">
-                        </div>
-                        <div>
-                            <input type="password" id="profilePass" placeholder="ตั้งรหัสผ่านความปลอดภัยใหม่" class="w-full bg-slate-100/50 dark:bg-slate-950/80 p-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-purple-500 focus:outline-none transition-all">
-                        </div>
-                        <button onclick="updateProfile()" class="w-full bg-purple-500/10 hover:bg-purple-600 border border-purple-500/20 text-purple-600 dark:text-purple-300 hover:text-white font-bold py-2.5 rounded-xl transition-all">
-                            อัปเดตข้อมูลส่วนตัว
-                        </button>
+                        <input type="text" id="profileName" placeholder="แก้ไขชื่อ - นามสกุล" class="w-full bg-slate-100/60 dark:bg-slate-950 p-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-purple-500">
+                        <input type="password" id="profilePass" placeholder="ตั้งรหัสผ่านใหม่" class="w-full bg-slate-100/60 dark:bg-slate-950 p-2.5 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-purple-500">
+                        <button onclick="updateProfile()" class="w-full bg-purple-500/10 hover:bg-purple-500 hover:text-white border border-purple-500/20 text-purple-600 dark:text-purple-300 font-bold py-2.5 rounded-xl transition-all">บันทึกการเปลี่ยนแปลง</button>
                     </div>
                 </div>
             </div>
 
             <div class="lg:col-span-3 space-y-6">
                 
-                <div id="editorPanel" class="hidden glass-panel border border-emerald-500/20 p-5 rounded-2xl shadow-xl space-y-4">
-                    <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-                        <button onclick="switchEditorTab('homework')" id="tabBtnHomework" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-cyan-600 dark:bg-cyan-500 text-white dark:text-slate-950 transition-all shadow-sm">
-                            <i class="fa-solid fa-tasks mr-1"></i> จัดการเพิ่มการบ้าน
-                        </button>
-                        <button onclick="switchEditorTab('announcement')" id="tabBtnAnnouncement" class="text-xs font-bold px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all">
-                            <i class="fa-solid fa-bullhorn mr-1"></i> จัดการเพิ่มประกาศกลุ่ม
-                        </button>
+                <div id="editorPanel" class="hidden glass-panel p-5 rounded-2xl space-y-4">
+                    <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <button onclick="switchEditorTab('homework')" id="tabBtnHomework" class="text-xs font-bold px-4 py-2 rounded-lg bg-cyan-600 dark:bg-cyan-500 text-white dark:text-slate-950 shadow-md transition-all"><i class="fa-solid fa-tasks mr-1"></i> เพิ่มภาระงาน</button>
+                        <button onclick="switchEditorTab('announcement')" id="tabBtnAnnouncement" class="text-xs font-bold px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"><i class="fa-solid fa-bullhorn mr-1"></i> แจ้งประกาศกลุ่ม</button>
                     </div>
 
-                    <div id="homeworkForm" class="space-y-4">
+                    <div id="homeworkForm" class="space-y-4 pt-1">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                            <select id="hwSubject" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-800 dark:text-slate-200 focus:border-emerald-500 focus:outline-none"></select>
-                            <input type="text" id="hwTitle" placeholder="ชื่อหัวข้อภารกิจ/งาน" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none">
-                            <input type="date" id="hwDeadline" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:border-emerald-500 focus:outline-none">
+                            <select id="hwSubject" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+                            <input type="text" id="hwTitle" placeholder="ชื่อหัวข้อภารกิจ/งาน" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
+                            <input type="date" id="hwDeadline" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                            <input type="url" id="hwUrl" placeholder="ลิงก์สั่งงานปลายทาง URL (ถ้ามี)" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none">
-                            <input type="text" id="hwNotes" placeholder="คำอธิบาย / หมายเหตุงานเพิ่มเติม" class="bg-slate-100/80 dark:
+                            <input type="url" id="hwUrl" placeholder="ลิงก์สั่งงานปลายทาง URL (ถ้ามี)" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
+                            <input type="text" id="hwNotes" placeholder="คำอธิบาย / หมายเหตุงานเพิ่มเติม" class="bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="flex justify-end"><button onclick="submitHomework()" class="bg-emerald-600 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs px-6 py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md">บันทึกงานขึ้นระบบ</button></div>
+                    </div>
+
+                    <div id="announcementForm" class="hidden space-y-4 pt-1">
+                        <div class="text-xs space-y-3">
+                            <input type="text" id="annTitle" placeholder="หัวข้อประกาศ..." class="w-full bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500">
+                            <textarea id="annContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." class="w-full bg-slate-100/80 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 text-slate-900 dark:text-white focus:outline-none focus:border-amber-500"></textarea>
+                        </div>
+                        <div class="flex justify-end"><button onclick="submitAnnouncement()" class="bg-amber-500 text-white dark:text-slate-950 font-bold text-xs px-6 py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md">โพสต์ประกาศ</button></div>
+                    </div>
+                </div>
+
+                <div id="adminPanel" class="hidden glass-panel border border-rose-500/20 p-5 rounded-2xl space-y-4 text-xs">
+                    <h2 class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest"><i class="fa-solid fa-shield-halved mr-1.5"></i> แผงควบคุมสิทธิ์แอดมินกลาง</h2>
+                    <div class="flex flex-wrap gap-3 items-center bg-slate-100/60 dark:bg-slate-950/60 p-3.5 rounded-xl border border-slate-200 dark:border-slate-900">
+                        <select id="adminTargetUser" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"></select>
+                        <select id="adminNewRole" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none">
+                            <option value="student">Student (ผู้เรียน)</option>
+                            <option value="assistant">Assistant (ผู้ช่วยลงงาน)</option>
+                        </select>
+                        <button onclick="adminChangeRole()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-bold px-3 py-2 rounded-xl transition-all">อัปเดตบทบาท</button>
+                        
+                        <div class="h-6 w-px bg-slate-300 dark:bg-slate-700 mx-2 hidden sm:block"></div>
+                        
+                        <input type="password" id="adminNewPass" placeholder="รหัสใหม่ (ส่งด่วน)" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl text-xs w-32 focus:outline-none">
+                        <button onclick="adminResetPassword()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl transition-all">รีเซ็ตพาสเวิร์ด</button>
+                    </div>
+                    <div class="bg-slate-900 text-slate-300 font-mono text-[10px] p-3 rounded-xl h-24 overflow-y-auto space-y-1 border border-slate-800" id="logContainer">
+                        </div>
+                </div>
+
+                <div class="glass-panel rounded-2xl overflow-hidden shadow-lg">
+                    <div class="p-4 sm:p-5 flex justify-between items-center bg-slate-100/40 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-900">
+                        <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2"><i class="fa-solid fa-list-check text-cyan-600 dark:text-cyan-400"></i> ทะเบียนภาระงาน ม.6/4 ปัจจุบัน</h2>
+                        <button onclick="refreshData()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm hover:bg-slate-50 transition-all active:scale-95"><i class="fa-solid fa-arrow-rotate-right"></i> ซิงค์ข้อมูล</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/80 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-900 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                                    <th class="py-3.5 px-4 text-center w-16">สถานะ</th>
+                                    <th class="py-3.5 px-3">วิชาเรียน</th>
+                                    <th class="py-3.5 px-3">หัวเรื่องภารกิจ</th>
+                                    <th class="py-3.5 px-3 w-28 text-rose-600 dark:text-rose-400">กำหนดส่ง</th>
+                                    <th class="py-3.5 px-3">ลิงก์ / หมายเหตุ</th>
+                                    <th class="py-3.5 px-4 text-center w-16">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="homeworkTableBody" class="divide-y divide-slate-200 dark:divide-slate-900/50">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let SESSION = null;
+        let DATABASE = { subjects:[], announcements:[], homework:[], students:[], logs:[], tracker:[] };
+
+        // แปลงรหัสผ่านเป็น Hash (SHA-256) ก่อนส่ง เพื่อความปลอดภัยที่แน่นหนา
+        async function hashPassword(str) {
+            const msgBuffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('').toLowerCase();
+        }
+
+        // ฟังก์ชันกลางสำหรับติดต่อ API หลังบ้าน
+        async function sendPostRequest(actionName, payload) {
+            const data = { dataAction: actionName, username: SESSION ? SESSION.id : "Guest", payload: payload };
+            try {
+                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(data) });
+                return JSON.parse(await response.text());
+            } catch (error) {
+                return { success: false, message: "เชื่อมต่อฐานข้อมูลล้มเหลว ตรวจสอบอินเทอร์เน็ต" };
+            }
+        }
+
+        // ระบบสลับแท็บ สร้างงาน <-> สร้างประกาศ
+        function switchEditorTab(tab) {
+            const btnHw = document.getElementById('tabBtnHomework');
+            const btnAnn = document.getElementById('tabBtnAnnouncement');
+            
+            if(tab === 'homework') {
+                document.getElementById('homeworkForm').classList.remove('hidden');
+                document.getElementById('announcementForm').classList.add('hidden');
+                
+                btnHw.className = "text-xs font-bold px-4 py-2 rounded-lg bg-cyan-600 dark:bg-cyan-500 text-white dark:text-slate-950 shadow-md transition-all";
+                btnAnn.className = "text-xs font-bold px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all";
+            } else {
+                document.getElementById('homeworkForm').classList.add('hidden');
+                document.getElementById('announcementForm').classList.remove('hidden');
+                
+                btnHw.className = "text-xs font-bold px-4 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all";
+                btnAnn.className = "text-xs font-bold px-4 py-2 rounded-lg bg-amber-500 text-white shadow-md transition-all";
+            }
+        }
+
+        // กดปุ่มล็อกอิน
+        async function handleAuth(e) {
+            e.preventDefault();
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value;
+            const passHash = await hashPassword(pass);
+            const btn = document.getElementById("loginBtn");
+            
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> กำลังตรวจสอบ...`;
+            btn.disabled = true;
+
+            const res = await sendPostRequest("login", { username: user, passwordHash: passHash });
+            
+            btn.innerText = "เข้าสู่ระบบ";
+            btn.disabled = false;
+
+            if (res && res.success) { 
+                SESSION = res.user; 
+                setupDashboard(); 
+            } else { 
+                alert(res?.message || "รหัสผ่านหรือไอดีไม่ถูกต้อง"); 
+            }
+        }
+
+        // จัดเตรียมหน้าจอหลังจากล็อกอินสำเร็จ (ซ่อน/แสดง เมนูตามสิทธิ์)
+        function setupDashboard() {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("dashboardPage").classList.remove("hidden");
+            document.getElementById("userFullName").innerText = SESSION.name;
+            
+            const badge = document.getElementById("badgeRole");
+            badge.innerText = SESSION.role.toUpperCase();
+            
+            // สีป้ายบอกสถานะตาม Role
+            if(SESSION.role === "admin") badge.className = "text-[9px] px-2 py-0.5 rounded-md font-extrabold bg-gradient-to-r from-rose-500 to-orange-500 text-white shadow-sm";
+            else if(SESSION.role === "assistant") badge.className = "text-[9px] px-2 py-0.5 rounded-md font-extrabold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm";
+            else badge.className = "text-[9px] px-2 py-0.5 rounded-md font-extrabold bg-slate-200 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300";
+
+            // ปลดล็อกแผงควบคุมตามสิทธิ์
+            if(SESSION.role === "admin" || SESSION.role === "assistant") document.getElementById("editorPanel").classList.remove("hidden");
+            if(SESSION.role === "admin") document.getElementById("adminPanel").classList.remove("hidden");
+
+            refreshData();
+        }
+
+        // ดึงข้อมูล Real-time
+        function refreshData() {
+            fetch(`${API_URL}?action=syncData`)
+            .then(res => res.json())
+            .then(res => { if(res.success) { DATABASE = res.data; renderUI(); } })
+            .catch(err => console.log("Sync Fail:", err));
+        }
+
+        // ยัดข้อมูลใส่ HTML
+        function renderUI() {
+            // 1. ช่องเลือกวิชา
+            const subSelect = document.getElementById("hwSubject");
+            subSelect.innerHTML = "";
+            DATABASE.subjects.forEach(s => subSelect.innerHTML += `<option value="${s}">${s}</option>`);
+
+            // 2. จัดการแผงแอดมิน (รายชื่อนร. สำหรับรีเซ็ตรหัส)
+            if(SESSION.role === "admin") {
+                const targetSelect = document.getElementById("adminTargetUser");
+                targetSelect.innerHTML = "";
+                DATABASE.students.forEach(st => targetSelect.innerHTML += `<option value="${st.id}">${st.id} - ${st.name}</option>`);
+            }
+
+            // 3. บอร์ดประกาศข่าวสาร
+            const annBox = document.getElementById("announcementBox");
+            annBox.innerHTML = "";
+            
+            if (DATABASE.announcements.length === 0) {
+                annBox.innerHTML = `<p class="text-slate-400 text-center py-4 text-[10px]">ยังไม่มีประกาศใหม่ในขณะนี้</p>`;
+            } else {
+                DATABASE.announcements.forEach(a => {
+                    let delBtn = "";
+                    if(SESSION.role === "admin" || SESSION.role === "assistant") {
+                        delBtn = `<button onclick="deleteAnnouncement('${a.NewsID}')" class="text-rose-500 hover:text-rose-700 text-[10px] p-1"><i class="fa-solid fa-trash-can"></i></button>`;
+                    }
+                    annBox.innerHTML += `
+                        <div class="p-3 rounded-xl border-l-4 border-amber-500 bg-slate-100/60 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-900/50 space-y-1">
+                            <div class="flex justify-between items-start gap-2">
+                                <p class="font-bold text-amber-700 dark:text-amber-400 tracking-wide">${a.Title}</p>
+                                ${delBtn}
+                            </div>
+                            <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">${a.Content}</p>
+                        </div>`;
+                });
+            }
+
+            // 4. ตารางงานและการเช็กสถานะ
+            const tbody = document.getElementById("homeworkTableBody");
+            tbody.innerHTML = "";
+            let doneCount = 0;
+
+            if(DATABASE.homework.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">🎉 ไม่มีงานคงค้างในระบบแล้ว! พักผ่อนได้เลย</td></tr>`;
+                document.getElementById("statPercent").innerText = "100%";
+                document.getElementById("statCount").innerText = "สำเร็จ 0/0 งาน";
+            } else {
+                DATABASE.homework.forEach(h => {
+                    const isDone = DATABASE.tracker.some(t => t.StudentID.toString() === SESSION.id.toString() && t.HomeworkID === h.HomeworkID);
+                    if(isDone) doneCount++;
+
+                    const checkColor = isDone ? 'text-emerald-500' : 'text-slate-300 dark:text-slate-700 hover:text-cyan-500';
+                    const checkIcon = isDone ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle';
+                    const statusBtn = `<button onclick="toggleTaskStatus('${h.HomeworkID}', '${isDone ? 'pending' : 'done'}')" class="hover:scale-110 active:scale-95 transition-all text-base ${checkColor}"><i class="${checkIcon}"></i></button>`;
+                    
+                    const urlHtml = h.URL ? `<a href="${h.URL}" target="_blank" class="text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 bg-cyan-500/10 px-2 py-0.5 rounded-md text-[10px] font-medium"><i class="fa-solid fa-link text-[8px]"></i> ลิงก์แนบ</a>` : '<span class="text-slate-400 dark:text-slate-600 text-[10px]">—</span>';
+                    const notesHtml = h.Notes ? `<p class="text-amber-600 dark:text-amber-500/80 text-[10px] mt-1 font-light bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20 inline-block">${h.Notes}</p>` : '';
+
+                    let actionBtn = `<span class="text-slate-300 dark:text-slate-700">—</span>`;
+                    if(SESSION.role === "admin" || SESSION.role === "assistant") {
+                        actionBtn = `<button onclick="deleteHomework('${h.HomeworkID}')" class="bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white px-2 py-1 rounded-lg border border-rose-500/20 text-[10px] font-bold transition-all"><i class="fa-solid fa-trash-can"></i> ลบ</button>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-100/50 dark:hover:bg-slate-900/30 text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-slate-900/40 transition-all">
+                            <td class="py-3 px-2 text-center">${statusBtn}</td>
+                            <td class="py-3 px-3 font-bold text-cyan-700 dark:text-cyan-400 tracking-wide">${h.Subject}</td>
+                            <td class="py-3 px-3 font-medium text-slate-900 dark:text-slate-200 text-sm">${h.Title}</td>
+                            <td class="py-3 px-3 text-rose-600 dark:text-rose-400 font-mono font-medium">${h.Deadline}</td>
+                            <td class="py-3 px-3">${urlHtml} <br> ${notesHtml}</td>
+                            <td class="py-3 px-2 text-center">${actionBtn}</td>
+                        </tr>`;
+                });
+
+                // คำนวณเปอร์เซ็นต์
+                const percent = Math.round((doneCount / DATABASE.homework.length) * 100);
+                document.getElementById("statPercent").innerText = percent + "%";
+                document.getElementById("statCount").innerText = `สำเร็จ ${doneCount}/${DATABASE.homework.length} ภารกิจ`;
+            }
+
+            // 5. อัปเดต Logs ให้แอดมินดู
+            if(SESSION.role === "admin") {
+                const logCont = document.getElementById("logContainer");
+                logCont.innerHTML = "";
+                DATABASE.logs.forEach(l => {
+                    logCont.innerHTML += `<div><span class="text-teal-500">[${l.Timestamp.substring(11,19)}]</span> <span class="text-amber-400 font-medium">${l.User}</span> : <span class="text-slate-300">${l.Action}</span></div>`;
+                });
+            }
+        }
+
+        // ==================== CRUD FUNCTIONS ====================
+
+        async function submitAnnouncement() {
+            const title = document.getElementById("annTitle").value.trim();
+            const content = document.getElementById("annContent").value.trim();
+            if(!title || !content) return alert("โปรดระบุข้อมูลให้ครบถ้วน");
+
+            const res = await sendPostRequest("addAnnouncement", { title, content });
+            if(res.success) {
+                alert("โพสต์ประกาศขึ้นบอร์ดสำเร็จ!");
+                document.getElementById("annTitle").value = "";
+                document.getElementById("annContent").value = "";
+                refreshData();
+            }
+        }
+
+        async function deleteAnnouncement(annId) {
+            if(!confirm("ต้องการลบประกาศนี้ใช่หรือไม่?")) return;
+            const res = await sendPostRequest("deleteAnnouncement", { annId });
+            if(res.success) refreshData();
+        }
+
+        async function toggleTaskStatus(hwId, nextStatus) {
+            const res = await sendPostRequest("toggleTask", { hwId: hwId, status: nextStatus });
+            if(res.success) refreshData();
+        }
+
+        async function submitHomework() {
+            const subject = document.getElementById("hwSubject").value;
+            const title = document.getElementById("hwTitle").value.trim();
+            const deadline = document.getElementById("hwDeadline").value;
+            const url = document.getElementById("hwUrl").value.trim();
+            const notes = document.getElementById("hwNotes").value.trim();
+
+            if(!title || !deadline) return alert("โปรดระบุ หัวข้อ และ กำหนดส่ง ให้เรียบร้อย");
+            
+            const res = await sendPostRequest("addHomework", { subject, title, deadline, url, notes, createdBy: SESSION.id });
+            if(res.success) {
+                alert("บันทึกภาระงานใหม่สำเร็จ!");
+                document.getElementById("hwTitle").value = "";
+                document.getElementById("hwUrl").value = "";
+                document.getElementById("hwNotes").value = "";
+                refreshData();
+            }
+        }
+
+        async function deleteHomework(hwId) {
+            if(!confirm("ยืนยันการลบภารกิจการบ้านนี้? (การลบจะลบข้อมูลการเช็กของเพื่อนทุกคนด้วย)")) return;
+            const res = await sendPostRequest("deleteHomework", { hwId });
+            if(res.success) refreshData();
+        }
+
+        async function updateProfile() {
+            const newName = document.getElementById("profileName").value.trim();
+            const newPass = document.getElementById("profilePass").value;
+            
+            if(!newName && !newPass) return alert("กรุณาระบุข้อมูลที่ต้องการแก้ไข");
+            
+            let payload = { username: SESSION.id };
+            if(newName) payload.newName = newName;
+            if(newPass) payload.newPasswordHash = await hashPassword(newPass);
+
+            const res = await sendPostRequest("updateProfile", payload);
+            if(res.success) {
+                alert("บันทึกข้อมูลส่วนตัวเรียบร้อย");
+                if(newName) SESSION.name = newName;
+                document.getElementById("profileName").value = "";
+                document.getElementById("profilePass").value = "";
+                refreshData();
+            }
+        }
+
+        async function adminResetPassword() {
+            const target = document.getElementById("adminTargetUser").value;
+            const newPass = document.getElementById("adminNewPass").value;
+            if(!newPass) return alert("โปรดระบุรหัสผ่านใหม่");
+            const hash = await hashPassword(newPass);
+
+            const res = await sendPostRequest("adminAction", { subAction: "resetPassword", targetUser: target, newPasswordHash: hash });
+            if(res.success) { 
+                alert("เปลี่ยนรหัสผ่านให้เพื่อนสำเร็จ!"); 
+                document.getElementById("adminNewPass").value = ""; 
+                refreshData(); 
+            }
+        }
+
+        async function adminChangeRole() {
+            const target = document.getElementById("adminTargetUser").value;
+            const newRole = document.getElementById("adminNewRole").value;
+            const res = await sendPostRequest("adminAction", { subAction: "changeRole", targetUser: target, newRole: newRole });
+            if(res.success) { alert("ปรับระดับบทบาทผู้ใช้งานสำเร็จ"); refreshData(); }
+        }
+
+        async function triggerForgotPassword() {
+            const user = prompt("โปรดระบุเลขประจำตัวของคุณ เพื่อส่งสัญญาณแจ้งเตือนไปยังแอดมินกลาง:");
+            if(!user) return;
+            const data = { dataAction: "adminAction", username: user.trim(), payload: { subAction: "forgotNotify", targetUser: user.trim() } };
+            try {
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(data) });
+                alert("🚀 ยิงสัญญาณฉุกเฉินสำเร็จ! โปรดรอให้แอดมินดำเนินการ");
+            } catch(e) { alert("เครือข่ายขัดข้อง"); }
+        }
+
+        function toggleThemeMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function logout() {
+            SESSION = null;
+            document.getElementById("loginPage").classList.remove("hidden");
+            document.getElementById("dashboardPage").classList.add("hidden");
+            
+            // ล้างฟอร์มตอนออก
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        }
+    </script>
+</body>
+</html>
