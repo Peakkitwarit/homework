@@ -3,1272 +3,479 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ M.6/4 SMART HUB v26.0</title>
+  <title>⚡ M.6/4 SMART HUB v27.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Sarabun:wght@300;400;600;700;800&family=Mitr:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sarabun:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          animation: {
-            'shake': 'shake 0.5s ease-in-out',
-            'float': 'float 4s ease-in-out infinite',
-            'scanline': 'scanline 10s linear infinite',
-            'glitch': 'glitch 3s infinite',
-            'blink': 'blink 1s step-end infinite',
-            'slide-up': 'slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both',
-            'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-            'fade-in': 'fadeIn 0.3s ease both',
-            'pop-in': 'popIn 0.35s cubic-bezier(0.16,1,0.3,1) both',
-          },
+          animation: { 'glow': 'glow 2s ease-in-out infinite', 'slide-up': 'slideUp 0.4s ease-out' },
           keyframes: {
-            shake: { '0%,100%':{transform:'translateX(0)'},'20%,60%':{transform:'translateX(-4px)'},'40%,80%':{transform:'translateX(4px)'} },
-            float: { '0%,100%':{transform:'translateY(0) rotate(0deg)'},'50%':{transform:'translateY(-12px) rotate(1deg)'} },
-            scanline: { '0%':{backgroundPosition:'0 0'},'100%':{backgroundPosition:'0 100%'} },
-            glitch: { '0%,100%':{textShadow:'2px 0 #00ff9d,-2px 0 #ff003c'},'25%':{textShadow:'-2px 0 #00ff9d,2px 0 #ff003c'},'50%':{textShadow:'none'} },
-            blink: { '0%,100%':{opacity:'1'},'50%':{opacity:'0'} },
-            slideUp: { 'from':{opacity:'0',transform:'translateY(20px)'},'to':{opacity:'1',transform:'translateY(0)'} },
-            fadeIn: { 'from':{opacity:'0'},'to':{opacity:'1'} },
-            popIn: { 'from':{opacity:'0',transform:'scale(0.92)'},'to':{opacity:'1',transform:'scale(1)'} },
-            glowPulse: { '0%,100%':{boxShadow:'0 0 15px rgba(0,255,157,0.3)'},'50%':{boxShadow:'0 0 35px rgba(0,255,157,0.6)'} },
+            glow: { '0%, 100%': { boxShadow: '0 0 5px var(--accent)' }, '50%': { boxShadow: '0 0 20px var(--accent)' } },
+            slideUp: { 'from': { opacity: 0, transform: 'translateY(20px)' }, 'to': { opacity: 1, transform: 'translateY(0)' } }
           }
         }
       }
     }
   </script>
   <style>
-    body { font-family:'Sarabun',sans-serif; }
-    .mono { font-family:'JetBrains Mono',monospace; }
-    .thai-display { font-family:'Mitr',sans-serif; }
-    .display { font-family:'Space Grotesk',sans-serif; }
-
     :root {
-      --bg:#f4f6ff; --bg2:#eaedff;
-      --card:rgba(255,255,255,0.85); --card-border:rgba(99,102,241,0.14); --card-border-hover:rgba(99,102,241,0.35);
-      --text:#18163a; --text-muted:#7c7f9e;
-      --accent:#5b5ef4; --accent2:#a259f7; --accent3:#f24f87; --accent4:#12d8a0;
-      --glow:rgba(91,94,244,0.22); --nav-bg:rgba(255,255,255,0.88); --nav-border:rgba(91,94,244,0.14);
-      --input-bg:rgba(255,255,255,0.95); --chip-bg:rgba(91,94,244,0.07); --chip-border:rgba(91,94,244,0.18);
-      --progress-track:#dde2ff;
-      --shadow-sm:0 2px 12px rgba(91,94,244,0.08); --shadow:0 8px 32px rgba(91,94,244,0.13); --shadow-lg:0 20px 60px rgba(91,94,244,0.18);
-      --danger:#f43f5e; --warning:#f59e0b; --success:#10b981;
+      --bg: #f8faff; --card: rgba(255, 255, 255, 0.8); --accent: #6366f1; --accent-glow: rgba(99, 102, 241, 0.2);
+      --text: #1e293b; --text-muted: #64748b; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
     }
     .dark {
-      --bg:#050d17; --bg2:#030a13;
-      --card:rgba(6,18,32,0.94); --card-border:rgba(0,255,157,0.13); --card-border-hover:rgba(0,255,157,0.35);
-      --text:#c4f0e0; --text-muted:#3e6a52;
-      --accent:#00ff9d; --accent2:#00d4ff; --accent3:#ff2d6d; --accent4:#ffca3a;
-      --glow:rgba(0,255,157,0.28); --nav-bg:rgba(3,10,20,0.97); --nav-border:rgba(0,255,157,0.18);
-      --input-bg:rgba(2,10,20,0.85); --chip-bg:rgba(0,255,157,0.04); --chip-border:rgba(0,255,157,0.15);
-      --progress-track:rgba(0,255,157,0.08);
-      --shadow-sm:0 2px 12px rgba(0,0,0,0.5); --shadow:0 0 30px rgba(0,255,157,0.07); --shadow-lg:0 0 60px rgba(0,255,157,0.12);
-      --danger:#ff2d6d; --warning:#ffca3a; --success:#00ff9d;
+      --bg: #020617; --card: rgba(15, 23, 42, 0.9); --accent: #10b981; --accent-glow: rgba(16, 185, 129, 0.2);
+      --text: #f1f5f9; --text-muted: #94a3b8;
     }
-
-    body { background-color:var(--bg); color:var(--text); transition:background-color .35s,color .35s; min-height:100vh; }
-
-    html.light body {
-      background-image:
-        radial-gradient(ellipse 80% 60% at 5% -10%,rgba(162,89,247,0.1) 0%,transparent 55%),
-        radial-gradient(ellipse 60% 50% at 95% 90%,rgba(242,79,135,0.07) 0%,transparent 50%),
-        radial-gradient(ellipse 50% 40% at 50% 50%,rgba(91,94,244,0.04) 0%,transparent 50%);
-      background-attachment:fixed;
-    }
-    html.dark body {
-      background-image:
-        linear-gradient(rgba(0,255,157,0.025) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(0,255,157,0.025) 1px,transparent 1px),
-        radial-gradient(ellipse 70% 50% at 15% 20%,rgba(0,212,255,0.04) 0%,transparent 60%),
-        radial-gradient(ellipse 50% 60% at 85% 80%,rgba(0,255,157,0.03) 0%,transparent 60%);
-      background-size:44px 44px,44px 44px,100% 100%,100% 100%;
-      background-attachment:fixed;
-    }
+    body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: var(--text); transition: 0.3s; overflow-x: hidden; }
+    .display { font-family: 'Space Grotesk', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .glass { background: var(--card); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    .cyber-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-left: 4px solid transparent; }
+    .cyber-card:hover { transform: translateY(-5px); border-left-color: var(--accent); box-shadow: 0 10px 30px -10px var(--accent-glow); }
+    .btn-action { transition: all 0.2s; position: relative; overflow: hidden; }
+    .btn-action:active { transform: scale(0.95); }
+    .tab-btn { position: relative; transition: 0.3s; }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    #toast { transform: translateX(-50%) translateY(100px); }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
     html.dark body::before {
-      content:''; position:fixed; inset:0;
-      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
-      pointer-events:none; z-index:9998; animation:scanline 10s linear infinite;
+      content: ""; position: fixed; inset: 0; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 157, 0.01) 2px, rgba(0, 255, 157, 0.01) 4px);
     }
-
-    .glass {
-      background:var(--card); backdrop-filter:blur(20px) saturate(140%); -webkit-backdrop-filter:blur(20px) saturate(140%);
-      border:1px solid var(--card-border); box-shadow:var(--shadow);
-      transition:border-color .25s,box-shadow .25s,transform .2s;
-    }
-    .glass:hover { border-color:var(--card-border-hover); }
-    html.dark .glass { box-shadow:0 0 25px rgba(0,255,157,0.04),inset 0 0 30px rgba(0,0,0,0.15); }
-    html.dark .glass:hover { box-shadow:0 0 40px rgba(0,255,157,0.1),inset 0 0 20px rgba(0,0,0,0.1); }
-    html.light .glass:hover { box-shadow:var(--shadow-lg); }
-
-    nav { background:var(--nav-bg); border-bottom:1px solid var(--nav-border); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); }
-
-    html.light .nav-logo { background:linear-gradient(135deg,#5b5ef4,#a259f7); box-shadow:0 4px 16px rgba(91,94,244,0.4),inset 0 1px 0 rgba(255,255,255,0.2); }
-    html.dark .nav-logo { background:transparent; border:1px solid var(--accent); color:var(--accent); box-shadow:0 0 18px rgba(0,255,157,0.35),inset 0 0 12px rgba(0,255,157,0.06); font-family:'JetBrains Mono',monospace; animation:glow-pulse 2s ease-in-out infinite; }
-
-    .tab-btn { color:var(--text-muted); transition:color .2s; position:relative; padding-bottom:14px; white-space:nowrap; }
-    .tab-btn:hover { color:var(--text); }
-    .tab-active { color:var(--accent)!important; font-weight:800; }
-    .tab-active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2.5px; background:var(--accent); border-radius:3px; }
-    html.dark .tab-active::after { box-shadow:0 0 10px var(--accent),0 0 20px rgba(0,255,157,0.3); }
-    html.light .tab-active::after { background:linear-gradient(90deg,#5b5ef4,#a259f7); }
-
-    html.light .btn-primary { background:linear-gradient(135deg,#5b5ef4,#a259f7); color:white; box-shadow:0 4px 20px rgba(91,94,244,0.38),inset 0 1px 0 rgba(255,255,255,0.15); transition:all .2s; }
-    html.light .btn-primary:hover { box-shadow:0 6px 28px rgba(91,94,244,0.5); transform:translateY(-1px); }
-    html.light .btn-primary:active { transform:translateY(0); }
-    html.dark .btn-primary { background:transparent; color:var(--accent); border:1px solid var(--accent); box-shadow:0 0 18px rgba(0,255,157,0.18),inset 0 0 10px rgba(0,255,157,0.05); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.08em; transition:all .2s; }
-    html.dark .btn-primary:hover { background:rgba(0,255,157,0.1); box-shadow:0 0 30px rgba(0,255,157,0.4); }
-    html.dark .btn-primary:active { transform:scale(0.97); }
-
-    html.dark .btn-danger { border:1px solid var(--accent3); color:var(--accent3); background:rgba(255,45,109,0.04); transition:all .2s; }
-    html.dark .btn-danger:hover { background:rgba(255,45,109,0.14); box-shadow:0 0 18px rgba(255,45,109,0.25); }
-    html.light .btn-danger { background:#fff1f2; color:var(--danger); border:1px solid rgba(244,63,94,0.15); transition:all .2s; }
-    html.light .btn-danger:hover { background:#ffe4e6; }
-
-    html.light .btn-warning { background:linear-gradient(135deg,#f59e0b,#f97316); color:white; box-shadow:0 4px 16px rgba(245,158,11,0.35); transition:all .2s; }
-    html.light .btn-warning:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(245,158,11,0.5); }
-    html.dark .btn-warning { background:rgba(255,202,58,0.08); border:1px solid var(--warning); color:var(--warning); font-family:'JetBrains Mono',monospace; transition:all .2s; }
-    html.dark .btn-warning:hover { background:rgba(255,202,58,0.16); box-shadow:0 0 20px rgba(255,202,58,0.3); }
-
-    html.light .btn-success { background:linear-gradient(135deg,#10b981,#059669); color:white; box-shadow:0 4px 16px rgba(16,185,129,0.35); transition:all .2s; }
-    html.dark .btn-success { background:rgba(0,255,157,0.08); border:1px solid var(--success); color:var(--success); font-family:'JetBrains Mono',monospace; transition:all .2s; }
-    html.dark .btn-success:hover { background:rgba(0,255,157,0.18); box-shadow:0 0 20px rgba(0,255,157,0.3); }
-
-    html.light .btn-complete { background:linear-gradient(135deg,#5b5ef4,#a259f7); color:white; box-shadow:0 4px 16px rgba(91,94,244,0.3); }
-    html.dark .btn-complete { background:rgba(0,255,157,0.08); border:1px solid var(--accent); color:var(--accent); font-family:'JetBrains Mono',monospace; }
-    html.dark .btn-complete:hover { background:rgba(0,255,157,0.18); box-shadow:0 0 20px rgba(0,255,157,0.35); }
-    html.light .btn-revert { background:#f1f5f9; color:#94a3b8; border:1px solid rgba(0,0,0,0.05); }
-    html.dark .btn-revert { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color:rgba(196,240,224,0.25); font-family:'JetBrains Mono',monospace; }
-
-    .themed-input { background:var(--input-bg); color:var(--text); border:1px solid var(--card-border); transition:all .2s; outline:none; }
-    .themed-input::placeholder { color:var(--text-muted); }
-    .themed-input:focus { border-color:var(--accent); }
-    html.dark .themed-input:focus { box-shadow:0 0 18px rgba(0,255,157,0.18); }
-    html.light .themed-input:focus { box-shadow:0 0 0 3px rgba(91,94,244,0.12); }
-
-    html.light .hw-card { border-top:3px solid var(--accent); border-radius:1.75rem; }
-    html.dark .hw-card { border-left:2px solid var(--accent); }
-    html.dark .hw-card.done-card { border-left-color:rgba(0,255,157,0.15); }
-    .hw-card { transition:opacity .3s,transform .2s; }
-    .hw-card:hover { transform:translateY(-2px); }
-    .hw-card.done-card:hover { transform:none; }
-
-    .subject-chip { padding:.3rem .7rem; border-radius:7px; font-size:.62rem; font-weight:700; cursor:pointer; transition:all .15s; background:var(--chip-bg); border:1px solid var(--chip-border); color:var(--text-muted); font-family:'JetBrains Mono',monospace; user-select:none; }
-    html.light .subject-chip.active { background:linear-gradient(135deg,#5b5ef4,#a259f7); color:white; border-color:transparent; box-shadow:0 3px 10px rgba(91,94,244,0.35); }
-    html.dark .subject-chip.active { background:rgba(0,255,157,0.1); color:var(--accent); border-color:var(--accent); box-shadow:0 0 12px rgba(0,255,157,0.22); }
-    .subject-chip:hover { border-color:var(--accent); color:var(--text); }
-
-    .progress-track { background:var(--progress-track); height:5px; border-radius:99px; overflow:hidden; }
-    html.light .progress-fill { background:linear-gradient(90deg,#5b5ef4,#a259f7); }
-    html.dark .progress-fill { background:linear-gradient(90deg,#00ff9d,#00d4ff); box-shadow:0 0 8px rgba(0,255,157,0.5); }
-
-    html.dark .cyber-title { color:var(--accent); text-shadow:0 0 25px rgba(0,255,157,0.45); font-family:'JetBrains Mono',monospace; }
-    html.dark .cyber-section-label { color:var(--accent2); font-family:'JetBrains Mono',monospace; font-size:.58rem; text-transform:uppercase; letter-spacing:.22em; }
-    html.light .cyber-title { color:var(--accent); }
-    html.light .cyber-section-label { color:var(--text-muted); font-size:.58rem; text-transform:uppercase; letter-spacing:.18em; font-family:'JetBrains Mono',monospace; }
-
-    html.dark .cursor-blink::after { content:'█'; animation:blink 1s step-end infinite; color:var(--accent); font-size:.55em; vertical-align:middle; margin-left:2px; }
-
-    html.light .profile-avatar { background:linear-gradient(135deg,#e0e4ff,#ede9fe); color:#5b5ef4; }
-    html.dark .profile-avatar { background:rgba(0,255,157,0.07); border:1px solid rgba(0,255,157,0.18); color:var(--accent); }
-    html.light .stat-box { background:linear-gradient(135deg,#f3f5ff,#eaeeff); border:1px solid rgba(91,94,244,0.1); }
-    html.dark .stat-box { background:rgba(0,255,157,0.03); border:1px solid rgba(0,255,157,0.1); }
-    html.dark .exp-color { color:var(--accent); text-shadow:0 0 12px rgba(0,255,157,0.5); }
-    html.light .exp-color { color:#a259f7; }
-
-    html.dark .filter-active { background:rgba(0,255,157,0.1)!important; border:1px solid var(--accent)!important; color:var(--accent)!important; box-shadow:0 0 10px rgba(0,255,157,0.18)!important; }
-    html.light .filter-active { background:white!important; color:var(--accent)!important; box-shadow:0 2px 10px rgba(91,94,244,0.15)!important; }
-
-    .theme-btn-light { background:linear-gradient(135deg,#fef3c7,#fde68a); box-shadow:0 2px 8px rgba(245,158,11,0.25); }
-    .theme-btn-dark { background:rgba(0,255,157,0.08); border:1px solid rgba(0,255,157,0.25); color:var(--accent); }
-
-    .due-pill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:6px; font-size:.65rem; font-weight:800; font-family:'JetBrains Mono',monospace; }
-    .due-overdue { background:rgba(244,63,94,0.12); color:#f43f5e; border:1px solid rgba(244,63,94,0.25); }
-    .due-today { background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.25); animation:pulse 1.5s ease-in-out infinite; }
-    .due-soon { background:rgba(245,158,11,0.07); color:#f59e0b; border:1px solid rgba(245,158,11,0.15); }
-    .due-normal { background:var(--chip-bg); color:var(--text-muted); border:1px solid var(--chip-border); }
-
-    .no-scrollbar::-webkit-scrollbar { display:none; }
-    .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
-    .fade-in { animation:slide-up .4s cubic-bezier(0.16,1,0.3,1) both; }
-    .stagger > * { animation:slide-up .4s cubic-bezier(0.16,1,0.3,1) both; }
-    .stagger > *:nth-child(1) { animation-delay:0ms; }
-    .stagger > *:nth-child(2) { animation-delay:60ms; }
-    .stagger > *:nth-child(3) { animation-delay:120ms; }
-    .stagger > *:nth-child(4) { animation-delay:180ms; }
-    .stagger > *:nth-child(n+5) { animation-delay:240ms; }
-
-    /* Admin table */
-    html.light .admin-row { border-bottom:1px solid rgba(91,94,244,0.07); }
-    html.light .admin-row:hover { background:rgba(91,94,244,0.03); }
-    html.dark .admin-row { border-bottom:1px solid rgba(0,255,157,0.05); }
-    html.dark .admin-row:hover { background:rgba(0,255,157,0.03); }
-
-    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--card); border:1px solid var(--card-border); backdrop-filter:blur(20px); padding:12px 24px; border-radius:999px; font-size:.75rem; font-weight:700; font-family:'JetBrains Mono',monospace; color:var(--text); z-index:9999; transition:transform .4s cubic-bezier(0.16,1,0.3,1),opacity .4s; opacity:0; pointer-events:none; box-shadow:var(--shadow-lg); }
-    #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
-    html.dark #toast { box-shadow:0 0 30px rgba(0,255,157,0.15); }
-
-    html.dark #btn-adminTab { color:var(--accent3)!important; font-family:'JetBrains Mono',monospace; }
-
-    /* Subject tag colors */
-    .subj-color-0 { color:#5b5ef4; background:rgba(91,94,244,0.1); }
-    .subj-color-1 { color:#a259f7; background:rgba(162,89,247,0.1); }
-    .subj-color-2 { color:#f24f87; background:rgba(242,79,135,0.1); }
-    .subj-color-3 { color:#12d8a0; background:rgba(18,216,160,0.1); }
-    .subj-color-4 { color:#f59e0b; background:rgba(245,158,11,0.1); }
-    .subj-color-5 { color:#06b6d4; background:rgba(6,182,212,0.1); }
-    .subj-color-6 { color:#84cc16; background:rgba(132,204,22,0.1); }
-    .subj-color-7 { color:#fb923c; background:rgba(251,146,60,0.1); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-<div id="toast">✓ Done</div>
-
-<div id="processingOverlay" class="hidden fixed inset-0 backdrop-blur-sm z-[500] flex items-center justify-center" style="background:rgba(0,0,0,0.2)">
-  <div class="glass p-8 rounded-[2.5rem] flex flex-col items-center gap-3">
-    <svg class="animate-spin h-10 w-10" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-15" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>
-      <path fill="none" stroke="var(--accent)" stroke-width="3" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-    </svg>
-    <p class="text-[10px] font-black tracking-widest uppercase mono" style="color:var(--accent)">Processing...</p>
-  </div>
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="fixed bottom-10 left-1/2 glass px-8 py-4 rounded-2xl text-xs font-bold z-[10000] transition-all duration-500 shadow-2xl flex items-center gap-3">
+  <span id="toastIcon">⚡</span> <span id="toastMsg">Action Successful</span>
 </div>
 
-<nav class="sticky top-0 z-50 px-5 py-3 flex justify-between items-center">
-  <div class="flex items-center gap-3">
-    <div class="nav-logo w-9 h-9 flex items-center justify-center rounded-xl font-black text-xs text-white mono select-none">6/4</div>
+<!-- TOP NAVIGATION -->
+<nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-4 flex justify-between items-center">
+  <div class="flex items-center gap-4">
+    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30 display">6/4</div>
     <div>
-      <h1 class="text-sm font-black tracking-tighter uppercase cyber-title cursor-blink display" style="line-height:1.1">Smart Hub</h1>
-      <p class="text-[9px] mono hidden sm:flex items-center gap-1.5" style="color:var(--text-muted)">
-        v26.0 ·
-        <span class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" style="box-shadow:0 0 4px #4ade80"></span>
-        <span id="userDisplayName">--</span>
-      </p>
+      <h1 class="text-sm font-bold tracking-tight display uppercase">Smart Hub <span class="text-accent">v27.0</span></h1>
+      <p id="userDisplayName" class="text-[10px] mono opacity-50 tracking-widest uppercase">Initializing_System...</p>
     </div>
   </div>
-  <div class="flex items-center gap-2">
-    <div id="navPendingBadge" class="hidden px-2.5 py-1 rounded-lg mono text-[9px] font-black" style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.2)">
-      <span id="navPendingCount">0</span> PENDING
+  <div class="flex items-center gap-3">
+    <div id="serverStatus" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-[9px] font-bold mono border border-success/20">
+      <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> ONLINE
     </div>
-    <button onclick="toggleDarkMode()" id="themeBtn" class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base">🌙</button>
-    <button onclick="handleLogout()" class="px-3 py-1.5 btn-danger rounded-lg text-xs font-bold uppercase mono tracking-tighter transition-all">Exit</button>
+    <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-white/10 transition-all">🌙</button>
+    <button onclick="handleLogout()" class="px-4 py-2 bg-danger/10 text-danger border border-danger/20 rounded-xl text-[10px] font-black hover:bg-danger hover:text-white transition-all">EXIT</button>
   </div>
 </nav>
 
-<div id="loginSection" class="flex-1 flex items-center justify-center p-4">
-  <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in">
+<!-- LOGIN SECTION -->
+<div id="loginSection" class="flex-1 flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_var(--accent-glow),_transparent)]">
+  <div class="glass p-10 rounded-[3rem] w-full max-w-md border border-white/20 shadow-2xl animate-slide-up">
     <div class="text-center mb-8">
-      <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-4 select-none" style="background:linear-gradient(135deg,#5b5ef4,#a259f7);box-shadow:0 8px 28px rgba(91,94,244,0.4)">⚡</div>
-      <h1 class="text-2xl font-black tracking-tighter display" style="color:var(--text)"><span class="thai-display">ม.6/4</span> Smart Hub</h1>
-      <p class="text-[10px] mt-1 font-semibold mono" style="color:var(--text-muted)">วิทยาศาสตร์-คอมพิวเตอร์ · 2567</p>
+      <div class="w-20 h-20 bg-accent/10 text-accent rounded-3xl flex items-center justify-center text-4xl mx-auto mb-4 animate-bounce">⚡</div>
+      <h2 class="text-2xl font-bold display">WELCOME_BACK</h2>
+      <p class="text-xs text-muted-foreground opacity-60 mono mt-2">กรุณาเข้าสู่ระบบด้วย Student ID</p>
     </div>
     <form onsubmit="handleLogin(event)" class="space-y-4">
       <div class="space-y-1">
-        <label class="cyber-section-label block">// Student ID</label>
-        <input type="text" id="login-u" placeholder="เลขที่ / Student ID" autocomplete="username" required class="themed-input w-full px-5 py-4 rounded-xl text-sm mono">
+        <label class="text-[10px] font-bold mono opacity-40 ml-2">// STUDENT_ID</label>
+        <input type="text" id="login-u" placeholder="เลขที่ของคุณ" required class="w-full p-4 rounded-2xl glass border border-white/10 focus:border-accent outline-none text-sm mono transition-all">
       </div>
       <div class="space-y-1">
-        <label class="cyber-section-label block">// Password</label>
-        <input type="password" id="login-p" placeholder="Password" autocomplete="current-password" required class="themed-input w-full px-5 py-4 rounded-xl text-sm mono">
+        <label class="text-[10px] font-bold mono opacity-40 ml-2">// ACCESS_KEY</label>
+        <input type="password" id="login-p" placeholder="รหัสผ่าน" required class="w-full p-4 rounded-2xl glass border border-white/10 focus:border-accent outline-none text-sm mono transition-all">
       </div>
-      <button type="submit" class="btn-primary w-full py-4 rounded-xl font-black uppercase tracking-widest text-xs mono transition-all active:scale-95 mt-2">🔐 เข้าสู่ระบบ</button>
+      <button type="submit" class="w-full py-4 bg-accent text-white rounded-2xl font-bold text-sm tracking-widest hover:opacity-90 transition-all shadow-xl shadow-accent/20">AUTHENTICATE</button>
     </form>
-    <p id="loginError" class="hidden text-center mt-3 text-[10px] mono font-bold" style="color:var(--danger)"></p>
-    <button onclick="switchSection('forgotSection')" class="w-full mt-4 text-center text-[10px] mono transition-all hover:underline" style="color:var(--text-muted)">[ ลืมรหัสผ่าน? ]</button>
+    <p id="loginError" class="text-center text-xs text-danger mt-4 hidden font-bold"></p>
   </div>
 </div>
 
-<div id="forgotSection" class="hidden flex-1 flex items-center justify-center p-4">
-  <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in text-center space-y-5">
-    <div>
-      <div class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-4" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25)">🔑</div>
-      <p class="text-[9px] mono mb-1 tracking-widest" style="color:var(--text-muted)">> PASSWORD_RECOVERY</p>
-      <h3 class="text-lg font-black uppercase cyber-title mono">ลืมรหัสผ่าน?</h3>
-      <p class="text-[11px] mt-2 leading-relaxed" style="color:var(--text-muted)">
-        การ reset รหัสผ่านต้องใช้ Admin เท่านั้น<br>
-        กรุณาติดต่อ Admin เพื่อให้รีเซ็ตรหัสผ่านให้
-      </p>
-    </div>
-    <div class="glass p-4 rounded-2xl text-left space-y-2" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2)">
-      <p class="text-[10px] font-black mono uppercase" style="color:var(--warning)">// วิธีติดต่อ Admin</p>
-      <p class="text-[11px]" style="color:var(--text-muted)">1. แจ้ง Student ID ของคุณกับ Admin</p>
-      <p class="text-[11px]" style="color:var(--text-muted)">2. Admin จะ reset รหัสผ่านกลับเป็น <span class="mono font-bold" style="color:var(--warning)">1234</span></p>
-      <p class="text-[11px]" style="color:var(--text-muted)">3. Login แล้วเปลี่ยนรหัสผ่านใหม่ได้เลย</p>
-    </div>
-    <!-- เพิ่มต่อจากคำอธิบายวิธีติดต่อ Admin -->
-    <div class="space-y-2 mt-4">
-    <input type="text" id="req-reset-id" placeholder="กรอกเลขที่ของคุณ" class="themed-input w-full px-4 py-3 rounded-xl text-xs mono">
-      <button onclick="requestResetPassword()" class="btn-warning w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">
-      [ ส่งคำขอรีเซ็ตถึง Admin ]
-      </button>
-    </div>
-    <button onclick="switchSection('loginSection')" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">← กลับหน้า Login</button>
-  </div>
-</div>
-
-<div id="firstPwSection" class="hidden flex-1 flex items-center justify-center p-4">
-  <div class="glass p-10 rounded-[2.5rem] w-full max-w-sm fade-in text-center space-y-6">
-    <div>
-      <p class="text-[9px] mono mb-1 tracking-widest" style="color:var(--text-muted)">> SECURITY_UPDATE_REQUIRED</p>
-      <h3 class="text-lg font-black uppercase cyber-title mono">Set New Key</h3>
-      <p class="text-[10px] mt-1" style="color:var(--text-muted)">ตั้งรหัสผ่านใหม่ (อย่างน้อย 8 ตัวอักษร)</p>
-    </div>
-    <form onsubmit="handleSetFirstPassword(event)" class="space-y-3 text-left">
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// New Password</label>
-        <input type="password" id="fp-new" placeholder="รหัสผ่านใหม่ (8+ ตัวอักษร)" required class="themed-input w-full px-5 py-4 rounded-xl text-xs mono">
-      </div>
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// Confirm Password</label>
-        <input type="password" id="fp-confirm" placeholder="ยืนยันรหัสผ่าน" required class="themed-input w-full px-5 py-4 rounded-xl text-xs mono">
-      </div>
-      <div class="progress-track">
-        <div id="pwStrengthBar" class="progress-fill h-full rounded-full transition-all duration-300" style="width:0%"></div>
-      </div>
-      <p id="pwStrengthLabel" class="text-[9px] mono" style="color:var(--text-muted)">// strength: —</p>
-      <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all mt-1">[ CONFIRM_KEY ]</button>
-    </form>
-  </div>
-</div>
-
+<!-- MAIN HUB -->
 <div id="mainSection" class="hidden flex-1 flex flex-col">
-  <div class="max-w-7xl mx-auto w-full px-5 mt-2 flex gap-1 overflow-x-auto no-scrollbar" style="border-bottom:1px solid var(--card-border)">
-    <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="tab-btn tab-active text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Dashboard</button>
-    <button onclick="switchTab('statsTab')" id="btn-statsTab" class="tab-btn text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Analytics</button>
-    <button onclick="switchTab('profileTab')" id="btn-profileTab" class="tab-btn text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Personal</button>
-    <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden tab-btn text-[10px] font-black uppercase tracking-widest mono px-4 pb-3">Root_CMD</button>
+  <!-- TAB BAR -->
+  <div class="max-w-7xl mx-auto w-full px-6 flex gap-8 border-b border-white/5 overflow-x-auto no-scrollbar">
+    <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="tab-btn py-5 text-xs font-bold mono active">DASHBOARD</button>
+    <button onclick="switchTab('statsTab')" id="btn-statsTab" class="tab-btn py-5 text-xs font-bold mono opacity-50">ANALYTICS</button>
+    <button onclick="switchTab('profileTab')" id="btn-profileTab" class="tab-btn py-5 text-xs font-bold mono opacity-50">PERSONAL</button>
+    <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden tab-btn py-5 text-xs font-bold mono text-danger opacity-50">ROOT_CMD</button>
   </div>
 
-  <main class="flex-1 max-w-7xl w-full mx-auto px-5 py-5 pb-32">
-
-    <div id="homeworkTab" class="space-y-5 fade-in">
-      <div id="summaryStrip" class="grid grid-cols-3 gap-3"></div>
-      <div id="subjectChipRow" class="flex flex-wrap gap-1.5 pb-1"></div>
-      <div class="glass p-3 rounded-2xl flex justify-between items-center gap-3 flex-wrap">
-        <div class="flex gap-1 p-1 rounded-xl" style="background:var(--chip-bg)">
-          <button onclick="setStatusFilter('all')" id="sfilter-all" class="filter-active px-4 py-2 rounded-lg text-[10px] font-black mono transition-all">ALL</button>
-          <button onclick="setStatusFilter('pending')" id="sfilter-pending" class="px-4 py-2 rounded-lg text-[10px] font-bold transition-all" style="color:var(--text-muted)">PENDING</button>
-          <button onclick="setStatusFilter('done')" id="sfilter-done" class="px-4 py-2 rounded-lg text-[10px] font-bold transition-all" style="color:var(--text-muted)">DONE</button>
+  <main class="max-w-7xl w-full mx-auto px-6 py-8 pb-20">
+    
+    <!-- DASHBOARD VIEW -->
+    <div id="homeworkTab" class="space-y-8 animate-slide-up">
+      <!-- ASSISTANT TOOLBOX -->
+      <div id="assistantTools" class="hidden glass p-6 rounded-[2.5rem] border-l-4 border-warning shadow-xl space-y-5 bg-gradient-to-r from-warning/5 to-transparent">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="p-2 bg-warning/20 text-warning rounded-lg">🛠️</span>
+            <p class="text-xs font-bold display uppercase tracking-widest">Assistant_Command_Center</p>
+          </div>
+          <p class="text-[9px] mono opacity-50 uppercase">สิทธิ์การแก้ไข: เปิดใช้งาน</p>
         </div>
-        <button onclick="openAddHomeworkModal()" class="btn-primary px-6 py-2.5 rounded-xl text-[10px] font-black mono uppercase transition-all">+ New_Task</button>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="openAddHomeworkModal()" class="px-6 py-3 bg-accent text-white rounded-xl text-[10px] font-bold shadow-lg shadow-accent/30 hover:scale-105 transition-all">+ ADD_NEW_TASK</button>
+          <button onclick="syncSubjects()" class="px-6 py-3 border border-success/30 text-success bg-success/5 rounded-xl text-[10px] font-bold hover:bg-success hover:text-white transition-all">🔄 SYNC_TIMETABLE</button>
+          <button onclick="exportHomeworkCSV()" class="px-6 py-3 border border-white/10 glass rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all">📥 EXPORT_DATA</button>
+        </div>
       </div>
-      <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 stagger"></div>
+
+      <!-- HW FILTER -->
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold display">ACTIVE_MISSIONS</h2>
+        <div class="flex glass p-1 rounded-xl">
+          <button onclick="filterStatus('all')" class="px-4 py-2 text-[10px] font-bold rounded-lg bg-accent text-white">ALL</button>
+          <button onclick="filterStatus('pending')" class="px-4 py-2 text-[10px] font-bold opacity-50 hover:opacity-100 transition-all">PENDING</button>
+        </div>
+      </div>
+
+      <!-- HW GRID -->
+      <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamic Content -->
+      </div>
     </div>
 
-    <div id="statsTab" class="hidden fade-in space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="lg:col-span-2 glass p-6 rounded-[2rem]">
-          <p class="cyber-section-label mb-4">// Completion_Rate</p>
-          <div class="h-72"><canvas id="completionRateChart"></canvas></div>
+    <!-- STATS VIEW -->
+    <div id="statsTab" class="hidden animate-slide-up">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 glass p-8 rounded-[3rem] h-[400px]">
+          <p class="text-xs font-bold mono mb-6 opacity-40">// COMPLETION_RATE_ANALYTICS</p>
+          <canvas id="statChart"></canvas>
         </div>
-        <div class="glass p-6 rounded-[2rem] flex flex-col">
-          <p class="cyber-section-label mb-4 text-center">// Subject_Load</p>
-          <div class="h-72"><canvas id="subjectChart"></canvas></div>
-        </div>
-      </div>
-      <div class="glass p-6 rounded-[2rem]">
-        <p class="cyber-section-label mb-4">// Due_Timeline (upcoming 7 days)</p>
-        <div id="timelineContainer" class="space-y-2"></div>
-      </div>
-    </div>
-
-    <div id="profileTab" class="hidden fade-in">
-      <div class="max-w-md mx-auto glass p-8 rounded-[2rem] text-center space-y-6">
-        <div class="w-20 h-20 profile-avatar rounded-2xl flex items-center justify-center text-3xl mx-auto select-none">👤</div>
-        <div>
-          <h2 id="prof-name" class="text-2xl font-black tracking-tighter thai-display cyber-title">-</h2>
-          <p id="prof-role" class="text-[10px] mono mt-1" style="color:var(--text-muted)">STUDENT_NODE</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="stat-box p-4 rounded-xl">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">TASKS_DONE</p>
-            <p id="prof-done" class="text-2xl font-black cyber-title">0</p>
+        <div class="glass p-8 rounded-[3rem] flex flex-col justify-center text-center space-y-6">
+          <div class="space-y-1">
+            <p class="text-4xl font-bold display text-accent" id="totalCount">0</p>
+            <p class="text-[10px] font-bold mono opacity-40 uppercase">Total_Tasks</p>
           </div>
-          <div class="stat-box p-4 rounded-xl">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">PENDING</p>
-            <p id="prof-pending" class="text-2xl font-black" style="color:var(--warning)">0</p>
+          <div class="w-full h-px bg-white/5"></div>
+          <div class="space-y-1">
+            <p class="text-4xl font-bold display text-success" id="doneCount">0</p>
+            <p class="text-[10px] font-bold mono opacity-40 uppercase">Completed</p>
           </div>
-          <div class="stat-box p-4 rounded-xl">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">TOTAL_TASKS</p>
-            <p id="prof-total" class="text-2xl font-black" style="color:var(--accent2)">0</p>
-          </div>
-          <div class="stat-box p-4 rounded-xl">
-            <p class="text-[9px] mono uppercase font-bold mb-1" style="color:var(--text-muted)">RATE_%</p>
-            <p id="prof-rate" class="text-2xl font-black" style="color:var(--success)">0%</p>
-          </div>
-        </div>
-        <div class="pt-2 border-t space-y-2" style="border-color:var(--card-border)">
-          <button onclick="openChangePwModal()" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ Change_Password ]</button>
         </div>
       </div>
     </div>
 
-    <div id="adminTab" class="hidden fade-in space-y-5">
-
-      <div id="adminStatsRow" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div class="space-y-4">
-
-          <div class="glass p-5 rounded-[2rem] space-y-4">
-            <p class="mono text-[10px] font-black uppercase" style="color:var(--accent3)">/ Add_User_Node</p>
-            <form onsubmit="handleAdminAddUser(event)" class="space-y-3">
-              <input type="text" id="adm-new-u" placeholder="Student ID" required class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
-              <input type="text" id="adm-new-n" placeholder="ชื่อ-นามสกุล" required class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
-              <select id="adm-new-role" class="themed-input w-full px-4 py-3 rounded-xl text-[10px] mono">
-                <option value="student">Student</option>
-                <option value="admin">Admin</option>
-              </select>
-              <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ Execute_Init ]</button>
-            </form>
+    <!-- ADMIN VIEW -->
+    <div id="adminTab" class="hidden animate-slide-up space-y-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- RESET CARD -->
+        <div class="glass p-8 rounded-[3rem] border border-danger/20">
+          <p class="text-xs font-bold mono text-danger mb-6 uppercase tracking-tighter">// SECURITY_OVERRIDE: PASSWORD_RESET</p>
+          <div class="flex flex-col gap-4">
+            <input type="text" id="reset-id" placeholder="Student ID (เช่น 01)" class="w-full p-4 rounded-2xl glass border border-white/10 outline-none text-sm mono">
+            <button onclick="handleResetPW()" class="w-full py-4 bg-danger text-white rounded-2xl font-bold text-xs tracking-widest shadow-lg shadow-danger/20 hover:opacity-90 transition-all">EXECUTE_RESET_1234</button>
           </div>
-
-          <div class="glass p-5 rounded-[2rem] space-y-4">
-            <p class="mono text-[10px] font-black uppercase" style="color:var(--accent2)">/ Subject_Manager</p>
-            <div id="adminSubjectList" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto no-scrollbar"></div>
-            <form onsubmit="handleAdminAddSubject(event)" class="flex gap-2">
-              <input type="text" id="adm-new-subj" placeholder="วิชาใหม่..." required class="themed-input flex-1 px-3 py-2.5 rounded-xl text-[10px] mono">
-              <button type="submit" class="btn-success px-4 py-2.5 rounded-xl text-[10px] font-black mono transition-all">+</button>
-            </form>
-          </div>
-
-          <div class="glass p-5 rounded-[2rem] space-y-3">
-            <p class="mono text-[10px] font-black uppercase" style="color:var(--accent4)">/ Export_Data</p>
-            <button onclick="exportHomeworkCSV()" class="btn-warning w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">📥 Export Homework CSV</button>
-            <button onclick="exportUsersCSV()" class="w-full py-3 rounded-xl text-[10px] font-black mono uppercase transition-all" style="border:1px solid var(--card-border);color:var(--text-muted)">📥 Export Users CSV</button>
-          </div>
+          <p class="text-[9px] mono opacity-40 mt-4 italic text-center">*รหัสผ่านจะถูกตั้งค่ากลับเป็น 1234 ทันที</p>
         </div>
 
-        <div class="lg:col-span-2 glass p-6 rounded-[2rem] flex flex-col" style="max-height:700px">
-          <div class="flex justify-between items-center mb-4">
-            <p class="cyber-section-label">// Node_Directory</p>
-            <button onclick="loadAdminPanel()" class="text-[9px] mono font-black uppercase px-3 py-1.5 rounded-lg transition-all" style="color:var(--accent);border:1px solid var(--card-border)">↻ Refresh</button>
+        <!-- STATS CARD -->
+        <div class="glass p-8 rounded-[3rem] space-y-6">
+          <p class="text-xs font-bold mono text-accent mb-6 uppercase tracking-tighter">// NODE_ACTIVITY_MONITOR</p>
+          <div id="logList" class="space-y-3 max-h-[200px] overflow-y-auto no-scrollbar pr-2">
+            <!-- Logs appear here -->
           </div>
-          <input type="text" id="adminSearch" placeholder="ค้นหา user..." class="themed-input w-full px-4 py-2.5 rounded-xl text-xs mono mb-3" oninput="filterAdminUsers(this.value)">
-          <div id="adminUserContainer" class="flex-1 overflow-y-auto space-y-2 no-scrollbar pr-1"></div>
         </div>
       </div>
 
-      <div class="glass p-6 rounded-[2rem]">
-        <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-          <p class="cyber-section-label">// All_Homework_Records</p>
-          <div class="flex gap-2">
-            <input type="text" id="adminHwSearch" placeholder="ค้นหางาน..." class="themed-input px-3 py-1.5 rounded-lg text-[10px] mono" oninput="renderAdminHomework(this.value)">
-          </div>
+      <!-- FULL LOGS TABLE -->
+      <div class="glass p-8 rounded-[3rem] overflow-hidden">
+        <p class="text-xs font-bold mono mb-6 opacity-40 uppercase">// SYSTEM_HISTORY_FULL_LOGS</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-[11px] mono">
+            <thead class="opacity-30">
+              <tr class="border-b border-white/5">
+                <th class="pb-4">TIMESTAMP</th>
+                <th class="pb-4">USER_NODE</th>
+                <th class="pb-4">ACTION</th>
+                <th class="pb-4">DETAILS</th>
+              </tr>
+            </thead>
+            <tbody id="fullLogTable" class="divide-y divide-white/5">
+              <!-- Logs -->
+            </tbody>
+          </table>
         </div>
-        <div id="adminHomeworkContainer" class="space-y-2 max-h-96 overflow-y-auto no-scrollbar"></div>
       </div>
     </div>
 
   </main>
 </div>
 
-<div id="addHwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.35)">
-  <div class="glass p-8 rounded-[2rem] w-full max-w-md space-y-5 relative fade-in" style="max-height:90vh;overflow-y:auto">
-    <div class="flex justify-between items-center">
-      <div>
-        <p class="cyber-section-label">// new task</p>
-        <h3 class="text-lg font-black uppercase cyber-title mono">Assign_Mission</h3>
+<!-- MODAL: ADD HW -->
+<div id="addHwModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
+  <div class="glass p-8 rounded-[3rem] w-full max-w-lg border border-white/20 shadow-2xl animate-slide-up">
+    <div class="flex justify-between items-center mb-8">
+      <h3 class="text-xl font-bold display">ASSIGN_NEW_MISSION</h3>
+      <button onclick="closeAddHwModal()" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:text-danger transition-all">✕</button>
+    </div>
+    <div class="space-y-5">
+      <div class="space-y-1">
+        <label class="text-[10px] font-bold mono opacity-40 ml-2">SUBJECT_SELECT</label>
+        <select id="hw-subject" class="w-full p-4 rounded-2xl glass border border-white/10 outline-none text-sm"></select>
       </div>
-      <button onclick="closeAddHomeworkModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color:var(--text-muted);background:var(--chip-bg)">✕</button>
-    </div>
-    <div>
-      <p class="cyber-section-label mb-2">// Select Subject</p>
-      <div id="modalSubjectChips" class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto no-scrollbar"></div>
-    </div>
-    <div class="space-y-3">
-      <input type="text" id="modal-subject" readonly class="themed-input w-full px-5 py-3 rounded-xl text-sm mono font-bold" placeholder="เลือกวิชาด้านบน..." style="color:var(--accent)">
-      <input type="text" id="modal-task" class="themed-input w-full px-5 py-3 rounded-xl text-sm" placeholder="รายละเอียดการบ้าน...">
-      <div class="grid grid-cols-2 gap-3">
-        <div class="space-y-1">
-          <label class="cyber-section-label block">// Due Date</label>
-          <input type="date" id="modal-date" class="themed-input w-full px-4 py-3 rounded-xl text-xs mono">
-        </div>
-        <div class="space-y-1">
-          <label class="cyber-section-label block">// Note / Link</label>
-          <input type="text" id="modal-note" class="themed-input w-full px-4 py-3 rounded-xl text-xs" placeholder="หมายเหตุ">
-        </div>
+      <div class="space-y-1">
+        <label class="text-[10px] font-bold mono opacity-40 ml-2">MISSION_DETAILS</label>
+        <input type="text" id="hw-task" placeholder="รายละเอียดการบ้าน..." class="w-full p-4 rounded-2xl glass border border-white/10 outline-none text-sm">
       </div>
-    </div>
-    <div class="flex gap-3 pt-1">
-      <button onclick="closeAddHomeworkModal()" class="flex-1 py-3 text-[10px] font-black uppercase mono transition-all rounded-xl" style="color:var(--text-muted);border:1px solid var(--card-border)">[ Abort ]</button>
-      <button onclick="handleQuickAddHomework()" class="flex-1 btn-primary py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ COMMIT ]</button>
+      <div class="space-y-1">
+        <label class="text-[10px] font-bold mono opacity-40 ml-2">DEADLINE_DATE</label>
+        <input type="date" id="hw-date" class="w-full p-4 rounded-2xl glass border border-white/10 outline-none text-sm mono">
+      </div>
+      <button onclick="submitHomework()" class="w-full py-4 btn-primary rounded-2xl font-bold text-xs tracking-widest mt-4 shadow-xl shadow-accent/20">COMMIT_TO_DATABASE</button>
     </div>
   </div>
 </div>
 
-<div id="changePwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.35)">
-  <div class="glass p-8 rounded-[2rem] w-full max-w-sm space-y-5 fade-in">
-    <div class="flex justify-between items-center">
-      <h3 class="text-sm font-black uppercase mono cyber-title">Change_Password</h3>
-      <button onclick="closeChangePwModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color:var(--text-muted);background:var(--chip-bg)">✕</button>
-    </div>
-    <form onsubmit="handleChangePassword(event)" class="space-y-3">
-      <input type="password" id="cp-old" placeholder="รหัสเดิม" required class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
-      <input type="password" id="cp-new" placeholder="รหัสใหม่ (8+ ตัวอักษร)" required class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
-      <div class="progress-track"><div id="cpStrengthBar" class="progress-fill h-full rounded-full transition-all duration-300" style="width:0%"></div></div>
-      <p id="cpStrengthLabel" class="text-[9px] mono" style="color:var(--text-muted)">// strength: —</p>
-      <button type="submit" class="btn-primary w-full py-3 rounded-xl text-[10px] font-black uppercase mono transition-all">[ CONFIRM ]</button>
-    </form>
-  </div>
-</div>
-
-<div id="editUserModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.35)">
-  <div class="glass p-8 rounded-[2rem] w-full max-w-sm space-y-5 fade-in">
-    <div class="flex justify-between items-center">
-      <div>
-        <p class="cyber-section-label">// edit node</p>
-        <h3 class="text-sm font-black uppercase mono cyber-title">Edit_User</h3>
-      </div>
-      <button onclick="closeEditUserModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color:var(--text-muted);background:var(--chip-bg)">✕</button>
-    </div>
-    <input type="hidden" id="edit-uid">
-    <div class="space-y-3">
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// Display Name</label>
-        <input type="text" id="edit-name" placeholder="ชื่อ-นามสกุล" required class="themed-input w-full px-5 py-3 rounded-xl text-sm">
-      </div>
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// Role</label>
-        <select id="edit-role" class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
-          <option value="student">Student</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-      <div class="glass p-3 rounded-xl space-y-1" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2)">
-        <p class="text-[9px] mono font-black uppercase" style="color:var(--warning)">// Reset Password</p>
-        <p class="text-[10px]" style="color:var(--text-muted)">รีเซ็ตรหัสผ่านกลับเป็น <span class="mono font-bold" style="color:var(--warning)">1234</span></p>
-        <button onclick="confirmResetPassword()" type="button" class="btn-warning w-full py-2.5 rounded-xl text-[10px] font-black mono uppercase transition-all mt-1">[ Reset → 1234 ]</button>
-      </div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="confirmDeleteUser()" type="button" class="flex-1 btn-danger py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">🗑 Delete</button>
-      <button onclick="saveEditUser()" type="button" class="flex-1 btn-primary py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ Save ]</button>
-    </div>
-  </div>
-</div>
-
-<div id="editHwModal" class="hidden fixed inset-0 backdrop-blur-md z-[500] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.35)">
-  <div class="glass p-8 rounded-[2rem] w-full max-w-md space-y-5 fade-in">
-    <div class="flex justify-between items-center">
-      <h3 class="text-sm font-black uppercase mono cyber-title">Edit_Homework</h3>
-      <button onclick="closeEditHwModal()" class="w-8 h-8 flex items-center justify-center rounded-lg" style="color:var(--text-muted);background:var(--chip-bg)">✕</button>
-    </div>
-    <input type="hidden" id="edit-hw-id">
-    <div class="space-y-3">
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// Subject</label>
-        <input type="text" id="edit-hw-subject" class="themed-input w-full px-5 py-3 rounded-xl text-sm mono">
-      </div>
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// Task</label>
-        <input type="text" id="edit-hw-task" class="themed-input w-full px-5 py-3 rounded-xl text-sm">
-      </div>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="space-y-1">
-          <label class="cyber-section-label block">// Due Date</label>
-          <input type="date" id="edit-hw-date" class="themed-input w-full px-4 py-3 rounded-xl text-xs mono">
-        </div>
-        <div class="space-y-1">
-          <label class="cyber-section-label block">// Status</label>
-          <select id="edit-hw-status" class="themed-input w-full px-4 py-3 rounded-xl text-xs mono">
-            <option value="pending">Pending</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
-      </div>
-      <div class="space-y-1">
-        <label class="cyber-section-label block">// Note</label>
-        <input type="text" id="edit-hw-note" class="themed-input w-full px-5 py-3 rounded-xl text-sm">
-      </div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="confirmDeleteHomework()" type="button" class="flex-1 btn-danger py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">🗑 Delete</button>
-      <button onclick="saveEditHomework()" type="button" class="flex-1 btn-primary py-3 rounded-xl text-[10px] font-black mono uppercase transition-all">[ Save ]</button>
-    </div>
-  </div>
-</div>
-
+<!-- SCRIPTS -->
 <script>
-// ═══════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjyo8X8OB1xkddvEivl2uhV-BNuoZWVwyrSwV4pij98JwbnhU7IBMMBp2dYt-WWFMm/exec";
 const API_KEY = "M64_SUPER_SECRET_2026";
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
-let currentUser = null;
-let currentUsername = "";
-let currentRole = "student";
-let homeworkList = [];
-let subjectList = [];
-let allUsers = [];
-let currentStatusFilter = 'all';
-let currentSubjectFilter = 'all';
-let analyticsChart = null;
-let subjectChartInst = null;
+let currentUser = "", currentRole = "", homeworks = [], subjects = [], chart = null;
 
-// ═══════════════════════════════════════════
-// API CALL
-// ═══════════════════════════════════════════
+// --- API & CORE ---
 async function apiCall(data) {
-  showOverlay();
   try {
-    const res = await fetch(WEB_APP_URL, {
-      method: 'POST',
-      body: JSON.stringify({ ...data, apiKey: API_KEY })
+    const res = await fetch(WEB_APP_URL, { 
+      method: 'POST', 
+      body: JSON.stringify({ ...data, apiKey: API_KEY, role: currentRole, username: currentUser }) 
     });
     return await res.json();
-  } catch(err) {
-    console.error("API Error:", err);
-    return { success: false, message: "การเชื่อมต่อเครือข่ายขัดข้อง กรุณาลองใหม่" };
-  } finally {
-    hideOverlay();
+  } catch (e) {
+    showToast("Server Connection Failed", "var(--danger)");
+    return { success: false };
   }
 }
 
-// ═══════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════
+// --- AUTH ---
 async function handleLogin(e) {
   e.preventDefault();
   const u = document.getElementById('login-u').value.trim();
   const p = document.getElementById('login-p').value.trim();
-  const errEl = document.getElementById('loginError');
-  errEl.classList.add('hidden');
+  const res = await apiCall({ action:'login', username: u, password: p });
 
-  const res = await apiCall({ action:'login', username:u, password:p });
   if (res.success) {
-    currentUsername = u;
-    currentUser = res.name;
-    currentRole = res.role || 'student';
+    currentUser = u; currentRole = res.role;
     if (res.isFirstTime) {
-      switchSection('firstPwSection');
-    } else {
-      loginSuccessActions();
+      const newP = prompt("SECURITY_ALERT: รหัสผ่านเริ่มต้นไม่ปลอดภัย\nกรุณาตั้งรหัสผ่านใหม่ (8 ตัวอักษรขึ้นไป):");
+      if (newP && newP.length >= 8) {
+        await apiCall({ action:'setFirstPassword', username:currentUser, newPassword:newP });
+        showToast("Password Secured Successfully", "var(--success)");
+      } else {
+        alert("Action Aborted: รหัสผ่านสั้นเกินไป ระบบจะบังคับเปลี่ยนอีกครั้งในการ Login ครั้งหน้า");
+      }
     }
+    loginSuccess();
   } else {
-    errEl.innerText = res.message || "Student ID หรือรหัสผ่านไม่ถูกต้อง";
-    errEl.classList.remove('hidden');
-    document.getElementById('loginSection').classList.add('animate-shake');
-    setTimeout(() => document.getElementById('loginSection').classList.remove('animate-shake'), 500);
+    const err = document.getElementById('loginError');
+    err.innerText = "✕ ACCESS_DENIED: " + res.message;
+    err.classList.remove('hidden');
   }
 }
 
-function loginSuccessActions() {
-  document.getElementById('userDisplayName').innerText = currentUser;
-  switchSection('mainSection');
-  // Show admin tab if admin
-  if (currentRole === 'admin') {
-    document.getElementById('btn-adminTab').classList.remove('hidden');
-  }
-  showToast(`⚡ ยินดีต้อนรับ ${currentUser}`);
-  loadHomework();
-  loadSubjects();
+function loginSuccess() {
+  document.getElementById('loginSection').classList.add('hidden');
+  document.getElementById('mainSection').classList.remove('hidden');
+  document.getElementById('serverStatus').classList.remove('hidden');
+  document.getElementById('userDisplayName').innerText = `USER_${currentUser} | ROLE_${currentRole.toUpperCase()}`;
+  
+  if (currentRole === 'admin') document.getElementById('btn-adminTab').classList.remove('hidden');
+  if (currentRole === 'admin' || currentRole === 'assistant') document.getElementById('assistantTools').classList.remove('hidden');
+  
+  loadHomework(); loadSubjects();
+  showToast(`⚡ Welcome Node: ${currentUser}`, "var(--accent)");
 }
 
-function handleLogout() {
-  currentUser = null; currentUsername = ""; currentRole = "student";
-  homeworkList = []; subjectList = []; allUsers = [];
-  document.getElementById('login-u').value = "";
-  document.getElementById('login-p').value = "";
-  document.getElementById('btn-adminTab').classList.add('hidden');
-  switchSection('loginSection');
-  showToast("✓ ออกจากระบบเรียบร้อย");
-}
-
-async function handleSetFirstPassword(e) {
-  e.preventDefault();
-  const newPw = document.getElementById('fp-new').value;
-  const confirmPw = document.getElementById('fp-confirm').value;
-  if (newPw.length < 8) return showToast("⚠ รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร", "var(--danger)");
-  if (newPw !== confirmPw) return showToast("⚠ รหัสผ่านไม่ตรงกัน", "var(--danger)");
-  const res = await apiCall({ action:'setFirstPassword', username:currentUsername, newPassword:newPw });
-  if (res.success) { showToast("✓ เปลี่ยนรหัสผ่านสำเร็จ!"); loginSuccessActions(); }
-  else showToast("✕ " + res.message, "var(--danger)");
-}
-
-async function handleChangePassword(e) {
-  e.preventDefault();
-  const oldPw = document.getElementById('cp-old').value;
-  const newPw = document.getElementById('cp-new').value;
-  if (newPw.length < 8) return showToast("⚠ รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร","var(--danger)");
-  const res = await apiCall({ action:'changePassword', username:currentUsername, oldPassword:oldPw, newPassword:newPw });
-  if (res.success) { showToast("✓ เปลี่ยนรหัสผ่านสำเร็จ!"); closeChangePwModal(); }
-  else showToast("✕ " + res.message, "var(--danger)");
-}
-
-// ═══════════════════════════════════════════
-// HOMEWORK
-// ═══════════════════════════════════════════
+// --- DATA LOADING ---
 async function loadHomework() {
   const res = await apiCall({ action:'getHomework' });
   if (res.success) {
-    homeworkList = res.data || [];
-    renderSubjectChips();
+    homeworks = res.data;
     renderHomework();
-    updateSummaryStrip();
-    updateProfileTab();
-    if (!document.getElementById('statsTab').classList.contains('hidden')) renderAnalytics();
-  } else showToast("✕ ดึงข้อมูลล้มเหลว","var(--danger)");
+    renderChart();
+    updateDashboardStats();
+  }
+}
+
+function renderHomework() {
+  const container = document.getElementById('homeworkContainer');
+  const canManage = (currentRole === 'admin' || currentRole === 'assistant');
+  
+  container.innerHTML = homeworks.map(hw => {
+    const isDone = hw.status === 'done';
+    return `
+      <div class="glass p-6 rounded-[2.5rem] cyber-card flex flex-col justify-between h-full fade-in ${isDone ? 'opacity-40 grayscale-[0.5]' : ''}">
+        <div>
+          <div class="flex justify-between items-start mb-4">
+            <span class="px-3 py-1 rounded-lg bg-accent/10 text-accent text-[9px] font-black mono border border-accent/20 uppercase tracking-widest">${hw.subject}</span>
+            ${canManage ? `<button onclick="deleteHW('${hw.id}')" class="w-8 h-8 rounded-full glass flex items-center justify-center text-xs hover:text-danger transition-all">🗑</button>` : ''}
+          </div>
+          <h3 class="text-sm font-bold leading-relaxed mb-3">${hw.task}</h3>
+          ${hw.note ? `<p class="text-[10px] opacity-40 italic mb-3">* ${hw.note}</p>` : ''}
+        </div>
+        <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
+          <div class="flex flex-col">
+            <span class="text-[8px] mono opacity-30 uppercase">Deadline</span>
+            <span class="text-[10px] mono font-bold ${hw.status !== 'done' ? 'text-warning' : ''}">${hw.dueDate || '---'}</span>
+          </div>
+          <button onclick="toggleHW('${hw.id}','${hw.status}')" class="px-6 py-2.5 rounded-xl text-[9px] font-black display tracking-widest btn-action ${isDone ? 'glass border border-white/10' : 'bg-accent text-white shadow-lg shadow-accent/20'}">
+            ${isDone ? 'REVERT' : 'COMPLETE'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// --- ASSISTANT ACTIONS ---
+async function syncSubjects() {
+  if (confirm("ต้องการอัปเดตรายวิชาตามตารางเรียน (16 วิชาหลัก)?")) {
+    const res = await apiCall({ action:'syncSubjects' });
+    if(res.success) { showToast("Database Synced Successfully", "var(--success)"); loadSubjects(); }
+  }
+}
+
+async function deleteHW(id) {
+  if (confirm("ยืนยันการลบภารกิจนี้?")) {
+    await apiCall({ action:'adminDeleteHomework', id });
+    loadHomework();
+    showToast("Task Deleted", "var(--danger)");
+  }
+}
+
+async function submitHomework() {
+  const subj = document.getElementById('hw-subject').value;
+  const task = document.getElementById('hw-task').value;
+  const date = document.getElementById('hw-date').value;
+  if(!task) return alert("กรุณาระบุรายละเอียดงาน");
+  
+  await apiCall({ action:'addHomework', subject: subj, task: task, dueDate: date });
+  closeAddHwModal(); loadHomework();
+  showToast("New Mission Added", "var(--success)");
+}
+
+// --- ADMIN ACTIONS ---
+async function handleResetPW() {
+  const id = document.getElementById('reset-id').value.trim();
+  if (!id) return showToast("กรุณากรอก Student ID", "var(--warning)");
+  if (confirm(`ยืนยันการรีเซ็ตรหัสของ ${id} เป็น 1234?`)) {
+    const res = await apiCall({ action:'adminResetPassword', targetUsername:id });
+    if(res.success) { 
+      showToast(`Key Reset for ${id}`, "var(--success)"); 
+      document.getElementById('reset-id').value = '';
+      loadUsageLogs();
+    }
+  }
+}
+
+async function loadUsageLogs() {
+  const res = await apiCall({ action:'getUsageLogs' });
+  if (res.success) {
+    const mini = document.getElementById('logList');
+    const full = document.getElementById('fullLogTable');
+    
+    const html = res.data.map(l => `
+      <tr class="hover:bg-white/5 transition-all">
+        <td class="py-4 opacity-40">${new Date(l[0]).toLocaleString()}</td>
+        <td class="py-4 font-bold text-accent">${l[1]}</td>
+        <td class="py-4"><span class="px-2 py-0.5 rounded bg-white/5 font-black text-[9px]">${l[2]}</span></td>
+        <td class="py-4 opacity-70 italic">${l[3]}</td>
+      </tr>
+    `).join('');
+    
+    full.innerHTML = html;
+    mini.innerHTML = res.data.slice(0,10).map(l => `
+      <div class="flex justify-between items-center border-b border-white/5 pb-2">
+        <span class="text-accent font-bold">${l[1]}</span>
+        <span class="opacity-40 text-[8px]">${l[2]}</span>
+      </div>
+    `).join('');
+  }
+}
+
+// --- UI HELPERS ---
+function switchTab(id) {
+  ['homeworkTab','statsTab','profileTab','adminTab'].forEach(t => {
+    const el = document.getElementById(t);
+    const btn = document.getElementById(`btn-${t}`);
+    if(t === id) { el.classList.remove('hidden'); btn.classList.add('active', 'opacity-100'); }
+    else { el.classList.add('hidden'); btn.classList.remove('active', 'opacity-100'); }
+  });
+  if (id === 'adminTab') loadUsageLogs();
+  if (id === 'statsTab') setTimeout(renderChart, 100);
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').innerText = msg;
+  t.style.borderColor = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function renderChart() {
+  const done = homeworks.filter(h=>h.status==='done').length;
+  const pending = homeworks.length - done;
+  const ctx = document.getElementById('statChart').getContext('2d');
+  const isDark = document.documentElement.classList.contains('dark');
+  
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Pending'],
+      datasets: [{
+        data: [done, pending],
+        backgroundColor: [isDark ? '#10b981' : '#22c55e', isDark ? '#6366f1' : '#6366f1'],
+        borderWidth: 0,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      cutout: '75%',
+      plugins: { legend: { position: 'bottom', labels: { color: isDark ? '#94a3b8' : '#1e293b', font: { family: 'JetBrains Mono', size: 10 } } } }
+    }
+  });
+}
+
+function updateDashboardStats() {
+  const done = homeworks.filter(h=>h.status==='done').length;
+  document.getElementById('totalCount').innerText = homeworks.length;
+  document.getElementById('doneCount').innerText = done;
 }
 
 async function loadSubjects() {
   const res = await apiCall({ action:'getSubjects' });
   if (res.success) {
-    subjectList = res.data || [];
-    renderModalSubjectChips();
+    document.getElementById('hw-subject').innerHTML = res.data.map(s => `<option value="${s}">${s}</option>`).join('');
   }
 }
 
-async function handleQuickAddHomework() {
-  const subj = document.getElementById('modal-subject').value;
-  const task = document.getElementById('modal-task').value.trim();
-  const dueDate = document.getElementById('modal-date').value;
-  const note = document.getElementById('modal-note').value;
-  if (!subj) return showToast('⚠ กรุณาเลือกวิชา','var(--warning)');
-  if (!task) return showToast('⚠ กรุณากรอกรายละเอียด','var(--warning)');
-  const res = await apiCall({ action:'addHomework', subject:subj, task:task, dueDate:dueDate, note:note });
+async function toggleHW(id, cur) {
+  const res = await apiCall({ action:'updateStatus', id, status: cur === 'done' ? 'pending' : 'done' });
   if (res.success) {
-    showToast('✓ เพิ่มงานใหม่เรียบร้อย!');
-    closeAddHomeworkModal();
+    if (cur !== 'done') confetti({ particleCount: 150, spread: 70, origin: { y: 0.7 }, colors: ['#6366f1', '#10b981', '#f59e0b'] });
     loadHomework();
-    if (typeof confetti === 'function') confetti({ particleCount:80, spread:60, origin:{y:0.6} });
-  } else showToast('✕ '+res.message,'var(--danger)');
-}
-
-async function toggleHomeworkStatus(id, currentStatus) {
-  const nextStatus = currentStatus === 'done' ? 'pending' : 'done';
-  const res = await apiCall({ action:'updateStatus', id:id, status:nextStatus });
-  if (res.success) {
-    showToast(nextStatus === 'done' ? '✓ ส่งงานแล้ว 🎉' : '🔄 เปลี่ยนเป็นค้างส่ง');
-    loadHomework();
-    if (nextStatus === 'done' && typeof confetti === 'function') confetti({ particleCount:60, spread:50, origin:{y:0.7} });
-  } else showToast('✕ อัปเดตสถานะล้มเหลว','var(--danger)');
-}
-
-// ═══════════════════════════════════════════
-// RENDERING
-// ═══════════════════════════════════════════
-function renderHomework() {
-  const container = document.getElementById('homeworkContainer');
-  container.innerHTML = "";
-  const filtered = homeworkList.filter(hw => {
-    const ms = currentStatusFilter === 'all' || hw.status === currentStatusFilter;
-    const msub = currentSubjectFilter === 'all' || hw.subject === currentSubjectFilter;
-    return ms && msub;
-  });
-
-  if (!filtered.length) {
-    container.innerHTML = `<div class="col-span-full py-16 text-center text-xs mono" style="color:var(--text-muted)">[ ไม่พบรายการในหมวดนี้ ]</div>`;
-    return;
-  }
-
-  const subjIndex = {};
-  [...new Set(homeworkList.map(h=>h.subject))].forEach((s,i)=> subjIndex[s]=i%8);
-
-  filtered.forEach(hw => {
-    const isDone = hw.status === 'done';
-    let dueBadgeClass = "due-normal", dueText = hw.dueDate || "ไม่ระบุวันส่ง";
-    if (hw.dueDate && !isDone) {
-      const today = new Date().setHours(0,0,0,0);
-      const target = new Date(hw.dueDate).setHours(0,0,0,0);
-      if (target < today) { dueBadgeClass="due-overdue"; dueText="เลยกำหนด! ⚠️"; }
-      else if (target===today) { dueBadgeClass="due-today"; dueText="ส่งวันนี้! 🔥"; }
-      else if (target-today<=86400000*2) { dueBadgeClass="due-soon"; dueText="ส่งเร็วๆนี้ ⏳"; }
-      else dueText = hw.dueDate;
-    }
-    const ci = subjIndex[hw.subject] !== undefined ? subjIndex[hw.subject] : 0;
-    const card = document.createElement('div');
-    card.className = `glass p-5 rounded-[2rem] hw-card relative flex flex-col justify-between ${isDone?'done-card opacity-60':''}`;
-    card.innerHTML = `
-      <div>
-        <div class="flex justify-between items-start mb-3 gap-2">
-          <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md subj-color-${ci}">${hw.subject}</span>
-          <span class="due-pill ${dueBadgeClass}">${dueText}</span>
-        </div>
-        <h3 class="text-sm font-bold mb-2 leading-snug ${isDone?'line-through opacity-40':''}">${hw.task}</h3>
-        ${hw.note ? `<p class="text-[11px] opacity-60 italic mb-2" style="color:var(--text-muted)">* ${hw.note}</p>` : ''}
-      </div>
-      <div class="mt-4 pt-3 border-t flex justify-end" style="border-color:var(--card-border)">
-        <button onclick="toggleHomeworkStatus('${hw.id}','${hw.status}')" class="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all ${isDone?'btn-revert':'btn-complete'}">
-          ${isDone ? '↩️ คืนค่า' : '✓ เสร็จสิ้น'}
-        </button>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function renderModalSubjectChips() {
-  const container = document.getElementById('modalSubjectChips');
-  if (!container) return;
-  container.innerHTML = "";
-  const list = subjectList.length ? subjectList : [...new Set(homeworkList.map(h=>h.subject))];
-  list.forEach((sub, i) => {
-    const chip = document.createElement('span');
-    chip.className = 'subject-chip';
-    chip.innerText = sub;
-    chip.onclick = () => {
-      document.getElementById('modal-subject').value = sub;
-      container.querySelectorAll('.subject-chip').forEach(c=>c.classList.remove('active'));
-      chip.classList.add('active');
-    };
-    container.appendChild(chip);
-  });
-}
-
-function renderSubjectChips() {
-  const row = document.getElementById('subjectChipRow');
-  if (!row) return;
-  const subjects = ['all', ...new Set(homeworkList.map(h=>h.subject))];
-  row.innerHTML = "";
-  subjects.forEach(sub => {
-    const chip = document.createElement('span');
-    chip.className = `subject-chip ${currentSubjectFilter===sub?'active':''}`;
-    chip.innerText = sub==='all' ? '📊 ALL' : sub.toUpperCase();
-    chip.onclick = () => { currentSubjectFilter=sub; renderSubjectChips(); renderHomework(); };
-    row.appendChild(chip);
-  });
-}
-
-function updateSummaryStrip() {
-  const pending = homeworkList.filter(h=>h.status!=='done').length;
-  const done = homeworkList.filter(h=>h.status==='done').length;
-  const overdue = homeworkList.filter(h => {
-    if (h.status==='done'||!h.dueDate) return false;
-    return new Date(h.dueDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0);
-  }).length;
-
-  const badge = document.getElementById('navPendingBadge');
-  if (badge) { document.getElementById('navPendingCount').innerText=pending; pending>0?badge.classList.remove('hidden'):badge.classList.add('hidden'); }
-
-  const strip = document.getElementById('summaryStrip');
-  if (!strip) return;
-  strip.innerHTML = `
-    <div class="glass p-4 rounded-2xl text-center stat-box">
-      <p class="cyber-section-label text-[8px]">// TOTAL</p>
-      <p class="text-xl font-black mt-0.5">${homeworkList.length}</p>
-    </div>
-    <div class="glass p-4 rounded-2xl text-center stat-box">
-      <p class="cyber-section-label text-[8px]" style="color:var(--warning)">// PENDING</p>
-      <p class="text-xl font-black mt-0.5" style="color:var(--warning)">${pending}</p>
-      ${overdue>0?`<p class="text-[9px] mono font-bold mt-0.5" style="color:var(--danger)">${overdue} เลยกำหนด</p>`:''}
-    </div>
-    <div class="glass p-4 rounded-2xl text-center stat-box">
-      <p class="cyber-section-label text-[8px]" style="color:var(--success)">// DONE</p>
-      <p class="text-xl font-black mt-0.5" style="color:var(--success)">${done}</p>
-    </div>
-  `;
-}
-
-function updateProfileTab() {
-  const done = homeworkList.filter(h=>h.status==='done').length;
-  const pending = homeworkList.filter(h=>h.status!=='done').length;
-  const total = homeworkList.length;
-  const rate = total>0 ? Math.round((done/total)*100) : 0;
-  document.getElementById('prof-name').innerText = currentUser || '-';
-  document.getElementById('prof-role').innerText = currentRole.toUpperCase() + '_NODE';
-  document.getElementById('prof-done').innerText = done;
-  document.getElementById('prof-pending').innerText = pending;
-  document.getElementById('prof-total').innerText = total;
-  document.getElementById('prof-rate').innerText = rate + '%';
-}
-
-function renderAnalytics() {
-  const done = homeworkList.filter(h=>h.status==='done').length;
-  const pending = homeworkList.filter(h=>h.status!=='done').length;
-  const isDark = document.documentElement.classList.contains('dark');
-  const textColor = isDark ? '#3e6a52' : '#7c7f9e';
-
-  // Completion donut
-  const ctx1 = document.getElementById('completionRateChart');
-  if (ctx1) {
-    if (analyticsChart) analyticsChart.destroy();
-    analyticsChart = new Chart(ctx1, {
-      type: 'doughnut',
-      data: {
-        labels: ['เสร็จสิ้น','ค้างส่ง'],
-        datasets: [{ data:[done,pending], backgroundColor:[isDark?'#00ff9d':'#5b5ef4','#f59e0b'], borderWidth:0, hoverOffset:8 }]
-      },
-      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:textColor, font:{size:11} } } }, cutout:'68%' }
-    });
-  }
-
-  // Subject bar
-  const subjMap = {};
-  homeworkList.forEach(h => { subjMap[h.subject]=(subjMap[h.subject]||0)+1; });
-  const labels = Object.keys(subjMap);
-  const values = Object.values(subjMap);
-  const ctx2 = document.getElementById('subjectChart');
-  if (ctx2) {
-    if (subjectChartInst) subjectChartInst.destroy();
-    subjectChartInst = new Chart(ctx2, {
-      type:'bar',
-      data: { labels, datasets:[{ data:values, backgroundColor:isDark?'rgba(0,255,157,0.5)':'rgba(91,94,244,0.6)', borderColor:isDark?'#00ff9d':'#5b5ef4', borderWidth:2, borderRadius:8 }] },
-      options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ x:{ticks:{color:textColor,font:{size:9}},grid:{display:false}}, y:{ticks:{color:textColor,font:{size:9}},grid:{color:isDark?'rgba(0,255,157,0.05)':'rgba(91,94,244,0.06)'}} } }
-    });
-  }
-
-  // Timeline
-  const timeline = document.getElementById('timelineContainer');
-  if (timeline) {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const upcoming = homeworkList.filter(h => {
-      if (h.status==='done'||!h.dueDate) return false;
-      const t = new Date(h.dueDate); t.setHours(0,0,0,0);
-      return t >= today && t-today <= 86400000*7;
-    }).sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate));
-
-    if (!upcoming.length) { timeline.innerHTML = `<p class="text-xs mono text-center py-8" style="color:var(--text-muted)">[ ไม่มีงานส่งใน 7 วันข้างหน้า ]</p>`; return; }
-    timeline.innerHTML = upcoming.map(h => {
-      const d = new Date(h.dueDate); d.setHours(0,0,0,0);
-      const diff = Math.round((d-today)/86400000);
-      const label = diff===0?'วันนี้':diff===1?'พรุ่งนี้':`อีก ${diff} วัน`;
-      const color = diff===0?'var(--danger)':diff<=2?'var(--warning)':'var(--success)';
-      return `<div class="admin-row flex justify-between items-center py-2.5 px-3 rounded-xl">
-        <div class="flex items-center gap-3">
-          <span class="text-[9px] mono font-black px-2 py-0.5 rounded-md" style="background:rgba(0,0,0,0.05);color:${color}">${label}</span>
-          <span class="text-xs font-bold">${h.task}</span>
-        </div>
-        <span class="text-[10px] mono font-bold px-2 py-1 rounded-md" style="background:var(--chip-bg);color:var(--text-muted)">${h.subject}</span>
-      </div>`;
-    }).join('');
   }
 }
 
-// ═══════════════════════════════════════════
-// ADMIN PANEL
-// ═══════════════════════════════════════════
-async function loadAdminPanel() {
-  const [usersRes, hwRes] = await Promise.all([
-    apiCall({ action:'getUsers' }),
-    apiCall({ action:'getAllHomework' })
-  ]);
+function toggleDarkMode() { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); }
+if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
-  if (usersRes.success) {
-    allUsers = usersRes.data || [];
-    renderAdminUsers(allUsers);
-    renderAdminStats(allUsers, hwRes.success ? hwRes.data : []);
-  }
-  if (hwRes.success) {
-    renderAdminHomework('');
-    // Temporarily store all homework for admin view
-    window._adminHomework = hwRes.data || [];
-  }
-}
-
-function renderAdminStats(users, homework) {
-  const row = document.getElementById('adminStatsRow');
-  if (!row) return;
-  const admins = users.filter(u=>u.role==='admin').length;
-  const students = users.filter(u=>u.role!=='admin').length;
-  const done = homework.filter(h=>h.status==='done').length;
-  const pending = homework.filter(h=>h.status!=='done').length;
-  row.innerHTML = `
-    <div class="glass p-4 rounded-2xl stat-box text-center">
-      <p class="cyber-section-label text-[8px]">// STUDENTS</p>
-      <p class="text-2xl font-black mt-1 cyber-title">${students}</p>
-    </div>
-    <div class="glass p-4 rounded-2xl stat-box text-center">
-      <p class="cyber-section-label text-[8px]">// ADMINS</p>
-      <p class="text-2xl font-black mt-1" style="color:var(--accent3)">${admins}</p>
-    </div>
-    <div class="glass p-4 rounded-2xl stat-box text-center">
-      <p class="cyber-section-label text-[8px]" style="color:var(--warning)">// HW_PENDING</p>
-      <p class="text-2xl font-black mt-1" style="color:var(--warning)">${pending}</p>
-    </div>
-    <div class="glass p-4 rounded-2xl stat-box text-center">
-      <p class="cyber-section-label text-[8px]" style="color:var(--success)">// HW_DONE</p>
-      <p class="text-2xl font-black mt-1" style="color:var(--success)">${done}</p>
-    </div>
-  `;
-}
-
-function renderAdminUsers(users) {
-  const container = document.getElementById('adminUserContainer');
-  if (!container) return;
-  if (!users.length) { container.innerHTML=`<p class="text-xs mono text-center py-8" style="color:var(--text-muted)">[ ไม่พบผู้ใช้ ]</p>`; return; }
-  container.innerHTML = users.map(u => `
-    <div class="admin-row flex items-center justify-between p-3 rounded-xl cursor-pointer" onclick="openEditUserModal('${u.username}','${u.name}','${u.role||'student'}')">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black" style="background:var(--chip-bg);color:${u.role==='admin'?'var(--accent3)':'var(--accent)'}">
-          ${u.role==='admin'?'👑':'👤'}
-        </div>
-        <div>
-          <p class="text-xs font-bold">${u.name}</p>
-          <p class="text-[9px] mono" style="color:var(--text-muted)">${u.username} · ${u.role||'student'}</p>
-        </div>
-      </div>
-      <span class="text-[9px] mono px-2 py-1 rounded-md" style="background:var(--chip-bg);color:var(--text-muted)">Edit →</span>
-    </div>
-  `).join('');
-}
-
-function filterAdminUsers(q) {
-  const filtered = allUsers.filter(u => u.name.includes(q) || u.username.includes(q));
-  renderAdminUsers(filtered);
-}
-
-function renderAdminHomework(query) {
-  const data = window._adminHomework || homeworkList;
-  const container = document.getElementById('adminHomeworkContainer');
-  if (!container) return;
-  const filtered = query ? data.filter(h => h.task.includes(query)||h.subject.includes(query)) : data;
-  if (!filtered.length) { container.innerHTML=`<p class="text-xs mono text-center py-8" style="color:var(--text-muted)">[ ไม่มีข้อมูล ]</p>`; return; }
-  container.innerHTML = filtered.map(h => `
-    <div class="admin-row flex items-center justify-between p-3 rounded-xl cursor-pointer" onclick="openEditHwModal('${h.id}')">
-      <div class="flex items-center gap-3">
-        <span class="text-[9px] mono font-black px-2 py-1 rounded-md" style="background:var(--chip-bg);color:var(--accent)">${h.subject}</span>
-        <span class="text-xs font-bold flex-1 truncate" style="max-width:200px">${h.task}</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="text-[9px] mono px-2 py-0.5 rounded-full ${h.status==='done'?'':'badge-urgent'}" style="background:${h.status==='done'?'rgba(16,185,129,0.12)':'rgba(245,158,11,0.12)'};color:${h.status==='done'?'var(--success)':'var(--warning)'}">
-          ${h.status==='done'?'DONE':'PENDING'}
-        </span>
-        <span class="text-[9px] mono" style="color:var(--text-muted)">Edit →</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function handleAdminAddUser(e) {
-  e.preventDefault();
-  const u = document.getElementById('adm-new-u').value.trim();
-  const n = document.getElementById('adm-new-n').value.trim();
-  const role = document.getElementById('adm-new-role').value;
-  const res = await apiCall({ action:'adminAddUser', newUsername:u, newName:n, role });
-  if (res.success) { showToast(`✓ เพิ่ม ${n} สำเร็จ!`); document.getElementById('adm-new-u').value=''; document.getElementById('adm-new-n').value=''; loadAdminPanel(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-// Subject Management
-function renderAdminSubjectList() {
-  const container = document.getElementById('adminSubjectList');
-  if (!container) return;
-  container.innerHTML = subjectList.map((s,i) => `
-    <div class="subject-chip flex items-center gap-1.5">
-      <span>${s}</span>
-      <button onclick="handleAdminDeleteSubject('${s}')" class="text-[10px] opacity-60 hover:opacity-100 transition-opacity" style="color:var(--danger)">×</button>
-    </div>
-  `).join('');
-}
-
-async function handleAdminAddSubject(e) {
-  e.preventDefault();
-  const s = document.getElementById('adm-new-subj').value.trim();
-  if (!s) return;
-  const res = await apiCall({ action:'addSubject', subject:s });
-  if (res.success) { showToast(`✓ เพิ่มวิชา ${s} แล้ว`); document.getElementById('adm-new-subj').value=''; await loadSubjects(); renderAdminSubjectList(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-async function handleAdminDeleteSubject(s) {
-  if (!confirm(`ลบวิชา "${s}" ?`)) return;
-  const res = await apiCall({ action:'deleteSubject', subject:s });
-  if (res.success) { showToast(`✓ ลบวิชา ${s} แล้ว`); await loadSubjects(); renderAdminSubjectList(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-// Edit User Modal
-let editingUserId = '';
-function openEditUserModal(uid, name, role) {
-  editingUserId = uid;
-  document.getElementById('edit-uid').value = uid;
-  document.getElementById('edit-name').value = name;
-  document.getElementById('edit-role').value = role;
-  document.getElementById('editUserModal').classList.remove('hidden');
-}
-function closeEditUserModal() { document.getElementById('editUserModal').classList.add('hidden'); }
-
-async function saveEditUser() {
-  const name = document.getElementById('edit-name').value.trim();
-  const role = document.getElementById('edit-role').value;
-  if (!name) return showToast('⚠ กรุณากรอกชื่อ','var(--warning)');
-  const res = await apiCall({ action:'adminEditUser', targetUsername:editingUserId, newName:name, newRole:role });
-  if (res.success) { showToast('✓ อัปเดต user สำเร็จ'); closeEditUserModal(); loadAdminPanel(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-async function confirmDeleteUser() {
-  if (!confirm(`ลบ user "${editingUserId}" ? การกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
-  const res = await apiCall({ action:'adminDeleteUser', targetUsername:editingUserId });
-  if (res.success) { showToast('✓ ลบ user สำเร็จ'); closeEditUserModal(); loadAdminPanel(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-async function confirmResetPassword() {
-  if (!confirm(`Reset รหัสผ่านของ "${editingUserId}" เป็น 1234 ?`)) return;
-  const res = await apiCall({ action:'adminResetPassword', targetUsername:editingUserId });
-  if (res.success) { showToast(`✓ Reset รหัสผ่านของ ${editingUserId} เป็น 1234 แล้ว`); closeEditUserModal(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-// Edit Homework Modal
-let editingHwId = '';
-function openEditHwModal(id) {
-  const hw = (window._adminHomework || homeworkList).find(h=>h.id===id);
-  if (!hw) return;
-  editingHwId = id;
-  document.getElementById('edit-hw-id').value = id;
-  document.getElementById('edit-hw-subject').value = hw.subject;
-  document.getElementById('edit-hw-task').value = hw.task;
-  document.getElementById('edit-hw-date').value = hw.dueDate || '';
-  document.getElementById('edit-hw-status').value = hw.status;
-  document.getElementById('edit-hw-note').value = hw.note || '';
-  document.getElementById('editHwModal').classList.remove('hidden');
-}
-function closeEditHwModal() { document.getElementById('editHwModal').classList.add('hidden'); }
-
-async function saveEditHomework() {
-  const res = await apiCall({
-    action:'adminEditHomework',
-    id: editingHwId,
-    subject: document.getElementById('edit-hw-subject').value,
-    task: document.getElementById('edit-hw-task').value,
-    dueDate: document.getElementById('edit-hw-date').value,
-    status: document.getElementById('edit-hw-status').value,
-    note: document.getElementById('edit-hw-note').value
-  });
-  if (res.success) { showToast('✓ อัปเดตการบ้านสำเร็จ'); closeEditHwModal(); loadAdminPanel(); loadHomework(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-async function confirmDeleteHomework() {
-  if (!confirm(`ลบงาน "${editingHwId}" ?`)) return;
-  const res = await apiCall({ action:'adminDeleteHomework', id:editingHwId });
-  if (res.success) { showToast('✓ ลบการบ้านสำเร็จ'); closeEditHwModal(); loadAdminPanel(); loadHomework(); }
-  else showToast('✕ '+res.message,'var(--danger)');
-}
-
-// Export
-function exportHomeworkCSV() {
-  const data = window._adminHomework || homeworkList;
-  const csv = ['ID,Subject,Task,DueDate,Note,Status', ...data.map(h=>[h.id,h.subject,h.task,h.dueDate,h.note,h.status].join(','))].join('\n');
-  downloadCSV(csv, 'homework_export.csv');
-}
-function exportUsersCSV() {
-  if (!allUsers.length) return showToast('⚠ ไม่มีข้อมูล user','var(--warning)');
-  const csv = ['Username,Name,Role', ...allUsers.map(u=>[u.username,u.name,u.role].join(','))].join('\n');
-  downloadCSV(csv, 'users_export.csv');
-}
-function downloadCSV(content, filename) {
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(content);
-  a.download = filename;
-  a.click();
-  showToast('✓ Export สำเร็จ!');
-}
-
-// ═══════════════════════════════════════════
-// UI HELPERS
-// ═══════════════════════════════════════════
-function setStatusFilter(status) {
-  currentStatusFilter = status;
-  ['all','pending','done'].forEach(s => {
-    const btn = document.getElementById(`sfilter-${s}`);
-    if (!btn) return;
-    btn.className = s===status
-      ? "filter-active px-4 py-2 rounded-lg text-[10px] font-black mono transition-all"
-      : "px-4 py-2 rounded-lg text-[10px] font-bold transition-all";
-    if (s!==status) btn.style.color='var(--text-muted)';
-  });
-  renderHomework();
-}
-
-function switchSection(id) {
-  ['loginSection','forgotSection','firstPwSection','mainSection'].forEach(s => {
-    const el = document.getElementById(s);
-    if (el) el.classList[s===id?'remove':'add']('hidden');
-  });
-  if (id==='mainSection') {
-    document.getElementById('loginSection').classList.add('hidden');
-  }
-}
-
-function switchTab(tabId) {
-  ['homeworkTab','statsTab','profileTab','adminTab'].forEach(t => {
-    const el = document.getElementById(t);
-    const btn = document.getElementById(`btn-${t}`);
-    if (!el||!btn) return;
-    const active = t===tabId;
-    el.classList[active?'remove':'add']('hidden');
-    btn.classList[active?'add':'remove']('tab-active');
-  });
-  if (tabId==='statsTab') { setTimeout(renderAnalytics,100); }
-  if (tabId==='adminTab') { loadAdminPanel(); loadSubjects().then(renderAdminSubjectList); }
-  if (tabId==='profileTab') updateProfileTab();
-}
-
-function openAddHomeworkModal() { document.getElementById('addHwModal').classList.remove('hidden'); renderModalSubjectChips(); }
-function closeAddHomeworkModal() {
-  document.getElementById('addHwModal').classList.add('hidden');
-  ['modal-subject','modal-task','modal-date','modal-note'].forEach(id => { document.getElementById(id).value=''; });
-  document.querySelectorAll('#modalSubjectChips .subject-chip').forEach(c=>c.classList.remove('active'));
-}
-function openChangePwModal() { document.getElementById('changePwModal').classList.remove('hidden'); }
-function closeChangePwModal() { document.getElementById('changePwModal').classList.add('hidden'); ['cp-old','cp-new'].forEach(id=>{document.getElementById(id).value='';}); }
-
-function toggleDarkMode() {
-  const html = document.documentElement;
-  const btn = document.getElementById('themeBtn');
-  if (html.classList.contains('dark')) {
-    html.classList.replace('dark','light');
-    btn.innerText='🌙'; btn.className='w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-light text-base';
-  } else {
-    html.classList.replace('light','dark');
-    btn.innerText='☀️'; btn.className='w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:scale-105 theme-btn-dark text-base';
-  }
-  // Re-render charts with new colors
-  if (!document.getElementById('statsTab').classList.contains('hidden')) setTimeout(renderAnalytics,150);
-}
-
-function showOverlay() { document.getElementById('processingOverlay')?.classList.remove('hidden'); }
-function hideOverlay() { document.getElementById('processingOverlay')?.classList.add('hidden'); }
-
-let toastTimer;
-function showToast(msg, color='var(--accent)') {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.innerText = msg;
-  toast.style.borderColor = color;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>toast.classList.remove('show'), 3000);
-}
-
-// Password strength meters
-function checkStrength(val, barId, lblId) {
-  const bar = document.getElementById(barId);
-  const lbl = document.getElementById(lblId);
-  if (!bar||!lbl) return;
-  let s=0;
-  if(val.length>=8) s+=30;
-  if(/[A-Z]/.test(val)) s+=25;
-  if(/[a-z]/.test(val)) s+=20;
-  if(/[0-9]/.test(val)) s+=25;
-  bar.style.width = s+'%';
-  if(s<50){lbl.innerText='// strength: อ่อนแอ ❌';bar.style.background='var(--danger)';}
-  else if(s<80){lbl.innerText='// strength: ปานกลาง ⚡';bar.style.background='var(--warning)';}
-  else{lbl.innerText='// strength: ปลอดภัยดีเยี่ยม 🛡️';bar.style.background='var(--success)';}
-}
-document.getElementById('fp-new')?.addEventListener('input',e=>checkStrength(e.target.value,'pwStrengthBar','pwStrengthLabel'));
-document.getElementById('cp-new')?.addEventListener('input',e=>checkStrength(e.target.value,'cpStrengthBar','cpStrengthLabel'));
-
-// Keyboard shortcuts
-document.addEventListener('keydown', e => {
-  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();if(!document.getElementById('mainSection').classList.contains('hidden'))openAddHomeworkModal();}
-  if(e.key==='Escape'){closeAddHomeworkModal();closeChangePwModal();closeEditUserModal();closeEditHwModal();}
-});
-
-// Click outside modals to close
-['addHwModal','changePwModal','editUserModal','editHwModal'].forEach(id=>{
-  document.getElementById(id)?.addEventListener('click',function(e){if(e.target===this){this.classList.add('hidden');}});
-});
+function openAddHomeworkModal() { document.getElementById('addHwModal').classList.remove('hidden'); }
+function closeAddHwModal() { document.getElementById('addHwModal').classList.add('hidden'); }
+function handleLogout() { location.reload(); }
 </script>
 </body>
 </html>
