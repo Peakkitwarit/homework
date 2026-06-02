@@ -14,11 +14,10 @@
 <body class="bg-slate-950 text-slate-100">
 
     <script>
-        // ⚠️ วาง URL เว็บแอปที่ได้จากการ Deploy ใหม่ที่นี่แทนไอดีจำลองเดิมครับ
+        // ⚠️ สำคัญมาก: เปลี่ยนลิงก์ข้างล่างนี้ให้เป็น URL ที่ได้จาก New Deployment ล่าสุดของคุณ
         const API_URL = "https://script.google.com/macros/s/AKfycbxbhnKdXeXCe0mfnaeRCYkcgXg1fiFJt9o7cLFvijkbu_GypWetnB4Z1IApaAgAU4xtTw/exec"; 
     </script>
 
-    <!-- ==================== หน้า LOGIN ==================== -->
     <div id="loginPage" class="min-h-screen flex items-center justify-center px-4 bg-slate-900 text-slate-100">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
             <div class="text-center mb-6">
@@ -47,7 +46,6 @@
         </div>
     </div>
 
-    <!-- ==================== หน้า DASHBOARD ==================== -->
     <div id="dashboardPage" class="hidden min-h-screen flex flex-col bg-slate-950 text-slate-100">
         <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-md">
             <div class="flex items-center gap-3">
@@ -68,7 +66,6 @@
         </header>
 
         <main class="flex-1 p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Sidebar -->
             <div class="space-y-6 lg:col-span-1">
                 <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm" id="statCard">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-chart-pie text-cyan-400 mr-2"></i> เปอร์เซ็นต์การบ้านของคุณ</h3>
@@ -96,7 +93,6 @@
                 </div>
             </div>
 
-            <!-- Content -->
             <div class="lg:col-span-3 space-y-6">
                 <div id="editorPanel" class="hidden bg-slate-900 border border-emerald-500/30 p-5 rounded-xl shadow-md">
                     <h2 class="text-sm font-bold mb-3 text-emerald-400"><i class="fa-solid fa-circle-plus mr-1"></i> ส่วนลงทะเบียนเพิ่มการบ้านกลาง</h2>
@@ -157,18 +153,19 @@
         </main>
     </div>
 
-    <!-- ==================== CONTROLLER SCRIPT ==================== -->
     <script>
         let SESSION = null;
         let DATABASE = { subjects:[], announcements:[], homework:[], students:[], logs:[], tracker:[] };
 
+        // ฟังก์ชันเข้ารหัสมาตรฐานตรงกับฝั่ง Code.gs แน่นอน 100%
         async function hashPassword(str) {
-            const utf8 = new Uint8Array(str.split('').map(c => c.charCodeAt(0)));
-            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+            const msgBuffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex.toLowerCase();
         }
 
-        // ปลุกสถาปัตยกรรมข้ามมิติ ปลดล็อกการติด CORS ด้วยการบังคับอ่านข้อความดิบ
         async function sendPostRequest(actionName, payload) {
             const data = { dataAction: actionName, username: SESSION ? SESSION.id : "Guest", payload: payload };
             try {
@@ -180,7 +177,7 @@
                 return JSON.parse(txt);
             } catch (error) {
                 console.error("Gateway Error:", error);
-                return { success: false, message: "เครือข่ายขัดข้อง กรุณาลองอีกครั้ง" };
+                return { success: false, message: "เครือข่ายขัดข้อง กรุณาลองอีกครั้งในภายหลัง" };
             }
         }
 
@@ -191,7 +188,7 @@
             const passHash = await hashPassword(pass);
 
             const btn = document.getElementById("loginBtn");
-            btn.innerText = "正在验证 ยืนยันตน...";
+            btn.innerText = "กำลังยืนยันตน...";
             btn.disabled = true;
 
             const res = await sendPostRequest("login", { username: user, passwordHash: passHash });
@@ -203,7 +200,7 @@
                 SESSION = res.user;
                 setupDashboard();
             } else {
-                alert(res?.message || "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง");
+                alert(res?.message || "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง");
             }
         }
 
@@ -233,7 +230,7 @@
 
         function refreshData() {
             fetch(`${API_URL}?action=syncData`)
-            .then(res => res.text()) // อ่านแบบ Text เสมอเพื่อเลี่ยงนโยบาย CORS
+            .then(res => res.text()) 
             .then(txt => {
                 const res = JSON.parse(txt);
                 if(res.success) {
@@ -378,18 +375,14 @@
             if(res.success) { alert("เปลี่ยนบทบาทสำเร็จ"); refreshData(); }
         }
 
-        // 🌗 ระบบสลับ Dark Mode / Light Mode มินิมอลเรียบหรูสไตล์พรีเมียม แก้ไขข้อผิดพลาดธีมเก่าเรียบร้อย
         function toggleThemeMode() {
             const html = document.documentElement;
             const isDark = html.classList.contains('dark');
-            
             if(isDark) {
                 html.classList.remove('dark');
                 document.body.className = "bg-amber-50/50 text-slate-900";
                 document.getElementById("dashboardPage").className = "min-h-screen flex flex-col bg-amber-50/50 text-slate-900";
                 document.getElementById("tableTitle").className = "text-md font-bold text-slate-900";
-                
-                // แปลงสไตล์สีส่วนประกอบย่อย
                 document.querySelectorAll('.bg-slate-900').forEach(e => e.classList.replace('bg-slate-900', 'bg-white'));
                 document.querySelectorAll('.bg-slate-950').forEach(e => e.classList.replace('bg-slate-950', 'bg-amber-100/50'));
             } else {
@@ -397,7 +390,6 @@
                 document.body.className = "bg-slate-950 text-slate-100";
                 document.getElementById("dashboardPage").className = "min-h-screen flex flex-col bg-slate-950 text-slate-100";
                 document.getElementById("tableTitle").className = "text-md font-bold text-white";
-
                 document.querySelectorAll('.bg-white').forEach(e => e.classList.replace('bg-white', 'bg-slate-900'));
                 document.querySelectorAll('.bg-amber-100\/50').forEach(e => e.classList.replace('bg-amber-100/50', 'bg-slate-950'));
             }
