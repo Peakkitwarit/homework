@@ -25,7 +25,6 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-<!-- MAINTENANCE -->
 <div id="maintenanceScreen" class="hidden fixed inset-0 z-[10000] bg-[#020617] flex flex-col items-center justify-center p-6 text-center">
   <div class="w-20 h-20 border-4 border-[#00ff9d] border-t-transparent rounded-full animate-spin mb-8 shadow-[0_0_15px_#00ff9d]"></div>
   <h1 class="text-2xl font-black mono text-[#00ff9d] animate-pulse">SERVER_UPDATING...</h1>
@@ -38,7 +37,6 @@
   <button onclick="bypassMT()" class="mt-20 opacity-0 text-[8px] mono text-white">ADMIN_BYPASS</button>
 </div>
 
-<!-- PROCESSING -->
 <div id="processing" class="hidden fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] flex items-center justify-center">
   <div class="glass p-8 rounded-[2rem] flex flex-col items-center gap-3">
     <div class="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
@@ -46,10 +44,8 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast" class="glass px-8 py-4 rounded-2xl text-xs font-bold shadow-2xl border border-white/10">⚡ <span id="toastMsg">Success</span></div>
 
-<!-- NAV -->
 <nav class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4 flex justify-between items-center">
   <div class="flex items-center gap-4">
     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">6/4</div>
@@ -64,7 +60,6 @@
   </div>
 </nav>
 
-<!-- LOGIN -->
 <div id="loginSection" class="flex-1 flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_rgba(91,94,244,0.05),_transparent)]">
   <div class="glass p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl fade-in text-center">
     <div class="w-16 h-16 bg-accent/10 text-accent rounded-3xl flex items-center justify-center text-3xl mx-auto mb-8">🔐</div>
@@ -79,7 +74,6 @@
   </div>
 </div>
 
-<!-- MAIN HUB -->
 <div id="mainSection" class="hidden flex-1 flex flex-col">
   <div class="max-w-7xl mx-auto w-full px-6 flex gap-8 border-b border-white/5 overflow-x-auto no-scrollbar">
     <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="py-5 text-xs font-bold mono tab-active tracking-widest">DASHBOARD</button>
@@ -128,7 +122,6 @@
   </main>
 </div>
 
-<!-- MODAL ADD -->
 <div id="addHwModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
   <div class="glass p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl border border-white/10">
     <h3 class="font-black mb-8 text-xl mono tracking-tighter uppercase">Assign_Mission</h3>
@@ -145,7 +138,8 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyBXf4KI5YSeMuE7LCf0yHjbOp8CEiOgyzTStFmfGLPJa43NUvgq-finl3lp-5dslhX/exec"; // ⚠️ ใส่ URL ของคุณที่นี่
+// ⚠️ สำคัญมาก: เปลี่ยนข้อความข้างล่างนี้เป็น Web App URL ของคุณที่ได้จากการ Deploy
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyBXf4KI5YSeMuE7LCf0yHjbOp8CEiOgyzTStFmfGLPJa43NUvgq-finl3lp-5dslhX/exec"; 
 const API_KEY = "M64_SUPER_SECRET_2026";
 let currentUser="", currentRole="", homeworks=[], chart=null, isMT=false;
 
@@ -296,4 +290,13 @@ function renderChart() {
   const ctx = document.getElementById('statChart').getContext('2d');
   const isDark = document.documentElement.classList.contains('dark');
   if (chart) chart.destroy();
-  chart = new Chart(ctx, { type:'doughnut', data:{ labels:['DONE','PENDING'], datasets:[{ data:[done,pending], backgroundColor:[isDark?'#00ff9d':'#10b981','#5b5ef4'], borderWidth:0 }] }, options:{ maintainAspectRatio:false, cutout:'85%', plugins:{ legend:{ labels:{ color:isDark?'#c4f0e0':'#18163a', f
+  chart = new Chart(ctx, { type:'doughnut', data:{ labels:['DONE','PENDING'], datasets:[{ data:[done,pending], backgroundColor:[isDark?'#00ff9d':'#10b981','#5b5ef4'], borderWidth:0 }] }, options:{ maintainAspectRatio:false, cutout:'85%', plugins:{ legend:{ labels:{ color:isDark?'#c4f0e0':'#18163a', font:{ family:'JetBrains Mono', size:10 } } } } } });
+}
+
+function exportCSV() {
+  const csv = "ID,Subject,Task,Deadline,Status\n" + homeworks.map(h => `${h.id},${h.subject},${h.task},${h.dueDate},${h.status}`).join("\n");
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = 'M64_HUB_DATA.csv'; a.click();
+}
+</script>
+</body>
+</html>
