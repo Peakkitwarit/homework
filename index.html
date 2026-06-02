@@ -7,59 +7,43 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sarabun:wght@300;400;600;700&family=Mitr:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          animation: { 'scanline': 'scanline 8s linear infinite', 'glow': 'glow 2s ease-in-out infinite', 'slide-up': 'slideUp 0.4s ease-out' },
-          keyframes: {
-            scanline: { '0%': { backgroundPosition: '0 0' }, '100%': { backgroundPosition: '0 100%' } },
-            glow: { '0%, 100%': { boxShadow: '0 0 5px var(--accent)' }, '50%': { boxShadow: '0 0 20px var(--accent)' } },
-            slideUp: { 'from': { opacity: 0, transform: 'translateY(20px)' }, 'to': { opacity: 1, transform: 'translateY(0)' } }
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sarabun:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f4f6ff; --card: rgba(255, 255, 255, 0.85); --accent: #5b5ef4; --text: #18163a; --success: #10b981; --danger: #f43f5e;
-    }
-    .dark {
-      --bg: #050d17; --card: rgba(6, 18, 32, 0.94); --accent: #00ff9d; --text: #c4f0e0;
-    }
-    body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: var(--text); transition: 0.3s; overflow-x: hidden; }
-    .display { font-family: 'Space Grotesk', sans-serif; }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .thai-display { font-family: 'Mitr', sans-serif; }
-    .glass { background: var(--card); backdrop-filter: blur(20px); border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.05); }
-    html.dark body::before {
-      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; animation: scanline 10s linear infinite;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 157, 0.02) 2px, rgba(0, 255, 157, 0.02) 4px);
-    }
-    .tab-active { color: var(--accent) !important; font-weight: 800; border-bottom: 3px solid var(--accent); }
-    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); transition: 0.4s; z-index: 9999; }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
+    :root { --bg:#f4f6ff; --card:rgba(255,255,255,0.85); --accent:#5b5ef4; --text:#18163a; --success:#10b981; --danger:#f43f5e; }
+    .dark { --bg:#050d17; --card:rgba(6, 18, 32, 0.94); --accent:#00ff9d; --text:#c4f0e0; }
+    body { background-color:var(--bg); color:var(--text); font-family:'Sarabun',sans-serif; transition: 0.3s; overflow-x: hidden; }
+    .glass { background:var(--card); backdrop-filter:blur(20px); border:1px solid rgba(128,128,128,0.1); box-shadow:0 8px 32px rgba(0,0,0,0.05); }
+    .mono { font-family:'JetBrains Mono',monospace; }
+    .tab-active { color:var(--accent)!important; font-weight:800; border-bottom:3px solid var(--accent); }
+    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); transition:0.4s; z-index:9999; }
+    #toast.show { transform:translateX(-50%) translateY(0); }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    html.dark body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px); animation: scanline 10s linear infinite; }
+    @keyframes scanline { 0% {background-position:0 0} 100% {background-position:0 100%} }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-<!-- MAINTENANCE OVERLAY -->
-<div id="maintenanceScreen" class="hidden fixed inset-0 z-[10000] bg-[#020617] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-  <div class="absolute inset-0 opacity-20 pointer-events-none" style="background: repeating-linear-gradient(0deg, transparent, transparent 2px, #00ff9d 2px, #00ff9d 4px); background-size: 100% 4px;"></div>
-  <div class="w-20 h-20 border-4 border-[#00ff9d] border-t-transparent rounded-full animate-spin mb-8 shadow-[0_0_20px_#00ff9d]"></div>
-  <h1 class="text-2xl font-black mono text-[#00ff9d] animate-pulse tracking-widest uppercase">Server_Updating...</h1>
-  <p class="text-[10px] mono text-[#00ff9d]/40 mt-2 uppercase tracking-[0.4em]">M.6/4_Smart_Hub_Systems</p>
-  <div class="glass p-6 rounded-[2.5rem] border border-[#00ff9d]/20 w-full max-w-xs mt-10 space-y-4">
-    <div class="flex justify-between text-[10px] mono font-bold text-[#00ff9d]"><span>PROGRESS</span><span id="updatePercent">0%</span></div>
+<!-- MAINTENANCE -->
+<div id="maintenanceScreen" class="hidden fixed inset-0 z-[10000] bg-[#020617] flex flex-col items-center justify-center p-6 text-center">
+  <div class="w-20 h-20 border-4 border-[#00ff9d] border-t-transparent rounded-full animate-spin mb-8 shadow-[0_0_15px_#00ff9d]"></div>
+  <h1 class="text-2xl font-black mono text-[#00ff9d] animate-pulse">SERVER_UPDATING...</h1>
+  <div class="glass p-6 rounded-[2rem] border border-[#00ff9d]/20 w-full max-w-xs mt-8">
     <div class="w-full h-1.5 bg-[#00ff9d]/10 rounded-full overflow-hidden">
       <div id="updateBar" class="h-full bg-[#00ff9d] transition-all duration-700 shadow-[0_0_10px_#00ff9d]" style="width: 0%"></div>
     </div>
+    <p id="updatePercent" class="text-[10px] mono text-[#00ff9d] mt-2">0%</p>
   </div>
-  <button onclick="bypassMT()" class="mt-20 opacity-0 hover:opacity-10 text-[8px] mono text-white">ADMIN_BYPASS</button>
+  <button onclick="bypassMT()" class="mt-20 opacity-0 text-[8px] mono text-white">ADMIN_BYPASS</button>
+</div>
+
+<!-- PROCESSING -->
+<div id="processing" class="hidden fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] flex items-center justify-center">
+  <div class="glass p-8 rounded-[2rem] flex flex-col items-center gap-3">
+    <div class="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-[10px] font-bold mono animate-pulse">SYNCING...</p>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -68,38 +52,29 @@
 <!-- NAV -->
 <nav class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4 flex justify-between items-center">
   <div class="flex items-center gap-4">
-    <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg">6/4</div>
+    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">6/4</div>
     <div>
-      <h1 class="text-sm font-black tracking-tighter uppercase display">Smart Hub <span class="text-accent">v27.2</span></h1>
+      <h1 class="text-sm font-bold tracking-tight mono uppercase">Smart Hub <span class="text-accent">v27.2</span></h1>
       <p id="userDisplayName" class="text-[9px] mono opacity-50 uppercase tracking-widest italic">Guest_Node</p>
     </div>
   </div>
-  <div class="flex items-center gap-3">
-    <div id="statusBadge" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-[9px] font-bold border border-success/20">
-      <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> ONLINE
-    </div>
-    <button onclick="toggleDarkMode()" id="themeBtn" class="w-10 h-10 rounded-xl glass flex items-center justify-center hover:bg-white/10 transition-all">🌙</button>
-    <button onclick="handleLogout()" class="px-4 py-2 border border-red-500/30 text-red-500 rounded-xl text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all">Exit</button>
+  <div class="flex items-center gap-2">
+    <button onclick="toggleDarkMode()" id="themeBtn" class="w-10 h-10 rounded-xl glass flex items-center justify-center">🌙</button>
+    <button onclick="handleLogout()" class="px-4 py-2 border border-red-500/30 text-red-500 rounded-xl text-[10px] font-bold uppercase">Exit</button>
   </div>
 </nav>
 
-<!-- LOGIN SECTION -->
+<!-- LOGIN -->
 <div id="loginSection" class="flex-1 flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_rgba(91,94,244,0.05),_transparent)]">
-  <div class="glass p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl animate-slide-up text-center border-white/10">
-    <div class="w-20 h-20 bg-accent/10 text-accent rounded-3xl flex items-center justify-center text-4xl mx-auto mb-8 animate-glow">🔐</div>
-    <h2 class="text-2xl font-black display tracking-tight mb-8">AUTHENTICATE</h2>
+  <div class="glass p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl fade-in text-center">
+    <div class="w-16 h-16 bg-accent/10 text-accent rounded-3xl flex items-center justify-center text-3xl mx-auto mb-8">🔐</div>
+    <h2 class="text-2xl font-black mono tracking-tighter mb-8 uppercase">Authenticate</h2>
     <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
-      <div class="space-y-1">
-        <label class="text-[10px] font-black mono opacity-40 ml-2 uppercase">// Student_ID</label>
-        <input type="text" id="login-u" placeholder="เลขที่ของคุณ" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
-      </div>
-      <div class="space-y-1">
-        <label class="text-[10px] font-black mono opacity-40 ml-2 uppercase">// Access_Key</label>
-        <input type="password" id="login-p" placeholder="Password" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
-      </div>
-      <button type="submit" placeholder="login"class="w-full py-4 bg-accent text-white rounded-2xl font-black text-xs tracking-widest shadow-xl shadow-accent/20 uppercase mt-4 hover:opacity-90 transition-all">Initialize_Session</button>
+      <input type="text" id="login-u" placeholder="Student ID (เลขที่)" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
+      <input type="password" id="login-p" placeholder="Password" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
+      <button type="submit" id="loginBtn" class="w-full py-4 bg-accent text-white rounded-2xl text-xs font-bold tracking-widest shadow-xl shadow-accent/20 uppercase mt-4 hover:opacity-90 transition-all">Login_Secure</button>
     </form>
-    <button onclick="alert('🔑 ลืมรหัสผ่าน?\nกรุณาติดต่อ Admin เพื่อ Reset รหัสผ่านเป็น 1234')" class="mt-6 text-[10px] mono opacity-30 hover:opacity-100 transition-all">[ Forgot_Password? ]</button>
+    <button onclick="alert('🔑 ลืมรหัสผ่าน? กรุณาแจ้ง Admin เพื่อ Reset เป็น 1234')" class="mt-6 text-[10px] mono opacity-30 hover:opacity-100 transition-all">[ Forgot_Key? ]</button>
     <p id="loginError" class="text-xs text-red-500 mt-4 hidden font-black"></p>
   </div>
 </div>
@@ -107,112 +82,86 @@
 <!-- MAIN HUB -->
 <div id="mainSection" class="hidden flex-1 flex flex-col">
   <div class="max-w-7xl mx-auto w-full px-6 flex gap-8 border-b border-white/5 overflow-x-auto no-scrollbar">
-    <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="py-5 text-xs font-black mono tab-active tracking-widest">DASHBOARD</button>
-    <button onclick="switchTab('statsTab')" id="btn-statsTab" class="py-5 text-xs font-black mono opacity-40 tracking-widest">ANALYTICS</button>
-    <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden py-5 text-xs font-black mono text-red-500 opacity-40 tracking-widest">ROOT_CMD</button>
+    <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="py-5 text-xs font-bold mono tab-active tracking-widest">DASHBOARD</button>
+    <button onclick="switchTab('statsTab')" id="btn-statsTab" class="py-5 text-xs font-bold mono opacity-40 tracking-widest">ANALYTICS</button>
+    <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden py-5 text-xs font-bold mono text-red-500 opacity-40 tracking-widest">ROOT_CMD</button>
   </div>
 
   <main class="max-w-7xl w-full mx-auto px-6 py-8 space-y-8 pb-24">
-    
-    <!-- DASHBOARD -->
-    <div id="homeworkTab" class="space-y-8 animate-slide-up">
-      <!-- Assistant Controls -->
+    <div id="homeworkTab" class="fade-in space-y-8">
       <div id="assistantTools" class="hidden glass p-6 rounded-[2.5rem] border-l-4 border-accent space-y-5 bg-gradient-to-r from-accent/5 to-transparent">
-        <p class="text-[10px] font-black mono text-accent uppercase tracking-[0.2em]">// Assistant_Tools_Active</p>
+        <p class="text-[10px] font-bold mono text-accent uppercase tracking-widest">// Assistant_Manager</p>
         <div class="flex flex-wrap gap-3">
-          <button onclick="openAddHwModal()" class="px-6 py-3 bg-accent text-white rounded-xl text-[10px] font-black shadow-lg shadow-accent/30 hover:scale-105 transition-all">+ NEW_TASK</button>
-          <button onclick="syncSubjects()" class="px-6 py-3 border border-accent text-accent rounded-xl text-[10px] font-black hover:bg-accent hover:text-black transition-all">🔄 SYNC_TIMETABLE</button>
-          <button onclick="exportCSV()" class="px-6 py-3 glass border border-white/10 rounded-xl text-[10px] font-black hover:bg-white/10 transition-all">📥 EXPORT</button>
+          <button onclick="openAddHwModal()" class="px-6 py-3 bg-accent text-white rounded-xl text-[10px] font-bold">+ NEW_TASK</button>
+          <button onclick="syncSubjects()" class="px-6 py-3 border border-accent text-accent rounded-xl text-[10px] font-bold">🔄 SYNC_TIMETABLE</button>
+          <button onclick="exportCSV()" class="px-6 py-3 glass border border-white/10 rounded-xl text-[10px] font-bold">📥 EXPORT</button>
         </div>
       </div>
       <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
-    <!-- STATS -->
-    <div id="statsTab" class="hidden animate-slide-up space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="md:col-span-2 glass p-8 rounded-[3rem] h-[400px] flex flex-col items-center">
-          <p class="text-[10px] font-black mono opacity-30 mb-6 uppercase tracking-widest">// Mission_Success_Ratio</p>
-          <div class="relative flex-1 w-full"><canvas id="statChart"></canvas></div>
-        </div>
-        <div class="glass p-8 rounded-[3rem] flex flex-col justify-center text-center space-y-8">
-           <div><p class="text-4xl font-black display" id="count-total">0</p><p class="text-[9px] mono opacity-40 uppercase">Total_Tasks</p></div>
-           <div class="w-full h-px bg-white/5"></div>
-           <div><p class="text-4xl font-black display text-success" id="count-done">0</p><p class="text-[9px] mono opacity-40 uppercase">Completed</p></div>
-        </div>
+    <div id="statsTab" class="hidden fade-in text-center">
+      <div class="glass p-10 rounded-[3rem] h-[400px] flex flex-col items-center">
+        <p class="text-xs font-bold mono opacity-40 mb-6 tracking-widest uppercase">// Mission_Success_Rate</p>
+        <div class="relative flex-1 w-full"><canvas id="statChart"></canvas></div>
       </div>
     </div>
 
-    <!-- ADMIN ROOT_CMD -->
-    <div id="adminTab" class="hidden animate-slide-up space-y-8">
+    <div id="adminTab" class="hidden fade-in space-y-8">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Control Card -->
-        <div class="glass p-8 rounded-[3.5rem] border border-red-500/20 space-y-8">
-          <div class="space-y-4">
-            <p class="text-[10px] font-black mono text-red-500 uppercase tracking-widest">// Password_Override</p>
-            <div class="flex gap-2">
-              <input type="text" id="reset-id" placeholder="Student ID" class="flex-1 p-4 rounded-2xl glass border border-white/10 outline-none text-sm mono">
-              <button onclick="handleResetPW()" class="px-6 py-4 bg-red-500 text-white rounded-2xl font-black text-xs hover:opacity-90 transition-all">RESET</button>
-            </div>
+        <div class="glass p-8 rounded-[3.5rem] border border-red-500/20 space-y-6">
+          <p class="text-[10px] font-bold mono text-red-500 uppercase tracking-widest">// Password_Override</p>
+          <div class="flex gap-2">
+            <input type="text" id="reset-id" placeholder="Student ID" class="flex-1 p-4 rounded-2xl glass text-xs mono outline-none">
+            <button onclick="handleResetPW()" class="px-6 py-4 bg-red-500 text-white rounded-2xl font-bold text-xs">RESET</button>
           </div>
-          <div class="w-full h-px bg-white/5"></div>
-          <div class="space-y-4">
-            <p class="text-[10px] font-black mono text-accent uppercase tracking-widest">// Server_Status_Toggle</p>
-            <button id="mt-btn" onclick="toggleMT()" class="w-full py-4 border border-accent text-accent rounded-2xl text-xs font-black hover:bg-accent hover:text-black transition-all uppercase tracking-widest">Enable_Maintenance</button>
-          </div>
+          <div class="w-full h-px bg-white/5 my-4"></div>
+          <p class="text-[10px] font-bold mono text-accent uppercase tracking-widest">// Server_Status</p>
+          <button id="mt-btn" onclick="toggleMT()" class="w-full py-4 border border-accent text-accent rounded-2xl text-xs font-bold hover:bg-accent hover:text-black">ENABLE_MAINTENANCE</button>
         </div>
-        <!-- Logs Card -->
-        <div class="glass p-8 rounded-[3.5rem] space-y-4 overflow-hidden flex flex-col">
-          <p class="text-[10px] font-black mono text-accent uppercase tracking-widest">// Access_History_Logs</p>
-          <div id="logList" class="flex-1 text-[10px] mono space-y-3 overflow-y-auto pr-2 no-scrollbar"></div>
+        <div class="glass p-8 rounded-[3.5rem] flex flex-col overflow-hidden">
+          <p class="text-[10px] font-bold mono text-accent uppercase mb-4 tracking-widest">// Activity_Logs</p>
+          <div id="logList" class="flex-1 text-[10px] mono space-y-3 overflow-y-auto no-scrollbar pr-2"></div>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- MODAL ADD HW -->
+<!-- MODAL ADD -->
 <div id="addHwModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
-  <div class="glass p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl animate-slide-up border border-white/10">
-    <h3 class="font-black mb-8 text-xl display tracking-tighter uppercase">Assign_Mission</h3>
-    <div class="space-y-5 text-left">
-      <div class="space-y-1">
-        <label class="text-[10px] font-black mono opacity-40 ml-2 uppercase">// Subject</label>
-        <select id="hw-subject" class="w-full p-4 rounded-2xl glass border border-white/5 outline-none text-sm"></select>
-      </div>
-      <div class="space-y-1">
-        <label class="text-[10px] font-black mono opacity-40 ml-2 uppercase">// Mission_Detail</label>
-        <input type="text" id="hw-task" placeholder="การบ้านอะไร..." class="w-full p-4 rounded-2xl glass border border-white/5 outline-none text-sm">
-      </div>
-      <div class="space-y-1">
-        <label class="text-[10px] font-black mono opacity-40 ml-2 uppercase">// Deadline</label>
-        <input type="date" id="hw-date" class="w-full p-4 rounded-2xl glass border border-white/5 outline-none text-sm mono">
-      </div>
+  <div class="glass p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl border border-white/10">
+    <h3 class="font-black mb-8 text-xl mono tracking-tighter uppercase">Assign_Mission</h3>
+    <div class="space-y-4">
+      <select id="hw-subject" class="w-full p-4 rounded-2xl glass text-sm outline-none border border-white/5"></select>
+      <input type="text" id="hw-task" placeholder="รายละเอียดภารกิจ..." class="w-full p-4 rounded-2xl glass text-sm outline-none">
+      <input type="date" id="hw-date" class="w-full p-4 rounded-2xl glass text-sm mono outline-none">
       <div class="flex gap-3 pt-6">
-        <button onclick="closeAddHwModal()" class="flex-1 py-4 glass rounded-2xl font-black text-xs uppercase hover:bg-red-500/10 hover:text-red-500 transition-all">Abort</button>
-        <button onclick="submitHomework()" class="flex-1 py-4 bg-accent text-white rounded-2xl font-black text-xs uppercase shadow-lg shadow-accent/30 tracking-widest">Commit</button>
+        <button onclick="closeAddHwModal()" class="flex-1 py-4 glass rounded-2xl font-bold text-xs uppercase">Cancel</button>
+        <button onclick="submitHomework()" class="flex-1 py-4 bg-accent text-white rounded-2xl font-bold text-xs uppercase shadow-lg">Commit</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyBXf4KI5YSeMuE7LCf0yHjbOp8CEiOgyzTStFmfGLPJa43NUvgq-finl3lp-5dslhX/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyBXf4KI5YSeMuE7LCf0yHjbOp8CEiOgyzTStFmfGLPJa43NUvgq-finl3lp-5dslhX/exec"; // ⚠️ ใส่ URL ของคุณที่นี่
 const API_KEY = "M64_SUPER_SECRET_2026";
-let currentUser = "", currentRole = "", homeworks = [], chart = null, isMT = false;
+let currentUser="", currentRole="", homeworks=[], chart=null, isMT=false;
 
 window.onload = checkMT;
 
 async function apiCall(data) {
+  document.getElementById('processing').classList.remove('hidden');
   try {
-    const res = await fetch(WEB_APP_URL, { 
-      method:'POST', 
-      body:JSON.stringify({ ...data, apiKey:API_KEY, role:currentRole, username:currentUser }) 
-    });
-    return await res.json();
+    const res = await fetch(WEB_APP_URL, { method:'POST', body:JSON.stringify({ ...data, apiKey:API_KEY, role:currentRole, username:currentUser }) });
+    const result = await res.json();
+    return result;
   } catch(e) {
-    showToast("Server connection error!", "var(--danger)");
-    return { success: false };
+    showToast("เซิร์ฟเวอร์ขัดข้อง", "var(--danger)");
+    return { success:false };
+  } finally {
+    document.getElementById('processing').classList.add('hidden');
   }
 }
 
@@ -222,27 +171,22 @@ async function checkMT() {
     isMT = res.maintenance;
     if (isMT) {
       document.getElementById('maintenanceScreen').classList.remove('hidden');
-      let p = 0;
-      const itv = setInterval(() => {
-        p += Math.floor(Math.random() * 5);
-        if(p > 99) p = 99;
-        document.getElementById('updatePercent').innerText = p + '%';
-        document.getElementById('updateBar').style.width = p + '%';
-      }, 700);
+      let p=0; const itv = setInterval(() => { p+=Math.floor(Math.random()*5); if(p>99) p=99; document.getElementById('updatePercent').innerText=p+'%'; document.getElementById('updateBar').style.width=p+'%'; }, 800);
     }
   }
 }
 
 async function handleLogin(e) {
-  e.preventDefault();
+  if(e) e.preventDefault();
   const u = document.getElementById('login-u').value.trim();
   const p = document.getElementById('login-p').value.trim();
-  const res = await apiCall({ action:'login', username:u, password:p });
+  if(!u || !p) return showToast("กรุณากรอกข้อมูล", "var(--danger)");
 
+  const res = await apiCall({ action:'login', username:u, password:p });
   if (res.success) {
-    currentUser = u; currentRole = res.role;
+    currentUser=u; currentRole=res.role;
     if (res.isFirstTime) {
-      const np = prompt("SECURITY_WARNING: รหัสผ่านเริ่มต้นไม่ปลอดภัย\nกรุณาตั้งรหัสใหม่ (8 ตัวอักษรขึ้นไป):");
+      const np = prompt("SECURITY: กรุณาตั้งรหัสผ่านใหม่ (8 ตัวขึ้นไป):");
       if (np && np.length >= 8) await apiCall({ action:'setFirstPassword', username:u, newPassword:np });
       else return alert("ต้องเปลี่ยนรหัสก่อน!");
     }
@@ -257,7 +201,6 @@ async function handleLogin(e) {
 function loginSuccess() {
   document.getElementById('loginSection').classList.add('hidden');
   document.getElementById('mainSection').classList.remove('hidden');
-  document.getElementById('statusBadge').classList.remove('hidden');
   document.getElementById('userDisplayName').innerText = `USER_${currentUser} | ROLE_${currentRole.toUpperCase()}`;
   if (currentRole === 'admin') {
     document.getElementById('btn-adminTab').classList.remove('hidden');
@@ -265,93 +208,69 @@ function loginSuccess() {
   }
   if (currentRole === 'admin' || currentRole === 'assistant') document.getElementById('assistantTools').classList.remove('hidden');
   loadHomework(); loadSubjects();
-  showToast(`⚡ Welcome, Node ${currentUser}`, "var(--accent)");
+  showToast("เข้าระบบสำเร็จ", "var(--success)");
 }
 
 async function loadHomework() {
   const res = await apiCall({ action:'getHomework' });
   if (res.success) {
     homeworks = res.data;
-    renderHomework();
+    const cont = document.getElementById('homeworkContainer');
+    const manage = (currentRole === 'admin' || currentRole === 'assistant');
+    cont.innerHTML = homeworks.map(h => {
+      const isD = h.status === 'done';
+      return `
+        <div class="glass p-7 rounded-[3rem] fade-in flex flex-col justify-between border-l-4 ${isD?'opacity-40 border-success':'border-accent shadow-lg'}">
+          <div>
+            <div class="flex justify-between items-start mb-5">
+              <span class="text-[9px] font-bold mono bg-accent/10 text-accent px-2.5 py-1 rounded-lg uppercase">${h.subject}</span>
+              ${manage ? `<button onclick="deleteHW('${h.id}')" class="text-red-500 font-bold text-xs hover:scale-125 transition-all">🗑</button>`:''}
+            </div>
+            <p class="font-bold text-sm leading-relaxed mb-2">${h.task}</p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+            <span class="text-[9px] mono opacity-40">${h.dueDate||'NO_DATE'}</span>
+            <button onclick="toggleHW('${h.id}','${h.status}')" class="px-6 py-2.5 rounded-xl text-[9px] font-black ${isD?'glass':'bg-accent text-white shadow-lg'} transition-all">${isD?'REVERT':'DONE'}</button>
+          </div>
+        </div>`;
+    }).join('');
   }
-}
-
-function renderHomework() {
-  const cont = document.getElementById('homeworkContainer');
-  const manage = (currentRole === 'admin' || currentRole === 'assistant');
-  cont.innerHTML = homeworks.map(h => {
-    const isD = h.status === 'done';
-    return `
-      <div class="glass p-7 rounded-[3rem] fade-in flex flex-col justify-between border-l-4 ${isD?'opacity-40 border-success shadow-none':'border-accent shadow-lg'}">
-        <div>
-          <div class="flex justify-between items-start mb-5">
-            <span class="text-[9px] font-black mono bg-accent/10 text-accent px-2.5 py-1 rounded-lg uppercase tracking-widest">${h.subject}</span>
-            ${manage ? `<button onclick="deleteHW('${h.id}')" class="text-red-500 font-bold text-xs hover:scale-150 transition-all">🗑</button>` : ''}
-          </div>
-          <h3 class="font-bold text-sm leading-relaxed mb-2">${h.task}</h3>
-        </div>
-        <div class="mt-6 pt-4 border-t border-white/5 flex justify-between items-center">
-          <div class="flex flex-col">
-            <span class="text-[8px] mono opacity-30 uppercase tracking-tighter">Deadline</span>
-            <span class="text-[10px] mono font-bold">${h.dueDate||'NO_DATE'}</span>
-          </div>
-          <button onclick="toggleHW('${h.id}','${h.status}')" class="px-6 py-3 rounded-2xl text-[9px] font-black display tracking-widest ${isD?'glass border border-white/10':'bg-accent text-white shadow-lg shadow-accent/20'}">
-            ${isD ? 'REVERT' : 'DONE'}
-          </button>
-        </div>
-      </div>
-    `;
-  }).join('');
-  if(!document.getElementById('statsTab').classList.contains('hidden')) renderChart();
-  document.getElementById('count-total').innerText = homeworks.length;
-  document.getElementById('count-done').innerText = homeworks.filter(h=>h.status==='done').length;
 }
 
 async function toggleHW(id, cur) {
   const next = cur === 'done' ? 'pending' : 'done';
   const res = await apiCall({ action:'updateStatus', id, status:next });
-  if (res.success) {
-    if (next === 'done') confetti({ particleCount:150, spread:70, origin:{y:0.7}, colors:['#5b5ef4', '#10b981'] });
-    loadHomework();
-  }
+  if (res.success) { if(next==='done') confetti({ particleCount:150, spread:70, origin:{y:0.7} }); loadHomework(); }
 }
 
-// --- ADMIN / ASSISTANT ---
 async function syncSubjects() {
-  if (confirm("ต้องการอัปเดตวิชาเรียน 16 วิชาหลักตามตารางเรียน?")) {
-    const res = await apiCall({ action:'syncSubjects' });
-    if(res.success) { showToast("✓ Database Synced", "var(--success)"); loadSubjects(); }
-  }
+  if (confirm("Sync รายวิชาตามตารางเรียน (16 วิชาหลัก)?")) { await apiCall({ action:'syncSubjects' }); loadSubjects(); showToast("ซิงค์วิชาเรียบร้อย"); }
 }
 
 async function handleResetPW() {
-  const id = document.getElementById('reset-id').value;
-  if (!id || !confirm(`ยืนยันการรีเซ็ตรหัสของ ${id} เป็น 1234?`)) return;
+  const id = document.getElementById('reset-id').value.trim();
+  if(!id) return;
   const res = await apiCall({ action:'adminResetPassword', targetUsername:id });
-  if (res.success) { showToast(`✓ Reset Successful`, "var(--success)"); document.getElementById('reset-id').value = ''; loadLogs(); }
+  if (res.success) { showToast(`รีเซ็ต ${id} เป็น 1234 แล้ว`); document.getElementById('reset-id').value=''; loadLogs(); }
 }
 
 async function toggleMT() {
   const next = !isMT;
   const res = await apiCall({ action:'toggleMaintenance', status:next });
-  if (res.success) { isMT = next; location.reload(); }
+  if (res.success) { isMT=next; location.reload(); }
 }
 
 async function loadLogs() {
   const res = await apiCall({ action:'getUsageLogs' });
   if (res.success) {
     document.getElementById('logList').innerHTML = res.data.map(l => `
-      <div class="pb-3 border-b border-white/5 flex flex-col gap-1">
-        <div class="flex justify-between items-center text-[8px]">
-          <span class="text-accent font-black uppercase tracking-widest">${l[1]}</span>
-          <span class="opacity-20 mono">${new Date(l[0]).toLocaleString()}</span>
-        </div>
-        <span class="opacity-70 text-[9px] italic">${l[2]}: ${l[3]}</span>
+      <div class="pb-2 border-b border-white/5 flex justify-between items-center">
+        <div class="flex flex-col"><span class="text-accent font-bold uppercase">${l[1]}</span><span class="opacity-60 text-[9px]">${l[2]}: ${l[3]}</span></div>
+        <span class="opacity-20 text-[8px] mono">${new Date(l[0]).toLocaleTimeString()}</span>
       </div>`).join('');
   }
 }
 
-// --- CORE UI ---
 function switchTab(id) {
   ['homeworkTab','statsTab','adminTab'].forEach(t => document.getElementById(t).classList.add('hidden'));
   ['btn-homeworkTab','btn-statsTab','btn-adminTab'].forEach(b => document.getElementById(b).classList.remove('tab-active', 'opacity-100'));
@@ -361,37 +280,15 @@ function switchTab(id) {
   if (id === 'statsTab') setTimeout(renderChart, 200);
 }
 
-function showToast(m, c) { 
-  const t = document.getElementById('toast'); 
-  document.getElementById('toastMsg').innerText = m; 
-  if(c) t.style.borderColor = c;
-  t.classList.add('show'); 
-  setTimeout(()=>t.classList.remove('show'), 3000); 
-}
-
-function toggleDarkMode() { 
-  const html = document.documentElement;
-  const btn = document.getElementById('themeBtn');
-  if (html.classList.contains('dark')) {
-    html.classList.replace('dark','light'); btn.innerText='🌙';
-  } else {
-    html.classList.replace('light','dark'); btn.innerText='☀️';
-  }
-  if(!document.getElementById('statsTab').classList.contains('hidden')) renderChart();
-}
-
-function bypassMT() { const k = prompt("ADMIN_KEY:"); if(k==="M64") document.getElementById('maintenanceScreen').classList.add('hidden'); }
+function showToast(m, c) { const t=document.getElementById('toast'); document.getElementById('toastMsg').innerText=m; if(c) t.style.borderColor=c; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
+function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+function bypassMT() { if(prompt("ADMIN_KEY:")==="M64") document.getElementById('maintenanceScreen').classList.add('hidden'); }
 function openAddHwModal() { document.getElementById('addHwModal').classList.remove('hidden'); }
 function closeAddHwModal() { document.getElementById('addHwModal').classList.add('hidden'); }
 function handleLogout() { location.reload(); }
 async function loadSubjects() { const res = await apiCall({ action:'getSubjects' }); if (res.success) document.getElementById('hw-subject').innerHTML = res.data.map(s=>`<option value="${s}">${s}</option>`).join(''); }
-async function submitHomework() { 
-  const t = document.getElementById('hw-task').value;
-  if(!t) return showToast("กรุณากรอกรายละเอียด", "var(--danger)");
-  await apiCall({ action:'addHomework', subject:document.getElementById('hw-subject').value, task:t, dueDate:document.getElementById('hw-date').value }); 
-  closeAddHwModal(); loadHomework(); showToast("✓ Mission Logged", "var(--success)");
-}
-async function deleteHW(id) { if (confirm("ยืนยันการลบภารกิจนี้?")) { await apiCall({ action:'adminDeleteHomework', id }); loadHomework(); } }
+async function submitHomework() { await apiCall({ action:'addHomework', subject:document.getElementById('hw-subject').value, task:document.getElementById('hw-task').value, dueDate:document.getElementById('hw-date').value }); closeAddHwModal(); loadHomework(); }
+async function deleteHW(id) { if(confirm("ลบงานนี้?")) { await apiCall({ action:'adminDeleteHomework', id }); loadHomework(); } }
 
 function renderChart() {
   const done = homeworks.filter(h=>h.status==='done').length;
@@ -399,24 +296,4 @@ function renderChart() {
   const ctx = document.getElementById('statChart').getContext('2d');
   const isDark = document.documentElement.classList.contains('dark');
   if (chart) chart.destroy();
-  chart = new Chart(ctx, { 
-    type:'doughnut', 
-    data:{ 
-        labels:['COMPLETED','PENDING'], 
-        datasets:[{ data:[done,pending], backgroundColor:[isDark?'#00ff9d':'#10b981','#6366f1'], borderWidth:0, hoverOffset: 15 }] 
-    }, 
-    options:{ 
-        maintainAspectRatio:false, 
-        cutout:'80%', 
-        plugins:{ legend:{ position:'bottom', labels:{ color:isDark?'#94a3b8':'#18163a', font:{ family:'JetBrains Mono', size:10 } } } } 
-    } 
-  });
-}
-
-function exportCSV() {
-  const csv = "ID,Subject,Task,Deadline,Status\n" + homeworks.map(h => `${h.id},${h.subject},${h.task},${h.dueDate},${h.status}`).join("\n");
-  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = 'M64_HUB_DATA.csv'; a.click();
-}
-</script>
-</body>
-</html>
+  chart = new Chart(ctx, { type:'doughnut', data:{ labels:['DONE','PENDING'], datasets:[{ data:[done,pending], backgroundColor:[isDark?'#00ff9d':'#10b981','#5b5ef4'], borderWidth:0 }] }, options:{ maintainAspectRatio:false, cutout:'85%', plugins:{ legend:{ labels:{ color:isDark?'#c4f0e0':'#18163a', f
