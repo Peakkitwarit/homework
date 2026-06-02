@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ M.6/4 SMART HUB v27.2</title>
+  <title>⚡ M.6/4 SMART HUB v27.4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -50,7 +50,7 @@
   <div class="flex items-center gap-4">
     <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">6/4</div>
     <div>
-      <h1 class="text-sm font-bold tracking-tight mono uppercase">Smart Hub <span class="text-accent">v27.2</span></h1>
+      <h1 class="text-sm font-bold tracking-tight mono uppercase">Smart Hub <span class="text-accent">v27.4</span></h1>
       <p id="userDisplayName" class="text-[9px] mono opacity-50 uppercase tracking-widest italic">Guest_Node</p>
     </div>
   </div>
@@ -65,8 +65,8 @@
     <div class="w-16 h-16 bg-accent/10 text-accent rounded-3xl flex items-center justify-center text-3xl mx-auto mb-8">🔐</div>
     <h2 class="text-2xl font-black mono tracking-tighter mb-8 uppercase">Authenticate</h2>
     <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
-      <input type="text" id="login-u" placeholder="Student ID (เลขที่)" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
-      <input type="password" id="login-p" placeholder="Password" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
+      <input type="text" id="login-u" placeholder="เลขที่ หรือ admin" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
+      <input type="password" id="login-p" placeholder="Password (เริ่มต้น 1234)" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
       <button type="submit" id="loginBtn" class="w-full py-4 bg-accent text-white rounded-2xl text-xs font-bold tracking-widest shadow-xl shadow-accent/20 uppercase mt-4 hover:opacity-90 transition-all">Login_Secure</button>
     </form>
     <button onclick="alert('🔑 ลืมรหัสผ่าน? กรุณาแจ้ง Admin เพื่อ Reset เป็น 1234')" class="mt-6 text-[10px] mono opacity-30 hover:opacity-100 transition-all">[ Forgot_Key? ]</button>
@@ -138,7 +138,6 @@
 </div>
 
 <script>
-// ⚠️ สำคัญมาก: เปลี่ยนข้อความข้างล่างนี้เป็น Web App URL ของคุณที่ได้จากการ Deploy
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyBXf4KI5YSeMuE7LCf0yHjbOp8CEiOgyzTStFmfGLPJa43NUvgq-finl3lp-5dslhX/exec"; 
 const API_KEY = "M64_SUPER_SECRET_2026";
 let currentUser="", currentRole="", homeworks=[], chart=null, isMT=false;
@@ -181,14 +180,15 @@ async function handleLogin(e) {
     currentUser=u; currentRole=res.role;
     if (res.isFirstTime) {
       const np = prompt("SECURITY: กรุณาตั้งรหัสผ่านใหม่ (8 ตัวขึ้นไป):");
-      if (np && np.length >= 8) await apiCall({ action:'setFirstPassword', username:u, newPassword:np });
-      else return alert("ต้องเปลี่ยนรหัสก่อน!");
+      if (np && np.length >= 8) {
+        const setRes = await apiCall({ action:'setFirstPassword', username:u, newPassword:np });
+        if(!setRes.success) { alert("เปลี่ยนรหัสผ่านไม่สำเร็จ!"); return; }
+      }
+      else { alert("ต้องเปลี่ยนรหัสก่อน!"); return; }
     }
     loginSuccess();
   } else {
     showToast(res.message, "var(--danger)");
-    document.getElementById('loginSection').classList.add('animate-shake');
-    setTimeout(() => document.getElementById('loginSection').classList.remove('animate-shake'), 500);
   }
 }
 
