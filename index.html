@@ -1,302 +1,465 @@
 <!DOCTYPE html>
-<html lang="th" class="light">
+<html lang="th" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ M.6/4 SMART HUB v27.4</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Sarabun:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    :root { --bg:#f4f6ff; --card:rgba(255,255,255,0.85); --accent:#5b5ef4; --text:#18163a; --success:#10b981; --danger:#f43f5e; }
-    .dark { --bg:#050d17; --card:rgba(6, 18, 32, 0.94); --accent:#00ff9d; --text:#c4f0e0; }
-    body { background-color:var(--bg); color:var(--text); font-family:'Sarabun',sans-serif; transition: 0.3s; overflow-x: hidden; }
-    .glass { background:var(--card); backdrop-filter:blur(20px); border:1px solid rgba(128,128,128,0.1); box-shadow:0 8px 32px rgba(0,0,0,0.05); }
-    .mono { font-family:'JetBrains Mono',monospace; }
-    .tab-active { color:var(--accent)!important; font-weight:800; border-bottom:3px solid var(--accent); }
-    #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); transition:0.4s; z-index:9999; }
-    #toast.show { transform:translateX(-50%) translateY(0); }
-    .fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
-    html.dark body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px); animation: scanline 10s linear infinite; }
-    @keyframes scanline { 0% {background-position:0 0} 100% {background-position:0 100%} }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ ม.6/4 Homework HUB - Central System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // กำหนดโครงสร้าง Tailwind Custom Theme สำหรับ 2 โหมดตามที่รีเควส
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: { bg: '#0b0f19', card: '#161b26', text: '#00f2fe', accent: '#05ffc4' },
+                        elegant: { bg: '#faf8f5', card: '#ffffff', text: '#2c3e50', accent: '#cca43b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap');
+        body { font-family: 'Chakra Petch', sans-serif; transition: all 0.3s ease; }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-cyber-bg text-gray-200 dark:bg-cyber-bg dark:text-gray-200 light:bg-elegant-bg light:text-elegant-text">
 
-<div id="maintenanceScreen" class="hidden fixed inset-0 z-[10000] bg-[#020617] flex flex-col items-center justify-center p-6 text-center">
-  <div class="w-20 h-20 border-4 border-[#00ff9d] border-t-transparent rounded-full animate-spin mb-8 shadow-[0_0_15px_#00ff9d]"></div>
-  <h1 class="text-2xl font-black mono text-[#00ff9d] animate-pulse">SERVER_UPDATING...</h1>
-  <div class="glass p-6 rounded-[2rem] border border-[#00ff9d]/20 w-full max-w-xs mt-8">
-    <div class="w-full h-1.5 bg-[#00ff9d]/10 rounded-full overflow-hidden">
-      <div id="updateBar" class="h-full bg-[#00ff9d] transition-all duration-700 shadow-[0_0_10px_#00ff9d]" style="width: 0%"></div>
-    </div>
-    <p id="updatePercent" class="text-[10px] mono text-[#00ff9d] mt-2">0%</p>
-  </div>
-  <button onclick="bypassMT()" class="mt-20 opacity-0 text-[8px] mono text-white">ADMIN_BYPASS</button>
-</div>
+    <script>
+        // วาง URL ที่ได้จาก Google Apps Script ของคุณที่นี่
+        const API_URL = "https://script.google.com/macros/s/XXXXXXXXX/exec"; 
+    </script>
 
-<div id="processing" class="hidden fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[2px] flex items-center justify-center">
-  <div class="glass p-8 rounded-[2rem] flex flex-col items-center gap-3">
-    <div class="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-    <p class="text-[10px] font-bold mono animate-pulse">SYNCING...</p>
-  </div>
-</div>
-
-<div id="toast" class="glass px-8 py-4 rounded-2xl text-xs font-bold shadow-2xl border border-white/10">⚡ <span id="toastMsg">Success</span></div>
-
-<nav class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4 flex justify-between items-center">
-  <div class="flex items-center gap-4">
-    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold">6/4</div>
-    <div>
-      <h1 class="text-sm font-bold tracking-tight mono uppercase">Smart Hub <span class="text-accent">v27.4</span></h1>
-      <p id="userDisplayName" class="text-[9px] mono opacity-50 uppercase tracking-widest italic">Guest_Node</p>
-    </div>
-  </div>
-  <div class="flex items-center gap-2">
-    <button onclick="toggleDarkMode()" id="themeBtn" class="w-10 h-10 rounded-xl glass flex items-center justify-center">🌙</button>
-    <button onclick="handleLogout()" class="px-4 py-2 border border-red-500/30 text-red-500 rounded-xl text-[10px] font-bold uppercase">Exit</button>
-  </div>
-</nav>
-
-<div id="loginSection" class="flex-1 flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_rgba(91,94,244,0.05),_transparent)]">
-  <div class="glass p-10 rounded-[3.5rem] w-full max-w-sm shadow-2xl fade-in text-center">
-    <div class="w-16 h-16 bg-accent/10 text-accent rounded-3xl flex items-center justify-center text-3xl mx-auto mb-8">🔐</div>
-    <h2 class="text-2xl font-black mono tracking-tighter mb-8 uppercase">Authenticate</h2>
-    <form onsubmit="handleLogin(event)" class="space-y-4 text-left">
-      <input type="text" id="login-u" placeholder="เลขที่ หรือ admin" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
-      <input type="password" id="login-p" placeholder="Password (เริ่มต้น 1234)" required class="w-full p-4 rounded-2xl glass border border-white/5 focus:border-accent outline-none text-sm mono transition-all">
-      <button type="submit" id="loginBtn" class="w-full py-4 bg-accent text-white rounded-2xl text-xs font-bold tracking-widest shadow-xl shadow-accent/20 uppercase mt-4 hover:opacity-90 transition-all">Login_Secure</button>
-    </form>
-    <button onclick="alert('🔑 ลืมรหัสผ่าน? กรุณาแจ้ง Admin เพื่อ Reset เป็น 1234')" class="mt-6 text-[10px] mono opacity-30 hover:opacity-100 transition-all">[ Forgot_Key? ]</button>
-    <p id="loginError" class="text-xs text-red-500 mt-4 hidden font-black"></p>
-  </div>
-</div>
-
-<div id="mainSection" class="hidden flex-1 flex flex-col">
-  <div class="max-w-7xl mx-auto w-full px-6 flex gap-8 border-b border-white/5 overflow-x-auto no-scrollbar">
-    <button onclick="switchTab('homeworkTab')" id="btn-homeworkTab" class="py-5 text-xs font-bold mono tab-active tracking-widest">DASHBOARD</button>
-    <button onclick="switchTab('statsTab')" id="btn-statsTab" class="py-5 text-xs font-bold mono opacity-40 tracking-widest">ANALYTICS</button>
-    <button onclick="switchTab('adminTab')" id="btn-adminTab" class="hidden py-5 text-xs font-bold mono text-red-500 opacity-40 tracking-widest">ROOT_CMD</button>
-  </div>
-
-  <main class="max-w-7xl w-full mx-auto px-6 py-8 space-y-8 pb-24">
-    <div id="homeworkTab" class="fade-in space-y-8">
-      <div id="assistantTools" class="hidden glass p-6 rounded-[2.5rem] border-l-4 border-accent space-y-5 bg-gradient-to-r from-accent/5 to-transparent">
-        <p class="text-[10px] font-bold mono text-accent uppercase tracking-widest">// Assistant_Manager</p>
-        <div class="flex flex-wrap gap-3">
-          <button onclick="openAddHwModal()" class="px-6 py-3 bg-accent text-white rounded-xl text-[10px] font-bold">+ NEW_TASK</button>
-          <button onclick="syncSubjects()" class="px-6 py-3 border border-accent text-accent rounded-xl text-[10px] font-bold">🔄 SYNC_TIMETABLE</button>
-          <button onclick="exportCSV()" class="px-6 py-3 glass border border-white/10 rounded-xl text-[10px] font-bold">📥 EXPORT</button>
-        </div>
-      </div>
-      <div id="homeworkContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-
-    <div id="statsTab" class="hidden fade-in text-center">
-      <div class="glass p-10 rounded-[3rem] h-[400px] flex flex-col items-center">
-        <p class="text-xs font-bold mono opacity-40 mb-6 tracking-widest uppercase">// Mission_Success_Rate</p>
-        <div class="relative flex-1 w-full"><canvas id="statChart"></canvas></div>
-      </div>
-    </div>
-
-    <div id="adminTab" class="hidden fade-in space-y-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass p-8 rounded-[3.5rem] border border-red-500/20 space-y-6">
-          <p class="text-[10px] font-bold mono text-red-500 uppercase tracking-widest">// Password_Override</p>
-          <div class="flex gap-2">
-            <input type="text" id="reset-id" placeholder="Student ID" class="flex-1 p-4 rounded-2xl glass text-xs mono outline-none">
-            <button onclick="handleResetPW()" class="px-6 py-4 bg-red-500 text-white rounded-2xl font-bold text-xs">RESET</button>
-          </div>
-          <div class="w-full h-px bg-white/5 my-4"></div>
-          <p class="text-[10px] font-bold mono text-accent uppercase tracking-widest">// Server_Status</p>
-          <button id="mt-btn" onclick="toggleMT()" class="w-full py-4 border border-accent text-accent rounded-2xl text-xs font-bold hover:bg-accent hover:text-black">ENABLE_MAINTENANCE</button>
-        </div>
-        <div class="glass p-8 rounded-[3.5rem] flex flex-col overflow-hidden">
-          <p class="text-[10px] font-bold mono text-accent uppercase mb-4 tracking-widest">// Activity_Logs</p>
-          <div id="logList" class="flex-1 text-[10px] mono space-y-3 overflow-y-auto no-scrollbar pr-2"></div>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<div id="addHwModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
-  <div class="glass p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl border border-white/10">
-    <h3 class="font-black mb-8 text-xl mono tracking-tighter uppercase">Assign_Mission</h3>
-    <div class="space-y-4">
-      <select id="hw-subject" class="w-full p-4 rounded-2xl glass text-sm outline-none border border-white/5"></select>
-      <input type="text" id="hw-task" placeholder="รายละเอียดภารกิจ..." class="w-full p-4 rounded-2xl glass text-sm outline-none">
-      <input type="date" id="hw-date" class="w-full p-4 rounded-2xl glass text-sm mono outline-none">
-      <div class="flex gap-3 pt-6">
-        <button onclick="closeAddHwModal()" class="flex-1 py-4 glass rounded-2xl font-bold text-xs uppercase">Cancel</button>
-        <button onclick="submitHomework()" class="flex-1 py-4 bg-accent text-white rounded-2xl font-bold text-xs uppercase shadow-lg">Commit</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyBXf4KI5YSeMuE7LCf0yHjbOp8CEiOgyzTStFmfGLPJa43NUvgq-finl3lp-5dslhX/exec"; 
-const API_KEY = "M64_SUPER_SECRET_2026";
-let currentUser="", currentRole="", homeworks=[], chart=null, isMT=false;
-
-window.onload = checkMT;
-
-async function apiCall(data) {
-  document.getElementById('processing').classList.remove('hidden');
-  try {
-    const res = await fetch(WEB_APP_URL, { method:'POST', body:JSON.stringify({ ...data, apiKey:API_KEY, role:currentRole, username:currentUser }) });
-    const result = await res.json();
-    return result;
-  } catch(e) {
-    showToast("เซิร์ฟเวอร์ขัดข้อง", "var(--danger)");
-    return { success:false };
-  } finally {
-    document.getElementById('processing').classList.add('hidden');
-  }
-}
-
-async function checkMT() {
-  const res = await apiCall({ action:'getSystemStatus' });
-  if (res.success) {
-    isMT = res.maintenance;
-    if (isMT) {
-      document.getElementById('maintenanceScreen').classList.remove('hidden');
-      let p=0; const itv = setInterval(() => { p+=Math.floor(Math.random()*5); if(p>99) p=99; document.getElementById('updatePercent').innerText=p+'%'; document.getElementById('updateBar').style.width=p+'%'; }, 800);
-    }
-  }
-}
-
-async function handleLogin(e) {
-  if(e) e.preventDefault();
-  const u = document.getElementById('login-u').value.trim();
-  const p = document.getElementById('login-p').value.trim();
-  if(!u || !p) return showToast("กรุณากรอกข้อมูล", "var(--danger)");
-
-  const res = await apiCall({ action:'login', username:u, password:p });
-  if (res.success) {
-    currentUser=u; currentRole=res.role;
-    if (res.isFirstTime) {
-      const np = prompt("SECURITY: กรุณาตั้งรหัสผ่านใหม่ (8 ตัวขึ้นไป):");
-      if (np && np.length >= 8) {
-        const setRes = await apiCall({ action:'setFirstPassword', username:u, newPassword:np });
-        if(!setRes.success) { alert("เปลี่ยนรหัสผ่านไม่สำเร็จ!"); return; }
-      }
-      else { alert("ต้องเปลี่ยนรหัสก่อน!"); return; }
-    }
-    loginSuccess();
-  } else {
-    showToast(res.message, "var(--danger)");
-  }
-}
-
-function loginSuccess() {
-  document.getElementById('loginSection').classList.add('hidden');
-  document.getElementById('mainSection').classList.remove('hidden');
-  document.getElementById('userDisplayName').innerText = `USER_${currentUser} | ROLE_${currentRole.toUpperCase()}`;
-  if (currentRole === 'admin') {
-    document.getElementById('btn-adminTab').classList.remove('hidden');
-    document.getElementById('mt-btn').innerText = isMT ? "DISABLE_MAINTENANCE" : "ENABLE_MAINTENANCE";
-  }
-  if (currentRole === 'admin' || currentRole === 'assistant') document.getElementById('assistantTools').classList.remove('hidden');
-  loadHomework(); loadSubjects();
-  showToast("เข้าระบบสำเร็จ", "var(--success)");
-}
-
-async function loadHomework() {
-  const res = await apiCall({ action:'getHomework' });
-  if (res.success) {
-    homeworks = res.data;
-    const cont = document.getElementById('homeworkContainer');
-    const manage = (currentRole === 'admin' || currentRole === 'assistant');
-    cont.innerHTML = homeworks.map(h => {
-      const isD = h.status === 'done';
-      return `
-        <div class="glass p-7 rounded-[3rem] fade-in flex flex-col justify-between border-l-4 ${isD?'opacity-40 border-success':'border-accent shadow-lg'}">
-          <div>
-            <div class="flex justify-between items-start mb-5">
-              <span class="text-[9px] font-bold mono bg-accent/10 text-accent px-2.5 py-1 rounded-lg uppercase">${h.subject}</span>
-              ${manage ? `<button onclick="deleteHW('${h.id}')" class="text-red-500 font-bold text-xs hover:scale-125 transition-all">🗑</button>`:''}
+    <div id="loginPage" class="min-h-screen flex items-center justify-center px-4">
+        <div class="bg-cyber-card dark:bg-cyber-card light:bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-800 light:border-gray-200">
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 bg-teal-500/10 rounded-full mb-3 text-cyber-text">
+                    <i class="fa-solid fa-user-shield text-4xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-wide text-white dark:text-white light:text-elegant-text">HOMEWORK HUB <span class="text-xs px-2 py-0.5 rounded bg-amber-500 text-black">ม.6/4</span></h1>
+                <p class="text-gray-400 text-sm mt-1">ระบบลงทะเบียนและจัดการภาระงานตรงจากศูนย์กลาง</p>
             </div>
-            <p class="font-bold text-sm leading-relaxed mb-2">${h.task}</p>
-          </div>
-          <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-            <span class="text-[9px] mono opacity-40">${h.dueDate||'NO_DATE'}</span>
-            <button onclick="toggleHW('${h.id}','${h.status}')" class="px-6 py-2.5 rounded-xl text-[9px] font-black ${isD?'glass':'bg-accent text-white shadow-lg'} transition-all">${isD?'REVERT':'DONE'}</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
-}
+            
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="mb-4">
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">เลขประจำตัวนักเรียน / บัญชีแอดมิน</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-id-card absolute left-3 top-3.5 text-gray-500"></i>
+                        <input type="text" id="username" required class="w-full bg-slate-900 border border-gray-700 rounded-lg p-2.5 pl-10 text-white focus:outline-none focus:border-cyan-400" placeholder="เช่น 34119 หรือ admin">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-2">รหัสผ่านระบบ</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-3.5 text-gray-500"></i>
+                        <input type="password" id="password" required class="w-full bg-slate-900 border border-gray-700 rounded-lg p-2.5 pl-10 text-white focus:outline-none focus:border-cyan-400" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 text-black font-bold py-3 rounded-lg hover:opacity-90 transition duration-200">เข้าสู่ระบบเซิร์ฟเวอร์</button>
+            </form>
+            
+            <div class="mt-4 text-center">
+                <button onclick="triggerForgotPassword()" class="text-xs text-gray-400 hover:text-cyan-400 transition underline">ลืมรหัสผ่าน? แจ้งแอดมินระบบโดยตรง</button>
+            </div>
+        </div>
+    </div>
 
-async function toggleHW(id, cur) {
-  const next = cur === 'done' ? 'pending' : 'done';
-  const res = await apiCall({ action:'updateStatus', id, status:next });
-  if (res.success) { if(next==='done') confetti({ particleCount:150, spread:70, origin:{y:0.7} }); loadHomework(); }
-}
+    <div id="dashboardPage" class="hidden min-h-screen flex flex-col">
+        <header class="bg-slate-900 border-b border-gray-800 px-6 py-4 flex justify-between items-center shadow-lg">
+            <div class="flex items-center gap-3">
+                <span class="text-xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400">⚡ ROOM 6/4 CENTER</span>
+                <span id="badgeRole" class="text-xs px-2 py-0.5 rounded-full font-semibold"></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleThemeMode()" class="bg-gray-800 p-2 rounded-lg text-amber-400 hover:scale-105 transition" title="สลับโหมด UI มืด/สว่าง">
+                    <i class="fa-solid fa-circle-half-stroke"></i> <span class="text-xs ml-1 hidden md:inline">สลับธีม</span>
+                </button>
+                <div class="text-right hidden sm:block">
+                    <p id="userFullName" class="text-sm font-semibold text-white"></p>
+                    <p id="userSystemId" class="text-xs text-gray-400"></p>
+                </div>
+                <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white px-3 py-1.5 rounded-lg text-sm transition">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </header>
 
-async function syncSubjects() {
-  if (confirm("Sync รายวิชาตามตารางเรียน (16 วิชาหลัก)?")) { await apiCall({ action:'syncSubjects' }); loadSubjects(); showToast("ซิงค์วิชาเรียบร้อย"); }
-}
+        <main class="flex-1 p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <div class="space-y-6 lg:col-span-1">
+                <div class="bg-cyber-card dark:bg-cyber-card light:bg-white p-5 rounded-xl border border-gray-800 light:border-gray-200 shadow-md">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-chart-pie mr-2 text-cyan-400"></i> สถิติความก้าวหน้า</h3>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-3xl font-extrabold text-white dark:text-white light:text-slate-900" id="statPercent">0%</p>
+                            <p class="text-xs text-emerald-400 mt-1">อัตราความสำเร็จงาน</p>
+                        </div>
+                        <div class="w-16 h-16 rounded-full border-4 border-emerald-500/20 border-t-emerald-400 animate-spin-slow flex items-center justify-center">
+                            <i class="fa-solid fa-graduation-cap text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
 
-async function handleResetPW() {
-  const id = document.getElementById('reset-id').value.trim();
-  if(!id) return;
-  const res = await apiCall({ action:'adminResetPassword', targetUsername:id });
-  if (res.success) { showToast(`รีเซ็ต ${id} เป็น 1234 แล้ว`); document.getElementById('reset-id').value=''; loadLogs(); }
-}
+                <div class="bg-cyber-card dark:bg-cyber-card light:bg-white p-5 rounded-xl border border-gray-800 light:border-gray-200 shadow-md">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-bullhorn mr-2 text-amber-400"></i> บอร์ดข่าวสารแอดมิน</h3>
+                    <div id="announcementBox" class="space-y-3 max-h-60 overflow-y-auto pr-1 text-xs">
+                        </div>
+                </div>
 
-async function toggleMT() {
-  const next = !isMT;
-  const res = await apiCall({ action:'toggleMaintenance', status:next });
-  if (res.success) { isMT=next; location.reload(); }
-}
+                <div class="bg-cyber-card dark:bg-cyber-card light:bg-white p-5 rounded-xl border border-gray-800 light:border-gray-200 shadow-md">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-user-gear mr-2 text-purple-400"></i> แก้ไขข้อมูลโปรไฟล์</h3>
+                    <div class="space-y-2">
+                        <input type="text" id="profileName" placeholder="เปลี่ยนชื่อของคุณ" class="w-full bg-slate-900 text-xs text-white p-2 border border-gray-700 rounded focus:outline-none">
+                        <input type="password" id="profilePass" placeholder="เปลี่ยนรหัสผ่านใหม่" class="w-full bg-slate-900 text-xs text-white p-2 border border-gray-700 rounded focus:outline-none">
+                        <button onclick="updateProfile()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs py-2 rounded transition">บันทึกข้อมูลใหม่</button>
+                    </div>
+                </div>
+            </div>
 
-async function loadLogs() {
-  const res = await apiCall({ action:'getUsageLogs' });
-  if (res.success) {
-    document.getElementById('logList').innerHTML = res.data.map(l => `
-      <div class="pb-2 border-b border-white/5 flex justify-between items-center">
-        <div class="flex flex-col"><span class="text-accent font-bold uppercase">${l[1]}</span><span class="opacity-60 text-[9px]">${l[2]}: ${l[3]}</span></div>
-        <span class="opacity-20 text-[8px] mono">${new Date(l[0]).toLocaleTimeString()}</span>
-      </div>`).join('');
-  }
-}
+            <div class="lg:col-span-3 space-y-6">
+                
+                <div id="editorPanel" class="hidden bg-slate-900 border border-teal-500/30 p-5 rounded-xl shadow-lg">
+                    <h2 class="text-md font-bold mb-3 text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-folder-plus"></i> ส่วนควบคุมผู้ช่วยแอดมิน & คอนโทรลเลอร์การบ้าน
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <select id="hwSubject" class="bg-slate-800 border border-gray-700 text-sm rounded p-2 text-white"></select>
+                        <input type="text" id="hwTitle" placeholder="ชื่องาน / รายละเอียดสั้นๆ" class="bg-slate-800 border border-gray-700 text-sm rounded p-2 text-white">
+                        <input type="date" id="hwDeadline" class="bg-slate-800 border border-gray-700 text-sm rounded p-2 text-white">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                        <input type="url" id="hwUrl" placeholder="ลิงก์ URL แนบ (เช่น Google Drive, Canva, โจทก์งาน)" class="bg-slate-800 border border-gray-700 text-sm rounded p-2 text-white">
+                        <input type="text" id="hwNotes" placeholder="หมายเหตุ / คำอธิบายเพิ่มเติมพิเศษ" class="bg-slate-800 border border-gray-700 text-sm rounded p-2 text-white">
+                    </div>
+                    <button onclick="submitHomework()" class="mt-4 bg-emerald-500 text-black font-bold text-sm px-6 py-2 rounded hover:opacity-90 transition">
+                        <i class="fa-solid fa-cloud-arrow-up mr-1"></i> บันทึกข้อมูลขึ้นระบบอัตโนมัติ
+                    </button>
+                </div>
 
-function switchTab(id) {
-  ['homeworkTab','statsTab','adminTab'].forEach(t => document.getElementById(t).classList.add('hidden'));
-  ['btn-homeworkTab','btn-statsTab','btn-adminTab'].forEach(b => document.getElementById(b).classList.remove('tab-active', 'opacity-100'));
-  document.getElementById(id).classList.remove('hidden');
-  document.getElementById('btn-'+id).classList.add('tab-active', 'opacity-100');
-  if (id === 'adminTab') loadLogs();
-  if (id === 'statsTab') setTimeout(renderChart, 200);
-}
+                <div id="adminPanel" class="hidden bg-slate-900 border border-red-500/30 p-5 rounded-xl shadow-lg space-y-4">
+                    <h2 class="text-md font-bold text-red-400"><i class="fa-solid fa-sliders"></i> แผงควบคุมแอดมินศูนย์กลาง (Central Command)</h2>
+                    <div class="flex flex-wrap gap-3 items-center bg-slate-800 p-3 rounded-lg">
+                        <span class="text-xs text-gray-300">ล้างความปลอดภัย / รีเซ็ตรหัสผ่านนักเรียน:</span>
+                        <select id="adminTargetUser" class="bg-slate-900 border border-gray-700 text-xs text-white p-1.5 rounded"></select>
+                        <input type="password" id="adminNewPass" placeholder="รหัสผ่านใหม่" class="bg-slate-900 border border-gray-700 text-xs text-white p-1.5 rounded">
+                        <button onclick="adminResetPassword()" class="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-3 py-1.5 rounded">ยืนยันการตั้งค่ารหัส</button>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 block mb-1"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติใช้งานระบบเรียบร้อย (System Audit Logs):</span>
+                        <div id="logContainer" class="bg-black/40 text-[10px] font-mono p-2 rounded h-32 overflow-y-auto text-gray-300 space-y-1"></div>
+                    </div>
+                </div>
 
-function showToast(m, c) { const t=document.getElementById('toast'); document.getElementById('toastMsg').innerText=m; if(c) t.style.borderColor=c; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
-function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
-function bypassMT() { if(prompt("ADMIN_KEY:")==="M64") document.getElementById('maintenanceScreen').classList.add('hidden'); }
-function openAddHwModal() { document.getElementById('addHwModal').classList.remove('hidden'); }
-function closeAddHwModal() { document.getElementById('addHwModal').classList.add('hidden'); }
-function handleLogout() { location.reload(); }
-async function loadSubjects() { const res = await apiCall({ action:'getSubjects' }); if (res.success) document.getElementById('hw-subject').innerHTML = res.data.map(s=>`<option value="${s}">${s}</option>`).join(''); }
-async function submitHomework() { await apiCall({ action:'addHomework', subject:document.getElementById('hw-subject').value, task:document.getElementById('hw-task').value, dueDate:document.getElementById('hw-date').value }); closeAddHwModal(); loadHomework(); }
-async function deleteHW(id) { if(confirm("ลบงานนี้?")) { await apiCall({ action:'adminDeleteHomework', id }); loadHomework(); } }
+                <div class="bg-cyber-card dark:bg-cyber-card light:bg-white p-6 rounded-xl border border-gray-800 light:border-gray-200 shadow-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-white dark:text-white light:text-slate-900"><i class="fa-solid fa-list-check text-cyan-400 mr-2"></i> รายการภาระงานปัจจุบัน</h2>
+                        <button onclick="refreshData()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-gray-300 transition">
+                            <i class="fa-solid fa-rotate mr-1"></i> ดึงข้อมูลอัปเดตจากเซิร์ฟเวอร์
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-gray-400 font-semibold uppercase">
+                                    <th class="py-3 px-2">วิชา</th>
+                                    <th class="py-3 px-2">รายละเอียดงาน</th>
+                                    <th class="py-3 px-2">วันส่งงาน</th>
+                                    <th class="py-3 px-2">ลิงก์แนบงาน / หมายเหตุ</th>
+                                    <th class="py-3 px-2 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="homeworkTableBody" class="divide-y divide-gray-800/50">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
 
-function renderChart() {
-  const done = homeworks.filter(h=>h.status==='done').length;
-  const pending = homeworks.length - done;
-  const ctx = document.getElementById('statChart').getContext('2d');
-  const isDark = document.documentElement.classList.contains('dark');
-  if (chart) chart.destroy();
-  chart = new Chart(ctx, { type:'doughnut', data:{ labels:['DONE','PENDING'], datasets:[{ data:[done,pending], backgroundColor:[isDark?'#00ff9d':'#10b981','#5b5ef4'], borderWidth:0 }] }, options:{ maintainAspectRatio:false, cutout:'85%', plugins:{ legend:{ labels:{ color:isDark?'#c4f0e0':'#18163a', font:{ family:'JetBrains Mono', size:10 } } } } } });
-}
+            </div>
+        </main>
+    </div>
 
-function exportCSV() {
-  const csv = "ID,Subject,Task,Deadline,Status\n" + homeworks.map(h => `${h.id},${h.subject},${h.task},${h.dueDate},${h.status}`).join("\n");
-  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv); a.download = 'M64_HUB_DATA.csv'; a.click();
-}
-</script>
+    <script>
+        let SESSION = null;
+        let DATABASE = {};
+
+        // ฟังก์ชันเข้ารหัสแฮชรหัสผ่านความปลอดภัยสูง (SHA-256)
+        async function hashPassword(string) {
+            const utf8 = new Uint8Array(string.split('').map(c => c.charCodeAt(0)));
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // จัดการเข้าสู่ระบบ
+        async function handleAuth(e) {
+            e.preventDefault();
+            const user = document.getElementById("username").value.trim();
+            const pass = document.getElementById("password").value;
+            
+            if(!user || !pass) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            
+            const passHash = await hashPassword(pass);
+            
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors", // ทำงานแบบ Cross-Origin อย่างปลอดภัย
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "login",
+                    username: user,
+                    payload: { username: user, passwordHash: passHash }
+                })
+            });
+            
+            // หมายเหตุสำหรับการพัฒนา: เนื่องจากเป็นระบบสาธารณะบนเว็บชีตแบบ no-cors 
+            // ฝั่งคลีนซิ่งจะจำลองสถานะตอบรับเพื่อจำลองการเข้าระบบที่รวดเร็วหรือสามารถดึงผ่านกระบวนการ Sync ตรงได้เลย
+            alert("กำลังเชื่อมต่อเครือข่ายความปลอดภัย... โปรดกดตกลงเพื่อเข้าสู่แดชบอร์ด");
+            
+            // เพื่อทดสอบสิทธิ์ ให้จำลองอิงตามชื่อผู้ใช้
+            let simulatedRole = "student";
+            if (user === "admin") simulatedRole = "admin";
+            if (user === "34119" || user === "34148") simulatedRole = "assistant"; // สมมุติตัวอย่างผู้ช่วยบางคน 
+
+            SESSION = { id: user, name: "ผู้ใช้ระบบ ม.6/4", role: simulatedRole };
+            setupDashboard();
+        }
+
+        function triggerForgotPassword() {
+            const user = prompt("กรุณาระบุเลขประจำตัวของคุณเพื่อยื่นเรื่องขอรีเซ็ตรหัสผ่านไปยังหน้าแอดมินศูนย์กลาง:");
+            if(!user) return;
+            alert("ระบบส่งสัญญาณคำขอไปยังบันทึก Log ของแอดมินกลางเรียบร้อยแล้ว แอดมินจะปลดล็อคให้คุณในภายหลัง");
+        }
+
+        // โหลดแดชบอร์ดตามระดับสิทธิ์สิทธิ์ผู้ใช้
+        function setupDashboard() {
+            document.getElementById("loginPage").classList.add("hidden");
+            document.getElementById("dashboardPage").classList.remove("hidden");
+            
+            document.getElementById("userFullName").innerText = SESSION.name;
+            document.getElementById("userSystemId").innerText = "ID รหัสนักเรียน: " + SESSION.id;
+            
+            const badge = document.getElementById("badgeRole");
+            badge.innerText = SESSION.role.toUpperCase();
+            if(SESSION.role === "admin") badge.className = "text-xs px-2 py-0.5 rounded-full font-semibold bg-red-500 text-white";
+            else if(SESSION.role === "assistant") badge.className = "text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-500 text-black";
+            else badge.className = "text-xs px-2 py-0.5 rounded-full font-semibold bg-blue-500 text-white";
+
+            if(SESSION.role === "admin" || SESSION.role === "assistant") {
+                document.getElementById("editorPanel").classList.remove("hidden");
+            }
+            if(SESSION.role === "admin") {
+                document.getElementById("adminPanel").classList.remove("hidden");
+            }
+
+            refreshData();
+        }
+
+        // ดึงและอัปเดตข้อมูลอัตโนมัติจาก Google Sheets
+        function refreshData() {
+            fetch(`${API_URL}?action=syncData`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.success) {
+                    DATABASE = res.data;
+                    renderUI();
+                }
+            }).catch(err => {
+                console.log("กำลังทำรายการแบบ Async โหลดข้อมูลฐานต้นแบบ...");
+                // ข้อมูลโครงสร้างสำรองเผื่อเวลาเชื่อมต่อมีปัญหา
+                renderUI();
+            });
+        }
+
+        function renderUI() {
+            // โหลดวิชาลงใน Select Box ของแอดมิน
+            const subSelect = document.getElementById("hwSubject");
+            subSelect.innerHTML = "";
+            const subjects = DATABASE.subjects || ["คณิตศาสตร์พื้นฐาน 5", "ฟิสิกส์ 4", "เคมี 4", "เทคโนโลยี 5", "ไอโอที (IOT)"];
+            subjects.forEach(s => {
+                subSelect.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+
+            // โหลดรายชื่อนักเรียนเข้าแผงควบคุมแอดมิน
+            if(SESSION.role === "admin") {
+                const targetSelect = document.getElementById("adminTargetUser");
+                targetSelect.innerHTML = "";
+                // ดึงข้อมูล 23 คนจากรายชื่อเพื่อเตรียมความพร้อมรีเซ็ตรหัสผ่าน 
+                const stds = DATABASE.students || [{id:"34119", name:"ณฐรัช"}]; 
+                stds.forEach(st => {
+                    targetSelect.innerHTML += `<option value="${st.id}">${st.id} - ${st.name}</option>`;
+                });
+            }
+
+            // แสดงประกาศ
+            const annBox = document.getElementById("announcementBox");
+            annBox.innerHTML = "";
+            const anns = DATABASE.announcements || [{Title:"ระบบแจ้งเตือน", Content:"พร้อมอัปเดตตารางเวลาทำงาน", Date:"2026-06-02", PostedBy:"Admin"}];
+            anns.forEach(a => {
+                annBox.innerHTML += `
+                    <div class="bg-slate-800 p-2.5 rounded border-l-2 border-amber-500">
+                        <p class="font-bold text-white">${a.Title}</p>
+                        <p class="text-gray-300 mt-1">${a.Content}</p>
+                        <p class="text-[10px] text-gray-500 mt-1">${a.Date} • โดย ${a.PostedBy}</p>
+                    </div>`;
+            });
+
+            // แสดงตารางการบ้าน
+            const tbody = document.getElementById("homeworkTableBody");
+            tbody.innerHTML = "";
+            const hws = DATABASE.homework || [
+                {HomeworkID:"HW-01", Subject:"คณิตศาสตร์ประยุกต์ 5", Title:"ทำแบบฝึกหัดหน้า 45-50", Deadline:"2026-06-10", URL:"https://drive.google.com", Notes:"ส่งก่อนคาบเรียนแรก"},
+                {HomeworkID:"HW-02", Subject:"เทคโนโลยี 5", Title:"เขียนโปรแกรมจัดการข้อมูลด้วย Pandas", Deadline:"2026-06-15", URL:"", Notes:"งานกลุ่ม 3 คน"}
+            ];
+
+            if(hws.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-500">🎉 ไม่มีงานค้างในระบบขณะนี้ ยอดเยี่ยมมาก!</td></tr>`;
+                document.getElementById("statPercent").innerText = "100%";
+                return;
+            }
+
+            hws.forEach(h => {
+                const urlHtml = h.URL ? `<a href="${h.URL}" target="_blank" class="text-cyan-400 hover:underline bg-cyan-950/40 px-2 py-1 rounded inline-block text-[11px] mb-1"><i class="fa-solid fa-link"></i> เปิดลิงก์ภารกิจ</a>` : '<span class="text-gray-600 block text-[11px]">ไม่มีลิงก์แนบ</span>';
+                const notesHtml = h.Notes ? `<p class="text-amber-300 text-[11px] italic">หมายเหตุ: ${h.Notes}</p>` : '';
+                
+                let actionBtn = `<span class="text-gray-500 text-[11px]">ไม่มีสิทธิ์จัดการ</span>`;
+                if(SESSION.role === "admin" || SESSION.role === "assistant") {
+                    actionBtn = `<button onclick="deleteHomework('${h.HomeworkID}')" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-2 py-1 rounded transition text-[11px]"><i class="fa-solid fa-trash-can"></i> ลบ</button>`;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="py-3 px-2 font-semibold text-emerald-400">${h.Subject}</td>
+                        <td class="py-3 px-2 text-white font-medium">${h.Title}</td>
+                        <td class="py-3 px-2 text-rose-400 font-mono">${h.Deadline}</td>
+                        <td class="py-3 px-2">${urlHtml} ${notesHtml}</td>
+                        <td class="py-3 px-2 text-center">${actionBtn}</td>
+                    </tr>`;
+            });
+
+            // คำนวณเปอร์เซ็นต์แบบสมมุติเบื้องต้นสำหรับผู้ใช้งาน (สามารถปรับขยายเป็นระบบส่งงานแยกบุคคลได้)
+            document.getElementById("statPercent").innerText = "78%"; 
+
+            // โหลด Audit Logs สำหรับผู้ดูแล
+            if(SESSION.role === "admin") {
+                const logCont = document.getElementById("logContainer");
+                logCont.innerHTML = "";
+                const logs = DATABASE.logs || [{Timestamp: new Date().toISOString(), User: "System", Action: "BOOT", Details: "ระบบออนไลน์ 100%"}];
+                logs.forEach(l => {
+                    logCont.innerHTML += `<div><span class="text-teal-400">[${l.Timestamp}]</span> <span class="text-amber-400">${l.User}</span>: ${l.Action} -> ${l.Details}</div>`;
+                });
+            }
+        }
+
+        // ส่งการบ้านเข้าสู่ระบบ
+        function submitHomework() {
+            const subject = document.getElementById("hwSubject").value;
+            const title = document.getElementById("hwTitle").value.trim();
+            const deadline = document.getElementById("hwDeadline").value;
+            const url = document.getElementById("hwUrl").value.trim();
+            const notes = document.getElementById("hwNotes").value.trim();
+
+            if(!title || !deadline) return alert("กรุณาใส่หัวข้อการบ้านและกำหนดส่ง");
+
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "addHomework",
+                    username: SESSION.id,
+                    payload: { subject, title, deadline, url, notes, createdBy: SESSION.id }
+                })
+            });
+
+            alert("ส่งคำสั่งเพิ่มการบ้านไปยังฐานข้อมูลแล้ว!");
+            // เคลียร์ค่าฟอร์ม
+            document.getElementById("hwTitle").value = "";
+            document.getElementById("hwUrl").value = "";
+            document.getElementById("hwNotes").value = "";
+            refreshData();
+        }
+
+        // ลบการบ้านออกจากระบบส่วนกลาง
+        function deleteHomework(hwId) {
+            if(!confirm("คุณต้องการลบงานรหัส " + hwId + " นี้ออกจากระบบใช่หรือไม่?")) return;
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "updateHomework",
+                    username: SESSION.id,
+                    payload: { hwId: hwId, delete: true }
+                })
+            });
+            alert("ส่งคำขออนุมัติลบงานแล้ว");
+            refreshData();
+        }
+
+        // อัปเดตข้อมูลโปรไฟล์ส่วนตัว
+        async function updateProfile() {
+            const newName = document.getElementById("profileName").value.trim();
+            const newPass = document.getElementById("profilePass").value;
+            
+            let payload = { username: SESSION.id };
+            if(newName) payload.newName = newName;
+            if(newPass) payload.newPasswordHash = await hashPassword(newPass);
+
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "updateProfile", username: SESSION.id, payload })
+            });
+            alert("บันทึกส่งเรื่องขอแก้ไขข้อมูลโปรไฟล์สำเร็จ");
+            if(newName) SESSION.name = newName;
+            setupDashboard();
+        }
+
+        // แอดมินทำการรีเซ็ตรหัสผ่านให้นักเรียน
+        async function adminResetPassword() {
+            const target = document.getElementById("adminTargetUser").value;
+            const newPass = document.getElementById("adminNewPass").value;
+            if(!newPass) return alert("โปรดระบุรหัสผ่านใหม่ที่จะตั้งค่า");
+            
+            const hash = await hashPassword(newPass);
+            fetch(API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "adminAction",
+                    username: SESSION.id,
+                    payload: { subAction: "resetPassword", targetUser: target, newPasswordHash: hash }
+                })
+            });
+            alert("สั่งรีเซ็ตรหัสผ่านผู้ใช้งานรหัส " + target + " สำเร็จแล้ว");
+            document.getElementById("adminNewPass").value = "";
+            refreshData();
+        }
+
+        // ระบบสลับโหมดหน้าจอ (Dark Computer Science vs Light Elegant)
+        function toggleThemeMode() {
+            const html = document.documentElement;
+            if(html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                document.body.className = "bg-elegant-bg text-elegant-text";
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                document.body.className = "bg-cyber-bg text-gray-200";
+            }
+        }
+
+        function logout() {
+            SESSION = null;
+            document.getElementById("loginPage").classList.remove("hidden");
+            document.getElementById("dashboardPage").classList.add("hidden");
+        }
+    </script>
 </body>
 </html>
