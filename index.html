@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ ม.6/4 Homework HUB - Central Web</title>
+    <title>⚡ ม.6/4 Homework HUB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap');
-        body { font-family: 'Chakra Petch', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        body { font-family: 'Chakra Petch', sans-serif; transition: background-color 0.2s, color 0.2s; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100">
+<body class="bg-slate-950 text-slate-100">
 
     <script>
-        // ⚠️ วาง URL ของ Google Apps Script ที่ Deploy ได้ที่นี่
+        // ⚠️ วาง URL เว็บแอปที่ได้จากการ Deploy ใหม่ที่นี่แทนไอดีจำลองเดิมครับ
         const API_URL = "https://script.google.com/macros/s/AKfycbxbhnKdXeXCe0mfnaeRCYkcgXg1fiFJt9o7cLFvijkbu_GypWetnB4Z1IApaAgAU4xtTw/exec"; 
     </script>
 
+    <!-- ==================== หน้า LOGIN ==================== -->
     <div id="loginPage" class="min-h-screen flex items-center justify-center px-4 bg-slate-900 text-slate-100">
         <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700">
             <div class="text-center mb-6">
@@ -37,7 +38,7 @@
                     <label class="block text-xs uppercase text-slate-400 mb-1">รหัสผ่าน</label>
                     <input type="password" id="password" required class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-white text-sm focus:border-cyan-400 focus:outline-none" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold py-2.5 rounded-lg text-sm hover:opacity-90 transition">เข้าสู่ระบบ</button>
+                <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-bold py-2.5 rounded-lg text-sm hover:opacity-90 transition">เข้าสู่ระบบ</button>
             </form>
             
             <div class="mt-4 text-center">
@@ -46,7 +47,8 @@
         </div>
     </div>
 
-    <div id="dashboardPage" class="hidden min-h-screen flex flex-col bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100">
+    <!-- ==================== หน้า DASHBOARD ==================== -->
+    <div id="dashboardPage" class="hidden min-h-screen flex flex-col bg-slate-950 text-slate-100">
         <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-md">
             <div class="flex items-center gap-3">
                 <span class="text-lg font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400">⚡ ROOM 6/4 CENTER</span>
@@ -66,8 +68,9 @@
         </header>
 
         <main class="flex-1 p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Sidebar -->
             <div class="space-y-6 lg:col-span-1">
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm">
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm" id="statCard">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-chart-pie text-cyan-400 mr-2"></i> เปอร์เซ็นต์การบ้านของคุณ</h3>
                     <div class="flex items-center justify-between">
                         <div>
@@ -78,12 +81,12 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm">
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm" id="annCard">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-bullhorn text-amber-400 mr-2"></i> ประกาศจากระบบส่วนกลาง</h3>
-                    <div id="announcementBox" class="space-y-3 max-h-48 overflow-y-auto pr-1 text-xs"></div>
+                    <div id="announcementBox" class="space-y-3 max-h-48 overflow-y-auto pr-1 text-xs text-slate-300"></div>
                 </div>
 
-                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm">
+                <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm" id="profileCard">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"><i class="fa-solid fa-user-gear text-purple-400 mr-2"></i> แก้ไขโปรไฟล์ส่วนตัว</h3>
                     <div class="space-y-2 text-xs">
                         <input type="text" id="profileName" placeholder="แก้ไขชื่อ-นามสกุล" class="w-full bg-slate-950 p-2 border border-slate-700 rounded text-white focus:outline-none">
@@ -93,6 +96,7 @@
                 </div>
             </div>
 
+            <!-- Content -->
             <div class="lg:col-span-3 space-y-6">
                 <div id="editorPanel" class="hidden bg-slate-900 border border-emerald-500/30 p-5 rounded-xl shadow-md">
                     <h2 class="text-sm font-bold mb-3 text-emerald-400"><i class="fa-solid fa-circle-plus mr-1"></i> ส่วนลงทะเบียนเพิ่มการบ้านกลาง</h2>
@@ -102,7 +106,7 @@
                         <input type="date" id="hwDeadline" class="bg-slate-950 border border-slate-700 rounded p-2 text-white">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 text-xs">
-                        <input type="url" id="hwUrl" placeholder="ลิงก์ URL แนบสั่งงาน (Google Drive/Canva)" class="bg-slate-950 border border-slate-700 rounded p-2 text-white">
+                        <input type="url" id="hwUrl" placeholder="ลิงก์ URL แนบสั่งงาน" class="bg-slate-950 border border-slate-700 rounded p-2 text-white">
                         <input type="text" id="hwNotes" placeholder="หมายเหตุ / คำอธิบายงานเพิ่มเติม" class="bg-slate-950 border border-slate-700 rounded p-2 text-white">
                     </div>
                     <button onclick="submitHomework()" class="mt-3 bg-emerald-500 text-slate-950 font-bold text-xs px-5 py-2 rounded hover:opacity-90 transition">บันทึกภารกิจอัตโนมัติ</button>
@@ -111,38 +115,37 @@
                 <div id="adminPanel" class="hidden bg-slate-900 border border-rose-500/30 p-5 rounded-xl shadow-md space-y-4 text-xs">
                     <h2 class="text-sm font-bold text-rose-400"><i class="fa-solid fa-shield-halved mr-1"></i> แผงแอดมินศูนย์กลาง (Central Authority System)</h2>
                     <div class="flex flex-wrap gap-3 items-center bg-slate-950 p-3 rounded-lg border border-slate-800">
-                        <span class="text-slate-300">จัดการสิทธิ์นักเรียนรายบุคคล:</span>
                         <select id="adminTargetUser" class="bg-slate-900 border border-slate-700 p-1 rounded text-white"></select>
                         <select id="adminNewRole" class="bg-slate-900 border border-slate-700 p-1 rounded text-white">
                             <option value="student">Student (นักเรียนทั่วไป)</option>
                             <option value="assistant">Assistant (ผู้ช่วยแก้ไขการบ้าน)</option>
                         </select>
                         <button onclick="adminChangeRole()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold px-2 py-1 rounded">อัปเดตบทบาท</button>
-                        <input type="password" id="adminNewPass" placeholder="ตั้งรหัสผ่านใหม่ให้นักเรียน" class="bg-slate-900 border border-slate-700 p-1 rounded text-white w-32">
-                        <button onclick="adminResetPassword()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded">รีเซ็ตรหัสผ่าน</button>
+                        <input type="password" id="adminNewPass" placeholder="ตั้งรหัสผ่านใหม่" class="bg-slate-900 border border-slate-700 p-1 rounded text-white w-32">
+                        <button onclick="adminResetPassword()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold px-2 py-1 rounded">รีเซ็ตพาสเวิร์ด</button>
                     </div>
-                    <div>
-                        <span class="text-slate-400 block mb-1 font-mono"><i class="fa-solid fa-list-ul"></i> ประวัติการเข้าใช้งานและ Log คำขอทั้งหมดในระบบ:</span>
-                        <div id="logContainer" class="bg-black/60 font-mono text-[10px] p-2.5 rounded h-28 overflow-y-auto text-slate-300 space-y-1"></div>
+                    <div id="logArea">
+                        <span class="text-slate-400 block mb-1 font-mono">📡 ประวัติคำขอและกิจกรรม Realtime:</span>
+                        <div id="logContainer" class="bg-black/60 font-mono text-[10px] p-2.5 rounded h-24 overflow-y-auto text-slate-300 space-y-1"></div>
                     </div>
                 </div>
 
-                <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-sm">
+                <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-sm" id="tableCard">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-md font-bold"><i class="fa-solid fa-list-check text-cyan-400 mr-2"></i> รายการภาระงานปัจจุบัน ม.6/4</h2>
+                        <h2 class="text-md font-bold text-white" id="tableTitle"><i class="fa-solid fa-list-check text-cyan-400 mr-2"></i> รายการภาระงานปัจจุบัน ม.6/4</h2>
                         <button onclick="refreshData()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition">
-                            <i class="fa-solid fa-arrow-rotate-right mr-1"></i> ซิงค์ข้อมูลเรียลไทม์
+                            <i class="fa-solid fa-arrow-rotate-right mr-1"></i> ซิงค์ข้อมูลด่วน
                         </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="border-b border-slate-800 text-slate-400 font-semibold">
-                                    <th class="py-2.5 px-2">สถานะของคุณ</th>
+                                <tr class="border-b border-slate-800 text-slate-400 font-semibold" id="tableHeader">
+                                    <th class="py-2.5 px-2">สถานะ</th>
                                     <th class="py-2.5 px-2">วิชา</th>
                                     <th class="py-2.5 px-2">รายละเอียดภารกิจ</th>
                                     <th class="py-2.5 px-2">กำหนดส่ง</th>
-                                    <th class="py-2.5 px-2">ลิงก์และหมายเหตุ</th>
+                                    <th class="py-2.5 px-2">ลิงก์/หมายเหตุ</th>
                                     <th class="py-2.5 px-2 text-center">จัดการ</th>
                                 </tr>
                             </thead>
@@ -154,6 +157,7 @@
         </main>
     </div>
 
+    <!-- ==================== CONTROLLER SCRIPT ==================== -->
     <script>
         let SESSION = null;
         let DATABASE = { subjects:[], announcements:[], homework:[], students:[], logs:[], tracker:[] };
@@ -164,52 +168,50 @@
             return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // เชื่อมต่อเซิร์ฟเวอร์แบบเลี่ยง Preflight (Bypass CORS ไปยัง Apps Script)
-        function sendPostRequest(actionName, payload, callback) {
+        // ปลุกสถาปัตยกรรมข้ามมิติ ปลดล็อกการติด CORS ด้วยการบังคับอ่านข้อความดิบ
+        async function sendPostRequest(actionName, payload) {
             const data = { dataAction: actionName, username: SESSION ? SESSION.id : "Guest", payload: payload };
-            fetch(API_URL, {
-                method: "POST",
-                mode: "no-cors", 
-                body: JSON.stringify(data)
-            }).then(() => { if(callback) callback(); });
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(data)
+                });
+                const txt = await response.text(); 
+                return JSON.parse(txt);
+            } catch (error) {
+                console.error("Gateway Error:", error);
+                return { success: false, message: "เครือข่ายขัดข้อง กรุณาลองอีกครั้ง" };
+            }
         }
 
-        function handleAuth(e) {
+        async function handleAuth(e) {
             e.preventDefault();
             const user = document.getElementById("username").value.trim();
             const pass = document.getElementById("password").value;
+            const passHash = await hashPassword(pass);
 
-            fetch(`${API_URL}?action=syncData`)
-            .then(res => res.json())
-            .then(async res => {
-                if(res.success) {
-                    DATABASE = res.data;
-                    const passHash = await hashPassword(pass);
-                    let foundUser = DATABASE.students.find(s => s.id === user);
-                    
-                    // เพื่อความปลอดภัยของแอดมินกลาง
-                    if(user === "admin" && passHash === "937e8d5f840a2d447446ecb2412611a152fedbb9922e038bb1099e9d2c3cf37f") {
-                        foundUser = { id: "admin", name: "ผู้ดูแลระบบกลาง", role: "admin" };
-                    }
+            const btn = document.getElementById("loginBtn");
+            btn.innerText = "正在验证 ยืนยันตน...";
+            btn.disabled = true;
 
-                    if(foundUser) {
-                        SESSION = foundUser;
-                        setupDashboard();
-                        // ส่ง Log เข้าระบบชีตอัตโนมัติ
-                        sendPostRequest("login", { username: user });
-                    } else {
-                        alert("รหัสผ่านหรือเลขประจำตัวไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง");
-                    }
-                }
-            }).catch(() => alert("เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่ายเซิร์ฟเวอร์"));
+            const res = await sendPostRequest("login", { username: user, passwordHash: passHash });
+            
+            btn.innerText = "เข้าสู่ระบบ";
+            btn.disabled = false;
+
+            if (res && res.success) {
+                SESSION = res.user;
+                setupDashboard();
+            } else {
+                alert(res?.message || "เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง");
+            }
         }
 
-        function triggerForgotPassword() {
-            const user = prompt("กรุณาระบุเลขประจำตัวของคุณเพื่อยื่นคำขอรีเซ็ตรหัสผ่านไปยังแอดมินกลาง:");
+        async function triggerForgotPassword() {
+            const user = prompt("ระบุเลขประจำตัวเพื่อแจ้งเตือนแอดมินกลาง:");
             if(!user) return;
-            sendPostRequest("adminAction", { subAction: "forgotNotify", targetUser: user }, () => {
-                alert("ส่งสัญญาณแจ้งแอดมินเรียบร้อยแล้ว แอดมินได้รับการแจ้งเตือนในระบบประวัติการใช้งานแล้ว!");
-            });
+            await sendPostRequest("adminAction", { subAction: "forgotNotify", targetUser: user });
+            alert("ส่งสัญญาณแล้ว! แอดมินจะตรวจสอบผ่านแผงล็อกกิจกรรมหน้าเว็บโดยตรง");
         }
 
         function setupDashboard() {
@@ -231,17 +233,17 @@
 
         function refreshData() {
             fetch(`${API_URL}?action=syncData`)
-            .then(res => res.json())
-            .then(res => {
+            .then(res => res.text()) // อ่านแบบ Text เสมอเพื่อเลี่ยงนโยบาย CORS
+            .then(txt => {
+                const res = JSON.parse(txt);
                 if(res.success) {
                     DATABASE = res.data;
                     renderUI();
                 }
-            });
+            }).catch(err => console.log("Sync Fail:", err));
         }
 
         function renderUI() {
-            // โหลดวิชาลงทะเบียน
             const subSelect = document.getElementById("hwSubject");
             subSelect.innerHTML = "";
             DATABASE.subjects.forEach(s => subSelect.innerHTML += `<option value="${s}">${s}</option>`);
@@ -252,20 +254,18 @@
                 DATABASE.students.forEach(st => targetSelect.innerHTML += `<option value="${st.id}">${st.id} - ${st.name}</option>`);
             }
 
-            // เรนเดอร์ประกาศข่าว
             const annBox = document.getElementById("announcementBox");
             annBox.innerHTML = "";
             DATABASE.announcements.forEach(a => {
-                annBox.innerHTML += `<div class="bg-slate-950 p-2.5 rounded border-l-2 border-amber-500"><p class="font-bold text-white">${a.Title}</p><p class="text-slate-400 mt-0.5">${a.Content}</p></div>`;
+                annBox.innerHTML += `<div class="p-2.5 rounded border-l-2 border-amber-500 bg-black/30"><p class="font-bold text-amber-400">${a.Title}</p><p class="mt-0.5">${a.Content}</p></div>`;
             });
 
-            // ตรวจสอบและเรนเดอร์งานรายบุคคลพร้อมกล่องเช็ค % อัตโนมัติ
             const tbody = document.getElementById("homeworkTableBody");
             tbody.innerHTML = "";
             let doneCount = 0;
 
             if(DATABASE.homework.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500">🎉 ยอดเยี่ยม! ไม่มีงานค้างในระบบแล้ว</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500">🎉 โล่งอก! ไม่มีงานค้างในระบบแล้วครับ</td></tr>`;
                 document.getElementById("statPercent").innerText = "100%";
                 document.getElementById("statCount").innerText = "สำเร็จ 0/0 งาน";
                 return;
@@ -278,8 +278,8 @@
                 const checkIcon = isDone ? 'fa-square-check text-emerald-400 text-lg' : 'fa-square text-slate-600 text-lg';
                 const statusBtn = `<button onclick="toggleTaskStatus('${h.HomeworkID}', '${isDone ? 'pending' : 'done'}')" class="hover:scale-110 transition"><i class="fa-solid ${checkIcon}"></i></button>`;
                 
-                const urlHtml = h.URL ? `<a href="${h.URL}" target="_blank" class="text-cyan-400 hover:underline inline-block bg-slate-950 px-2 py-0.5 rounded text-[11px] mb-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> เปิดลิงก์งาน</a>` : '<span class="text-slate-600 block text-[11px]">ไม่มีลิงก์แนบ</span>';
-                const notesHtml = h.Notes ? `<p class="text-amber-300 text-[11px] italic">หมายเหตุ: ${h.Notes}</p>` : '';
+                const urlHtml = h.URL ? `<a href="${h.URL}" target="_blank" class="text-cyan-400 hover:underline inline-block bg-black/40 px-2 py-0.5 rounded text-[11px] mb-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> ส่องลิงก์งาน</a>` : '<span class="text-slate-500 block text-[11px]">ไม่มีลิงก์</span>';
+                const notesHtml = h.Notes ? `<p class="text-amber-400 text-[11px] italic">โน้ต: ${h.Notes}</p>` : '';
 
                 let actionBtn = `<span class="text-slate-600">ไม่มีสิทธิ์</span>`;
                 if(SESSION.role === "admin" || SESSION.role === "assistant") {
@@ -297,50 +297,47 @@
                     </tr>`;
             });
 
-            // ประมวลผลทางสถิติระดับสูงแบบเรียลไทม์ตามบรีฟ
             const percent = Math.round((doneCount / DATABASE.homework.length) * 100);
             document.getElementById("statPercent").innerText = percent + "%";
             document.getElementById("statCount").innerText = `สำเร็จ ${doneCount}/${DATABASE.homework.length} งาน`;
 
-            // โหลดแผง Log สำนักควบคุมแอดมิน
             if(SESSION.role === "admin") {
                 const logCont = document.getElementById("logContainer");
                 logCont.innerHTML = "";
                 DATABASE.logs.forEach(l => {
-                    logCont.innerHTML += `<div><span class="text-teal-400">[${l.Timestamp.substring(11,19)}]</span> <span class="text-amber-400">${l.User}</span>: <span class="text-slate-200">${l.Action}</span> -> ${l.Details}</div>`;
+                    logCont.innerHTML += `<div><span class="text-teal-400">[${l.Timestamp.substring(11,19)}]</span> <span class="text-amber-400">${l.User}</span>: ${l.Action}</div>`;
                 });
             }
         }
 
-        function toggleTaskStatus(hwId, nextStatus) {
-            sendPostRequest("toggleTask", { hwId: hwId, status: nextStatus }, () => {
-                setTimeout(refreshData, 1000); // ดีเลย์ 1 วินาทีเพื่อให้ Sheets ประมวลผลเรียบร้อย
-            });
+        async function toggleTaskStatus(hwId, nextStatus) {
+            const res = await sendPostRequest("toggleTask", { hwId: hwId, status: nextStatus });
+            if(res.success) refreshData();
         }
 
-        function submitHomework() {
+        async function submitHomework() {
             const subject = document.getElementById("hwSubject").value;
             const title = document.getElementById("hwTitle").value.trim();
             const deadline = document.getElementById("hwDeadline").value;
             const url = document.getElementById("hwUrl").value.trim();
             const notes = document.getElementById("hwNotes").value.trim();
 
-            if(!title || !deadline) return alert("กรุณาใส่หัวข้อและกำหนดส่งงาน");
-            sendPostRequest("addHomework", { subject, title, deadline, url, notes, createdBy: SESSION.id }, () => {
-                alert("เพิ่มภารกิจลงสารบบกลางอัตโนมัติสำเร็จ");
+            if(!title || !deadline) return alert("โปรดกรอกข้อมูลสำคัญให้ครบถ้วน");
+            
+            const res = await sendPostRequest("addHomework", { subject, title, deadline, url, notes, createdBy: SESSION.id });
+            if(res.success) {
+                alert("บันทึกการบ้านใหม่สำเร็จ!");
                 document.getElementById("hwTitle").value = "";
                 document.getElementById("hwUrl").value = "";
                 document.getElementById("hwNotes").value = "";
-                setTimeout(refreshData, 1200);
-            });
+                refreshData();
+            }
         }
 
-        function deleteHomework(hwId) {
-            if(!confirm("ต้องการลบงานรหัสนี้ออกจากศูนย์กลางใช่หรือไม่?")) return;
-            sendPostRequest("deleteHomework", { hwId }, () => {
-                alert("ลบข้อมูลสำเร็จ");
-                setTimeout(refreshData, 1200);
-            });
+        async function deleteHomework(hwId) {
+            if(!confirm("ต้องการลบภารกิจนี้ใช่หรือไม่?")) return;
+            const res = await sendPostRequest("deleteHomework", { hwId });
+            if(res.success) { alert("ลบข้อมูลสำเร็จ"); refreshData(); }
         }
 
         async function updateProfile() {
@@ -350,49 +347,59 @@
             if(newName) payload.newName = newName;
             if(newPass) payload.newPasswordHash = await hashPassword(newPass);
 
-            sendPostRequest("updateProfile", payload, () => {
-                alert("อัปเดตข้อมูลโปรไฟล์ส่วนตัวสำเร็จแล้ว");
+            const res = await sendPostRequest("updateProfile", payload);
+            if(res.success) {
+                alert("โปรไฟล์ได้รับการอัปเดตเรียบร้อย");
                 if(newName) SESSION.name = newName;
-                setTimeout(refreshData, 1000);
-            });
+                document.getElementById("profileName").value = "";
+                document.getElementById("profilePass").value = "";
+                refreshData();
+            }
         }
 
         async function adminResetPassword() {
             const target = document.getElementById("adminTargetUser").value;
             const newPass = document.getElementById("adminNewPass").value;
-            if(!newPass) return alert("โปรดกรอกรหัสผ่านใหม่");
+            if(!newPass) return alert("กรุณาป้อนรหัสผ่านใหม่");
             const hash = await hashPassword(newPass);
 
-            sendPostRequest("adminAction", { subAction: "resetPassword", targetUser: target, newPasswordHash: hash }, () => {
-                alert("รีเซ็ตรหัสผ่านให้นักเรียนรายดังกล่าวเสร็จสิ้น");
+            const res = await sendPostRequest("adminAction", { subAction: "resetPassword", targetUser: target, newPasswordHash: hash });
+            if(res.success) {
+                alert("รีเซ็ตพาสเวิร์ดเรียบร้อย");
                 document.getElementById("adminNewPass").value = "";
-                setTimeout(refreshData, 1200);
-            });
+                refreshData();
+            }
         }
 
-        function adminChangeRole() {
+        async function adminChangeRole() {
             const target = document.getElementById("adminTargetUser").value;
             const newRole = document.getElementById("adminNewRole").value;
-            sendPostRequest("adminAction", { subAction: "changeRole", targetUser: target, newRole: newRole }, () => {
-                alert("เปลี่ยนแปลงระดับสิทธิ์สมาชิกสำเร็จ");
-                setTimeout(refreshData, 1200);
-            });
+            const res = await sendPostRequest("adminAction", { subAction: "changeRole", targetUser: target, newRole: newRole });
+            if(res.success) { alert("เปลี่ยนบทบาทสำเร็จ"); refreshData(); }
         }
 
-        // ระบบสลับโหมด UI (สไตล์ Hacker/Cyberpunk vs สว่างหรูคลีนมินิมอล) ตามเงื่อนไข Tailwind แท้
+        // 🌗 ระบบสลับ Dark Mode / Light Mode มินิมอลเรียบหรูสไตล์พรีเมียม แก้ไขข้อผิดพลาดธีมเก่าเรียบร้อย
         function toggleThemeMode() {
             const html = document.documentElement;
-            if(html.classList.contains('dark')) {
+            const isDark = html.classList.contains('dark');
+            
+            if(isDark) {
                 html.classList.remove('dark');
-                document.body.className = "bg-amber-50/40 text-slate-800";
-                // เปลี่ยนคลาสหน้าการจัดการใน Light Mode ให้สว่างหรูหรา
+                document.body.className = "bg-amber-50/50 text-slate-900";
+                document.getElementById("dashboardPage").className = "min-h-screen flex flex-col bg-amber-50/50 text-slate-900";
+                document.getElementById("tableTitle").className = "text-md font-bold text-slate-900";
+                
+                // แปลงสไตล์สีส่วนประกอบย่อย
                 document.querySelectorAll('.bg-slate-900').forEach(e => e.classList.replace('bg-slate-900', 'bg-white'));
-                document.querySelectorAll('.bg-slate-950').forEach(e => e.classList.replace('bg-slate-950', 'bg-amber-50/80'));
+                document.querySelectorAll('.bg-slate-950').forEach(e => e.classList.replace('bg-slate-950', 'bg-amber-100/50'));
             } else {
                 html.classList.add('dark');
                 document.body.className = "bg-slate-950 text-slate-100";
+                document.getElementById("dashboardPage").className = "min-h-screen flex flex-col bg-slate-950 text-slate-100";
+                document.getElementById("tableTitle").className = "text-md font-bold text-white";
+
                 document.querySelectorAll('.bg-white').forEach(e => e.classList.replace('bg-white', 'bg-slate-900'));
-                document.querySelectorAll('.bg-amber-50\/80').forEach(e => e.classList.replace('bg-amber-50/80', 'bg-slate-950'));
+                document.querySelectorAll('.bg-amber-100\/50').forEach(e => e.classList.replace('bg-amber-100/50', 'bg-slate-950'));
             }
         }
 
